@@ -1,10 +1,23 @@
-<!--
-  Placeholder appcast. Real feed is written by scripts/release.sh into this path
-  for GitHub Pages (https://yipeng-git.github.io/paste-it/appcast.xml).
--->
+<?xml version="1.0" standalone="yes"?>
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>Paste It</title>
-        <language>en</language>
+        <item>
+            <title>0.1.0</title>
+            <pubDate>Sat, 18 Jul 2026 14:48:27 +0800</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.1.0/PasteIt-0.1.0-universal.dmg" length="2097312" type="application/octet-stream" sparkle:edSignature="Zt0fvtEiKJYHN7dC29TRHjVVKG42tO1eqEeYHqvDNgFkOxHJDs8XVo2uEd70vsRhDxziKD++vMNMo2iypyCoCA=="/>
+        </item>
+    <item>
+            <title>0.1.0</title>
+            <pubDate>Sat, 18 Jul 2026 14:48:27 +0800</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.1.0/PasteIt-0.1.0-arm64.dmg" length="1668139" type="application/octet-stream" sparkle:edSignature="QHV5HzOsXDK7NGuq6gc/1KcCX6webe1oUTALyOT6xJXWtlM5qersqWrchUI2qT0OwD+fQI6LthpFGGkiVfTrCw=="/>
+        </item>
     </channel>
 </rss>
