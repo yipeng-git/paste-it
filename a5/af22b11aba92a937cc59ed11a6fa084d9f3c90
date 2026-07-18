@@ -1,0 +1,19 @@
+Info.plist
+  s_6d2cea6e857ae8::t_05b2d1a7abc87f 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "a5af22b11aba92a937cc59ed11a6fa084d9f3c90",
+  "prompts": {},
+  "sessions": {
+    "s_6d2cea6e857ae8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3522faf1-8961-437e-884d-4b19d9834c7e",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    }
+  }
+}
