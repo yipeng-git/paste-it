@@ -38,6 +38,7 @@ final class AppSettings: ObservableObject {
     @AppStorage("maxBlobMegabytes") var maxBlobMegabytes: Int = 1024
     @AppStorage("launchAtLogin") var launchAtLogin: Bool = true
     @AppStorage("pasteAsPlainTextByDefault") var pasteAsPlainTextByDefault: Bool = false
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("pasteStackDefaultDirection") private var pasteStackDefaultDirectionRaw: String =
         PasteStackController.Direction.oldestFirst.rawValue
     @AppStorage("ignoredBundleIdentifiers") private var ignoredBundleIdentifiersRaw: String = defaultIgnoredApps.joined(separator: "\n")

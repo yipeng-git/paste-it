@@ -98,6 +98,13 @@ final class AppRuntime: NSObject {
         LaunchAtLoginManager.syncAtStartup(enabled: settings.launchAtLogin)
         // Retain Sparkle updater for automatic background checks.
         _ = UpdateChecker.shared
+
+        if !settings.hasCompletedOnboarding {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [settings] in
+                guard !settings.hasCompletedOnboarding else { return }
+                OnboardingWindowController.shared.show(settings: settings)
+            }
+        }
     }
 
     func stop() {

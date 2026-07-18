@@ -25,6 +25,10 @@ final class HistoryStore: ObservableObject {
 
     private static let didPurgeSourceIconPNGKey = "didPurgeSourceIconPNG_v1"
     private static let needsHistoryStoreVacuumKey = "needsHistoryStoreVacuum_v1"
+    private static let didSeedWelcomeClipsKey = "didSeedWelcomeClips_v1"
+
+    /// True when `history.store` did not exist before this process opened it (true first install).
+    private let isFreshStore: Bool
 
     init(blobStore: BlobStore, settings: AppSettings) {
         self.blobStore = blobStore
@@ -39,6 +43,8 @@ final class HistoryStore: ObservableObject {
             at: blobStore.rootURL,
             withIntermediateDirectories: true
         )
+
+        self.isFreshStore = !FileManager.default.fileExists(atPath: storeURL.path)
 
         // Prefer VACUUM before SwiftData opens the file (deferred from a prior purge).
         if UserDefaults.standard.bool(forKey: Self.needsHistoryStoreVacuumKey) {
@@ -75,6 +81,7 @@ final class HistoryStore: ObservableObject {
         if pinboards.isEmpty {
             createDefaultPinboards()
         }
+        seedWelcomeClipsIfNeeded()
         purgeEmbeddedSourceIconsIfNeeded()
         pruneHistory(force: true)
     }
@@ -530,6 +537,67 @@ final class HistoryStore: ObservableObject {
         context.insert(Pinboard(name: "Templates", colorHex: "#35C759"))
         saveQuietly()
         refresh()
+    }
+
+    /// First install only: three starter clips. Overwrite/upgrade keeps `history.store`
+    /// and/or `didSeedWelcomeClips_v1`, so this never re-injects into existing libraries.
+    private func seedWelcomeClipsIfNeeded() {
+        guard !UserDefaults.standard.bool(forKey: Self.didSeedWelcomeClipsKey) else { return }
+        defer { UserDefaults.standard.set(true, forKey: Self.didSeedWelcomeClipsKey) }
+
+        guard isFreshStore, clips.isEmpty else { return }
+
+        let bundleID = Bundle.main.bundleIdentifier ?? "app.paste-it.mac"
+        let now = Date()
+
+        let welcome = ClipItem(
+            createdAt: now,
+            title: "Welcome to Paste It",
+            plainText: "Welcome to Paste It",
+            primaryType: .text,
+            pasteboardTypes: ["public.utf8-plain-text"],
+            sourceAppName: "Paste It",
+            sourceBundleIdentifier: bundleID,
+            contentHash: DataHashing.sha256("welcome-to-paste-it-seed-v1")
+        )
+
+        let websiteURL = "https://paste-it.app"
+        let website = ClipItem(
+            createdAt: now.addingTimeInterval(-1),
+            title: "paste-it.app",
+            plainText: websiteURL,
+            primaryType: .url,
+            pasteboardTypes: ["public.url", "public.utf8-plain-text"],
+            sourceAppName: "Paste It",
+            sourceBundleIdentifier: bundleID,
+            fileURLString: websiteURL,
+            linkTitle: "Paste It",
+            contentHash: DataHashing.sha256(websiteURL)
+        )
+
+        let githubURL = "https://github.com/yipeng-git/paste-it"
+        let github = ClipItem(
+            createdAt: now.addingTimeInterval(-2),
+            title: "GitHub",
+            plainText: githubURL,
+            primaryType: .url,
+            pasteboardTypes: ["public.url", "public.utf8-plain-text"],
+            sourceAppName: "Paste It",
+            sourceBundleIdentifier: bundleID,
+            fileURLString: githubURL,
+            linkTitle: "yipeng-git/paste-it",
+            contentHash: DataHashing.sha256(githubURL)
+        )
+
+        // Insert oldest → newest so a failed mid-seed still sorts correctly after refresh.
+        for item in [github, website, welcome] {
+            context.insert(item)
+        }
+        guard saveQuietly() else { return }
+        refresh()
+
+        enrichLinkMetadataIfNeeded(for: website.id)
+        enrichLinkMetadataIfNeeded(for: github.id)
     }
 
     @discardableResult

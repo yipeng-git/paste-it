@@ -47,6 +47,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         guard wasAccessory else { return }
+        if OnboardingWindowController.shared.isVisible { return }
         NSApp.setActivationPolicy(.accessory)
     }
 }
