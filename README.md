@@ -47,4 +47,6 @@ Global shortcuts use `NSEvent` monitors (`Shift+Cmd+V` timeline, `Shift+Cmd+C` P
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[PolyForm Noncommercial License 1.0.0](LICENSE) — free for personal, educational, research, hobby, and other noncommercial use. **Commercial use requires a separate license** from the copyright holder.
+
+Versions published under MIT before this change remain available under MIT for those releases only.
