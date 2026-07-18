@@ -1,0 +1,10 @@
+<!--
+  Placeholder appcast. Real feed is written by scripts/release.sh into this path
+  for GitHub Pages (https://yipeng-git.github.io/paste-it-mac/appcast.xml).
+-->
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Paste It</title>
+        <language>en</language>
+    </channel>
+</rss>

@@ -1,0 +1,332 @@
+import AppKit
+import ApplicationServices
+import Carbon
+import Foundation
+
+@MainActor
+final class PasteStackController: ObservableObject {
+    enum Direction: String, CaseIterable, Identifiable {
+        case oldestFirst
+        case newestFirst
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .oldestFirst: return "First in, first out"
+            case .newestFirst: return "Last in, first out"
+            }
+        }
+
+        var systemImage: String {
+            switch self {
+            case .oldestFirst: return "arrow.down"
+            case .newestFirst: return "arrow.up"
+            }
+        }
+    }
+
+    @Published private(set) var isCollecting = false
+    @Published private(set) var items: [ClipItem] = []
+    @Published var direction: Direction = .oldestFirst {
+        didSet {
+            guard direction != oldValue else { return }
+            settings.pasteStackDefaultDirection = direction
+        }
+    }
+
+    var onChange: (() -> Void)?
+    /// Called when the stack panel should appear / refresh / dismiss.
+    var onPanelSync: ((Bool) -> Void)?
+
+    private let pasteController: PasteController
+    private let settings: AppSettings
+
+    nonisolated(unsafe) private var eventTap: CFMachPort?
+    nonisolated(unsafe) private var runLoopSource: CFRunLoopSource?
+    private var didPromptForAccessibility = false
+
+    init(pasteController: PasteController, settings: AppSettings) {
+        self.pasteController = pasteController
+        self.settings = settings
+        self.direction = settings.pasteStackDefaultDirection
+    }
+
+    deinit {
+        if let eventTap {
+            CGEvent.tapEnable(tap: eventTap, enable: false)
+            CFMachPortInvalidate(eventTap)
+        }
+        if let runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+        }
+    }
+
+    /// ⇧⌘C — open Stack (start collecting) or close it (clear queue, like Paste).
+    func toggle() {
+        if isCollecting || !items.isEmpty {
+            close()
+        } else {
+            open()
+        }
+    }
+
+    func open() {
+        direction = settings.pasteStackDefaultDirection
+        items = []
+        isCollecting = true
+        ensureAccessibilityIfNeeded()
+        refreshPasteIntercept()
+        notifyChange()
+        onPanelSync?(true)
+        NSLog("PasteIt: Paste Stack opened")
+    }
+
+    func close() {
+        isCollecting = false
+        items = []
+        tearDownEventTap()
+        notifyChange()
+        onPanelSync?(false)
+        NSLog("PasteIt: Paste Stack closed")
+    }
+
+    /// Compatibility alias used by menus / settings toggle.
+    func toggleCollecting() {
+        toggle()
+    }
+
+    func startCollecting() { open() }
+    func stopCollecting() { close() }
+
+    func append(_ capturedClip: CapturedClip) {
+        guard isCollecting else { return }
+        let item = capturedClip.makeModel()
+        if items.last?.duplicateContentKey == item.duplicateContentKey { return }
+        if items.contains(where: { $0.contentHash == item.contentHash }) { return }
+        items.append(item)
+        refreshPasteIntercept()
+        notifyChange()
+        onPanelSync?(true)
+        NSLog("PasteIt: Paste Stack +1 → \(items.count) — \(item.title)")
+    }
+
+    func remove(_ item: ClipItem) {
+        items.removeAll { $0.id == item.id }
+        refreshPasteIntercept()
+        notifyChange()
+        onPanelSync?(isCollecting || !items.isEmpty)
+    }
+
+    /// Move `item` to the next-to-paste position for the current direction.
+    func promoteToNext(_ item: ClipItem) {
+        items.removeAll { $0.id == item.id }
+        switch direction {
+        case .oldestFirst:
+            items.insert(item, at: 0)
+        case .newestFirst:
+            items.append(item)
+        }
+        refreshPasteIntercept()
+        notifyChange()
+        onPanelSync?(true)
+    }
+
+    func clear() {
+        items = []
+        refreshPasteIntercept()
+        notifyChange()
+        onPanelSync?(isCollecting)
+    }
+
+    /// Stage next item onto the pasteboard only (used by Paste Next / pre-stage).
+    @discardableResult
+    func stageNext() -> Bool {
+        guard !items.isEmpty else { return false }
+        let item = removeNext()
+        let mode: PasteController.PasteMode = settings.pasteAsPlainTextByDefault ? .plainText : .normal
+        let ok = pasteController.copyToPasteboard(item, mode: mode)
+        finishStage(itemTitle: item.title)
+        return ok
+    }
+
+    /// Async stage that reads image blobs off the main thread before writing.
+    @discardableResult
+    func stageNextAsync() async -> Bool {
+        guard !items.isEmpty else { return false }
+        let item = removeNext()
+        let mode: PasteController.PasteMode = settings.pasteAsPlainTextByDefault ? .plainText : .normal
+        let ok: Bool
+        if item.primaryType == .image, mode == .normal {
+            ok = await pasteController.copyToPasteboardAsync(item, mode: mode)
+        } else {
+            ok = pasteController.copyToPasteboard(item, mode: mode)
+        }
+        finishStage(itemTitle: item.title)
+        return ok
+    }
+
+    private func finishStage(itemTitle: String) {
+        refreshPasteIntercept()
+        notifyChange()
+        if !isCollecting && items.isEmpty {
+            onPanelSync?(false)
+        }
+        NSLog("PasteIt: Paste Stack staged — \(itemTitle) (\(items.count) left)")
+    }
+
+    /// Stage next item and synthesize ⌘V (⌥⌘V / Paste Next button).
+    @discardableResult
+    func pasteNext(panelController: TimelinePanelController? = nil) -> Bool {
+        guard !items.isEmpty else { return false }
+        panelController?.hide()
+        ensureAccessibilityIfNeeded()
+        Task { @MainActor in
+            guard await self.stageNextAsync() else { return }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            Self.postCommandV()
+        }
+        return true
+    }
+
+    @discardableResult
+    func prepareNextForSystemPaste() -> Bool {
+        stageNext()
+    }
+
+    func flipDirection() {
+        direction = direction == .oldestFirst ? .newestFirst : .oldestFirst
+        onPanelSync?(isCollecting || !items.isEmpty)
+    }
+
+    var statusTitle: String {
+        if isCollecting || !items.isEmpty {
+            return items.isEmpty ? "Stack" : "Stack · \(items.count)"
+        }
+        return "Paste"
+    }
+
+    var toggleMenuTitle: String {
+        if isCollecting || !items.isEmpty {
+            return "Close Paste Stack"
+        }
+        return "Open Paste Stack"
+    }
+
+    func ensureAccessibilityIfNeeded() {
+        guard !AXIsProcessTrusted() else { return }
+        guard !didPromptForAccessibility else { return }
+        didPromptForAccessibility = true
+        let promptKey = "AXTrustedCheckOptionPrompt" as CFString
+        _ = AXIsProcessTrustedWithOptions([promptKey: true] as CFDictionary)
+        NSLog("PasteIt: requesting Accessibility for Paste Stack ⌘V")
+    }
+
+    // MARK: - ⌘V intercept (Paste-compatible)
+
+    private func refreshPasteIntercept() {
+        if items.isEmpty {
+            tearDownEventTap()
+        } else {
+            installEventTapIfPossible()
+        }
+    }
+
+    private func installEventTapIfPossible() {
+        if eventTap != nil { return }
+        guard AXIsProcessTrusted() else {
+            ensureAccessibilityIfNeeded()
+            return
+        }
+
+        let mask = CGEventMask(1 << CGEventType.keyDown.rawValue)
+        let refcon = Unmanaged.passUnretained(self).toOpaque()
+        guard let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: mask,
+            callback: { _, type, event, refcon -> Unmanaged<CGEvent>? in
+                guard let refcon else { return Unmanaged.passUnretained(event) }
+                let controller = Unmanaged<PasteStackController>.fromOpaque(refcon).takeUnretainedValue()
+                return controller.handleEventTap(type: type, event: event)
+            },
+            userInfo: refcon
+        ) else {
+            NSLog("PasteIt: failed to create Paste Stack event tap")
+            return
+        }
+
+        eventTap = tap
+        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        runLoopSource = source
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+        NSLog("PasteIt: Paste Stack ⌘V intercept enabled")
+    }
+
+    private func tearDownEventTap() {
+        if let eventTap {
+            CGEvent.tapEnable(tap: eventTap, enable: false)
+            CFMachPortInvalidate(eventTap)
+        }
+        if let runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+        }
+        eventTap = nil
+        runLoopSource = nil
+    }
+
+    nonisolated private func handleEventTap(
+        type: CGEventType,
+        event: CGEvent
+    ) -> Unmanaged<CGEvent>? {
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let tap = eventTap {
+                CGEvent.tapEnable(tap: tap, enable: true)
+            }
+            return Unmanaged.passUnretained(event)
+        }
+        guard type == .keyDown else { return Unmanaged.passUnretained(event) }
+
+        let flags = event.flags
+        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+        guard flags.contains(.maskCommand),
+              !flags.contains(.maskShift),
+              !flags.contains(.maskAlternate),
+              !flags.contains(.maskControl),
+              keyCode == CGKeyCode(kVK_ANSI_V) else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        // Swallow ⌘V, stage the next item asynchronously, then re-post ⌘V.
+        // Never block the event-tap thread with main.sync — that stalls the
+        // system keyboard path whenever the main actor is busy.
+        Task { @MainActor in
+            guard await self.stageNextAsync() else { return }
+            // Brief yield so the pasteboard write is visible to the target app.
+            try? await Task.sleep(nanoseconds: 20_000_000)
+            Self.postCommandV()
+        }
+        return nil
+    }
+
+    private func removeNext() -> ClipItem {
+        let index = direction == .oldestFirst ? 0 : items.count - 1
+        return items.remove(at: index)
+    }
+
+    private func notifyChange() {
+        onChange?()
+    }
+
+    private static func postCommandV() {
+        let source = CGEventSource(stateID: .hidSystemState)
+        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: true)
+        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: false)
+        keyDown?.flags = .maskCommand
+        keyUp?.flags = .maskCommand
+        keyDown?.post(tap: .cghidEventTap)
+        keyUp?.post(tap: .cghidEventTap)
+    }
+}
