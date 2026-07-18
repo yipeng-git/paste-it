@@ -61,7 +61,7 @@ if [[ -f "$UPDATES/appcast.xml" ]]; then
   echo "  1. Rewrite enclosure urls to GitHub release download URLs if needed"
   echo "  2. cp \"$UPDATES/appcast.xml\" \"$DOCS_APPCAST\""
   echo "  3. Upload DMGs to a GitHub Release mac-vX.Y.Z on this same repository"
-  echo "  4. Push so GitHub Pages serves docs/appcast.xml (…/paste-it-mac/appcast.xml)"
+  echo "  4. Push so GitHub Pages serves docs/appcast.xml (…/paste-it/appcast.xml)"
 else
   echo "Expected appcast at $UPDATES/appcast.xml — check generate_appcast output." >&2
   exit 1

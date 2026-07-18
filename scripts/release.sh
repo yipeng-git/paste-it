@@ -29,7 +29,7 @@ if [[ -n "${PASTEIT_RELEASE_REPO:-}" ]]; then
 elif remote_url="$(git -C "$ROOT" remote get-url origin 2>/dev/null)"; then
   RELEASE_REPO="$(printf '%s\n' "$remote_url" | sed -E 's#(git@|https://)github\.com[:/]##; s#\.git$##')"
 else
-  RELEASE_REPO="yipeng-git/paste-it-mac"
+  RELEASE_REPO="yipeng-git/paste-it"
 fi
 DOWNLOAD_BASE="https://github.com/$RELEASE_REPO/releases/download"
 NOTARY_PROFILE="${PASTEIT_NOTARY_PROFILE:-paste-it-notary}"

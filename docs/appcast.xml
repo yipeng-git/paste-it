@@ -1,6 +1,6 @@
 <!--
   Placeholder appcast. Real feed is written by scripts/release.sh into this path
-  for GitHub Pages (https://yipeng-git.github.io/paste-it-mac/appcast.xml).
+  for GitHub Pages (https://yipeng-git.github.io/paste-it/appcast.xml).
 -->
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>

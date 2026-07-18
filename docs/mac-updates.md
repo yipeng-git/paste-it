@@ -2,7 +2,7 @@
 
 Paste It uses **Sparkle 2** for in-app updates. Signed DMGs ship as **GitHub Releases on this same repository**. The stable feed is hosted on this repository’s GitHub Pages:
 
-`https://yipeng-git.github.io/paste-it-mac/appcast.xml` → [`docs/appcast.xml`](appcast.xml)
+`https://yipeng-git.github.io/paste-it/appcast.xml` → [`docs/appcast.xml`](appcast.xml)
 
 There is **no** version↔DMG database. The mapping is:
 
@@ -52,12 +52,12 @@ Override the release target with `PASTEIT_RELEASE_REPO=owner/name` if `origin` i
 
 ### Remaining step: GitHub Pages
 
-Enable GitHub Pages for this repo from the `/docs` folder (or your preferred static publish path) so `https://yipeng-git.github.io/paste-it-mac/appcast.xml` is reachable after push.
+Enable GitHub Pages for this repo from the `/docs` folder (or your preferred static publish path) so `https://yipeng-git.github.io/paste-it/appcast.xml` is reachable after push.
 
 ### Verify
 
 ```sh
-curl -fsS https://yipeng-git.github.io/paste-it-mac/appcast.xml
+curl -fsS https://yipeng-git.github.io/paste-it/appcast.xml
 ```
 
 Install the build under `/Applications` and use **Settings → About → Check for Updates…**.

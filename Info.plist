@@ -31,7 +31,7 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://yipeng-git.github.io/paste-it-mac/appcast.xml</string>
+	<string>https://yipeng-git.github.io/paste-it/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>swPHBrOCR4/Iqp0mWPDEGfz3Tml9ChoElForJ1BKPhc=</string>
 </dict>
