@@ -1,0 +1,245 @@
+Sources/PasteIt/App/AppRuntime.swift
+  s_6d2cea6e857ae8::t_081ac911ac4a7c 150
+  s_6d2cea6e857ae8::t_1dca5c001ce69b 34-123,129,134,151-257,261
+  s_6d2cea6e857ae8::t_05a960d481cafc 5
+  s_6d2cea6e857ae8::t_1f9c4563f7340d 2-4
+  s_6d2cea6e857ae8::t_4da19e2a55d5a2 6-8,31-33
+  s_6d2cea6e857ae8::t_68a12b71587b9e 124-128
+  s_6d2cea6e857ae8::t_eac7d1d79cee58 130-133
+  s_6d2cea6e857ae8::t_e015fa8a229364 135-137,147-149
+  s_6d2cea6e857ae8::t_93cb2281bfcd88 258-260
+  s_6d2cea6e857ae8::t_ba9c80f888092e 262
+scripts/package-release.sh
+  s_6d2cea6e857ae8::t_2586d05b52c059 100
+  s_6d2cea6e857ae8::t_6b3401f681f721 97-99
+  s_6d2cea6e857ae8::t_98437e07b349e0 101-103
+Sources/PasteIt/App/UpdateChecker.swift
+  s_6d2cea6e857ae8::t_2d5a038ce8fb12 20
+  s_6d2cea6e857ae8::t_7c825e943e4301 17-19
+  s_6d2cea6e857ae8::t_31a2a9d1b2311e 21-23
+Sources/PasteIt/App/AppDelegate.swift
+  s_6d2cea6e857ae8::t_7a0c8d3292fb40 8-9
+  s_6d2cea6e857ae8::t_75241715a4f2fe 5-7
+  s_6d2cea6e857ae8::t_7564077330f22b 10-12
+docs/mac-packaging.md
+  s_6d2cea6e857ae8::t_eb2b5a6434e3da 3-83
+  s_6d2cea6e857ae8::t_cdca5b6aa17e70 1-2
+  s_6d2cea6e857ae8::t_27fc86ca246ab4 84
+docs/appcast.xml
+  s_6d2cea6e857ae8::t_21910b719e44b5 1-10
+Sources/PasteIt/Features/PasteStack/PasteStackController.swift
+  s_6d2cea6e857ae8::t_554b040cf6a87c 49
+  s_6d2cea6e857ae8::t_6e23d72c30afd3 46-48
+  s_6d2cea6e857ae8::t_347ef3ccc4298e 50-52
+scripts/run-app.sh
+  s_6d2cea6e857ae8::t_4be537dff71e06 2-3
+  s_6d2cea6e857ae8::t_3f028ae4ae6c87 1
+  s_6d2cea6e857ae8::t_be1e95c1a0d3f4 4-6
+scripts/release.sh
+  s_6d2cea6e857ae8::t_de785e9cfc2c7d 3-23,90-311
+  s_6d2cea6e857ae8::t_ad498a8874dbb8 26-39,83,88
+  s_6d2cea6e857ae8::t_f8446bee616678 1-2
+  s_6d2cea6e857ae8::t_0b17441a80504c 24-25
+  s_6d2cea6e857ae8::t_1657b43ca0e3bf 40-42,80-82
+  s_6d2cea6e857ae8::t_c9663830f590d1 84-87
+  s_6d2cea6e857ae8::t_1bcd8244a7ef89 89
+  s_6d2cea6e857ae8::t_c0fcc6870e9b35 312-314
+Sources/PasteIt/Utilities/NSMenuItem+DisableAutoIcons.swift
+  s_6d2cea6e857ae8::t_48f0dd29f7e054 25-28
+  s_6d2cea6e857ae8::t_07f6c707bc8d00 1-24,29-74
+scripts/generate-appcast.sh
+  s_6d2cea6e857ae8::t_86086b960043c8 63-64
+  s_6d2cea6e857ae8::t_96c4758e27607b 2-62
+  s_6d2cea6e857ae8::t_baa32e2070c865 1
+  s_6d2cea6e857ae8::t_0ce6219d6b7be0 65-67
+Info.plist
+  s_6d2cea6e857ae8::t_784273acaeced6 22-24
+  s_6d2cea6e857ae8::t_f11a15e33100d5 34
+  s_6d2cea6e857ae8::t_e3e483ea8079af 19-21
+  s_6d2cea6e857ae8::t_0f724ab49ba5e3 25-27,31-33
+  s_6d2cea6e857ae8::t_2c3dfe3d1ced47 35-37
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_6d2cea6e857ae8::t_bbd27ee0e8e8cb 22-73,87,92,122,138,145,155-156,165,208,212,263,281,286,293,298,303,314,319
+  s_6d2cea6e857ae8::t_88c3bb9e6391bb 19-21
+  s_6d2cea6e857ae8::t_71def0fad67aeb 74-76,84-86
+  s_6d2cea6e857ae8::t_0b8817d3f0b839 88-91
+  s_6d2cea6e857ae8::t_384ae838329a10 93-95,119-121
+  s_6d2cea6e857ae8::t_427cf671e81db4 123-125,135-137
+  s_6d2cea6e857ae8::t_cb6064353f87a5 139-144
+  s_6d2cea6e857ae8::t_508b57ab228bd6 146-148,152-154
+  s_6d2cea6e857ae8::t_2461d0956860f6 157-159,162-164
+  s_6d2cea6e857ae8::t_7557ed4f76085d 166-168,205-207
+  s_6d2cea6e857ae8::t_5b433bae220640 209-211
+  s_6d2cea6e857ae8::t_8ae4c7a882831b 213-215,260-262
+  s_6d2cea6e857ae8::t_f2a136f3b29f93 264-266,278-280
+  s_6d2cea6e857ae8::t_e6f4076f183135 282-285
+  s_6d2cea6e857ae8::t_6f0c3b8ce7b6bf 287-292
+  s_6d2cea6e857ae8::t_e5df1714b16bb4 294-297
+  s_6d2cea6e857ae8::t_718721aed6a6b8 299-302
+  s_6d2cea6e857ae8::t_a0c6b055f89aa2 304-306,311-313
+  s_6d2cea6e857ae8::t_03555ff9e909f1 315-318
+  s_6d2cea6e857ae8::t_2fd31a5f7d7f7f 320-322
+docs/mac-updates.md
+  s_6d2cea6e857ae8::t_0d4956f1307281 5,18-44,47-49,53-67
+  s_6d2cea6e857ae8::t_c37758cacd7c31 3,11,45-46,50-51
+  s_6d2cea6e857ae8::t_b3bbfae88a693a 1-2
+  s_6d2cea6e857ae8::t_30ec4b7d588d02 4
+  s_6d2cea6e857ae8::t_28b341573b652b 6-10
+  s_6d2cea6e857ae8::t_85c25caf48d536 12-17
+  s_6d2cea6e857ae8::t_50d36d2cea6c26 52
+LICENSE
+  s_6d2cea6e857ae8::t_22fca13f05a409 1-21
+Sources/PasteIt/Settings/SettingsView.swift
+  s_6d2cea6e857ae8::t_44f18cfd983e8e 10-83,87,98,102,107,115-116,140-141,164,173-174,176-177,181,187,191-192,198-199,203,208,212,216,218-219
+  s_6d2cea6e857ae8::t_acbb570355ea8a 7-9
+  s_6d2cea6e857ae8::t_09003a8b859583 84-86
+  s_6d2cea6e857ae8::t_019ef02d1997c4 88-90,95-97
+  s_6d2cea6e857ae8::t_26d298f4ba8e32 99-101
+  s_6d2cea6e857ae8::t_ab5afdb58bc8ee 103-106
+  s_6d2cea6e857ae8::t_7375cf8e31aeeb 108-110,112-114
+  s_6d2cea6e857ae8::t_88a4e773991753 117-119,137-139
+  s_6d2cea6e857ae8::t_9d31c2e7d8cd99 142-144,161-163
+  s_6d2cea6e857ae8::t_b2c2d38d312d04 165-167,170-172
+  s_6d2cea6e857ae8::t_e8d52376045bcc 175
+  s_6d2cea6e857ae8::t_3185c4eae407e2 178-180
+  s_6d2cea6e857ae8::t_9c02017d90dbaa 182-186
+  s_6d2cea6e857ae8::t_6d3ec4bde13817 188-190
+  s_6d2cea6e857ae8::t_9bca0e580843c1 193-197
+  s_6d2cea6e857ae8::t_d21b6f18cca207 200-202
+  s_6d2cea6e857ae8::t_504a5e1e44b658 204-207
+  s_6d2cea6e857ae8::t_6a5acc2d8e0ef1 209-211
+  s_6d2cea6e857ae8::t_6c0fa0e40ee4a8 213-215
+  s_6d2cea6e857ae8::t_2d1d8ab6e03934 217
+  s_6d2cea6e857ae8::t_572e9cdc98843f 220-221
+README.md
+  s_6d2cea6e857ae8::t_02fc1789779287 3-50
+  s_6d2cea6e857ae8::t_85bfdad5041366 1-2
+Sources/PasteIt/App/AppState.swift
+  s_6d2cea6e857ae8::t_810b1e3f79e38a 84
+  s_6d2cea6e857ae8::t_f5427d6b285134 81-83
+  s_6d2cea6e857ae8::t_1e81162c3b94c1 85-87
+.gitignore
+  s_9812588dc7eac8::t_dad8cafd13e026 1-37
+Package.swift
+  s_9812588dc7eac8::t_41371e1986e5a4 1-28
+PasteIt.entitlements
+  s_9812588dc7eac8::t_20eaaa3bd6540f 1-5
+Sources/PasteIt/App/AppSettings.swift
+  s_9812588dc7eac8::t_9c628ac773a22d 1-118
+Sources/PasteIt/App/PasteItApp.swift
+  s_9812588dc7eac8::t_ac7cc1b1895bb7 1-16
+Sources/PasteIt/Core/HotkeyManager.swift
+  s_9812588dc7eac8::t_9dc7c1014b48ec 1-212
+Sources/PasteIt/Core/PasteController.swift
+  s_9812588dc7eac8::t_75c1f2cd44191b 1-111
+Sources/PasteIt/Core/PasteboardMonitor.swift
+  s_ca3972732f2ab6::t_d4604a3d84a49f 1-299
+Sources/PasteIt/Features/PasteStack/PasteStackPanelController.swift
+  s_9812588dc7eac8::t_6707d6927c4d27 1-149
+Sources/PasteIt/Features/PasteStack/PasteStackView.swift
+  s_ea5a152113ce53::t_1cf714c2dca32a 1-188
+Sources/PasteIt/Models/CapturedClip.swift
+  s_9812588dc7eac8::t_93a314ee031123 1-49
+Sources/PasteIt/Models/ClipItem.swift
+  s_9812588dc7eac8::t_cba5c4b9b2a994 1-150
+Sources/PasteIt/Models/ClipType.swift
+  s_9812588dc7eac8::t_cb52f17c692b22 1-59
+Sources/PasteIt/Models/ContentIdentity.swift
+  s_9812588dc7eac8::t_5ac430faba900e 1-64
+Sources/PasteIt/Models/Pinboard.swift
+  s_9812588dc7eac8::t_317cf9d90fd3bd 1-42
+Sources/PasteIt/Search/LinkMetadataService.swift
+  s_9812588dc7eac8::t_3cec30b15662cb 1-184
+Sources/PasteIt/Search/OCRService.swift
+  s_9812588dc7eac8::t_11aa3e9f888731 1-45
+Sources/PasteIt/Search/SearchService.swift
+  s_9812588dc7eac8::t_a9da51eedced75 1-93
+Sources/PasteIt/Settings/InstalledAppCatalog.swift
+  s_ea5a152113ce53::t_72f24e0b6811c4 1-82
+Sources/PasteIt/Settings/LaunchAtLoginManager.swift
+  s_9812588dc7eac8::t_9bd24c8f9269ce 1-37
+Sources/PasteIt/Settings/PrivacySettingsView.swift
+  s_ea5a152113ce53::t_8f430de3d712c0 1-249
+Sources/PasteIt/Storage/BlobStore.swift
+  s_9812588dc7eac8::t_f643cf30ae4e73 1-140
+Sources/PasteIt/Storage/ClipVisualCache.swift
+  s_9812588dc7eac8::t_1f0cdd2102bfa2 1-128
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_ea5a152113ce53::t_fc9e0f0f16dfbc 1-616
+Sources/PasteIt/UI/ClipDetachedWindowController.swift
+  s_9812588dc7eac8::t_2f29ace295be81 1-223
+Sources/PasteIt/UI/Components/AppMenuButton.swift
+  s_9812588dc7eac8::t_68ac8600827669 1-47
+Sources/PasteIt/UI/Components/FilterPill.swift
+  s_9812588dc7eac8::t_7b11b4ea5ef072 1-25
+Sources/PasteIt/UI/Components/RichTextEditor.swift
+  s_9812588dc7eac8::t_038f9f99ad2aaf 1-147
+Sources/PasteIt/UI/Timeline/ClipCardView.swift
+  s_9812588dc7eac8::t_6f0d02a4ae8775 1-292
+Sources/PasteIt/UI/Timeline/ClipEditView.swift
+  s_9812588dc7eac8::t_f4e3c7c2b69991 1-145
+Sources/PasteIt/UI/Timeline/ClipPreviewView.swift
+  s_9812588dc7eac8::t_f72ccd9ef0df9b 1-75
+Sources/PasteIt/UI/Timeline/ClipQuickPreview.swift
+  s_9812588dc7eac8::t_a19fce57c1945e 1-133
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_9812588dc7eac8::t_ec6e0afff7f5dd 1-258
+Sources/PasteIt/Utilities/AppKitExtensions.swift
+  s_ca3972732f2ab6::t_e6fa0e3163d275 1-39
+Sources/PasteIt/Utilities/ClearHostingBackground.swift
+  s_9812588dc7eac8::t_2108ac633fff41 1-73
+Sources/PasteIt/Utilities/ColorExtensions.swift
+  s_9812588dc7eac8::t_2d2d8c1542c3a6 1-13
+Sources/PasteIt/Utilities/DataHashing.swift
+  s_9812588dc7eac8::t_19e6ead076c5d3 1-14
+Sources/PasteIt/Utilities/DateExtensions.swift
+  s_9812588dc7eac8::t_c95514dcbd85cd 1-22
+Sources/PasteIt/Utilities/LiquidGlass.swift
+  s_9812588dc7eac8::t_136ff6a6628735 1-43
+scripts/generate-app-icon.swift
+  s_9812588dc7eac8::t_e71316a3c362d6 1-255
+scripts/make-dmg-background.py
+  s_9812588dc7eac8::t_4edb5dd026b81d 1-127
+scripts/pack-favicon.py
+  s_9812588dc7eac8::t_ad5af5019b1bc5 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "9825e3a01fbb060e780ad7a5f31a35d4e756afbf",
+  "prompts": {},
+  "sessions": {
+    "s_6d2cea6e857ae8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3522faf1-8961-437e-884d-4b19d9834c7e",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    },
+    "s_9812588dc7eac8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b7b5458f-3d6c-4cbc-9dd6-791847d528a1",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    },
+    "s_ca3972732f2ab6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8f95accb-988d-4a0c-9b5b-1c06edb6845d",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    },
+    "s_ea5a152113ce53": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c9fa995-d2f9-449f-868a-c6fa6b487ec9",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    }
+  }
+}
