@@ -1,0 +1,28 @@
+docs/mac-updates.md
+  s_6d2cea6e857ae8::t_8aaac1082646bf 55,60
+  s_6d2cea6e857ae8::t_fff90f6979e235 5
+scripts/release.sh
+  s_6d2cea6e857ae8::t_35de8aa81ce055 32
+docs/appcast.xml
+  s_6d2cea6e857ae8::t_d2833f19f68c59 3
+Info.plist
+  s_6d2cea6e857ae8::t_0d30b84dfad643 34
+scripts/generate-appcast.sh
+  s_6d2cea6e857ae8::t_85b00f44e8a143 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "65da7fc5b5528b0d4ca1d5b19bfe8782dda4acc1",
+  "prompts": {},
+  "sessions": {
+    "s_6d2cea6e857ae8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3522faf1-8961-437e-884d-4b19d9834c7e",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    }
+  }
+}
