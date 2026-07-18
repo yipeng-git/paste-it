@@ -101,6 +101,7 @@ private struct WelcomeHero: View {
                 .opacity(showLock ? 1 : 0)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: isActive) { _, active in
             if active {
                 showLock = false
@@ -172,6 +173,7 @@ private struct CaptureHero: View {
                 .frame(width: 220, height: OnboardingCardMetrics.fullHeight * 0.50, alignment: .leading)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: isActive) { _, active in
             if active {
                 startLoop()
@@ -230,6 +232,7 @@ private struct TimelineHero: View {
 
             KeyCapsule(label: "⇧ ⌘ V", pulsing: pulse)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: isActive) { _, active in
             pulse = active
         }
@@ -303,6 +306,7 @@ private struct StageHero: View {
             }
             .opacity(step >= 2 ? 1 : 0.45)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: isActive) { _, active in
             if active {
                 startSequence()
@@ -348,7 +352,7 @@ private struct NextStepsHero: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)
                 ZStack(alignment: .topTrailing) {
-                    ScaledDemoCard(clip: .favorite, isSelected: pinned, scale: 0.55)
+                    ScaledDemoCard(clip: .favorite, isSelected: pinned, scale: 0.48)
                     Image(systemName: "pin.fill")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.accentColor)
@@ -372,7 +376,7 @@ private struct NextStepsHero: View {
                                 .font(.system(size: 11, weight: .bold).monospaced())
                                 .foregroundStyle(.secondary)
                                 .frame(width: 18, alignment: .trailing)
-                            ScaledDemoCard(clip: clip, scale: 0.42)
+                            ScaledDemoCard(clip: clip, scale: 0.34)
                         }
                     }
                 }
@@ -382,6 +386,7 @@ private struct NextStepsHero: View {
                     .foregroundStyle(.tertiary)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: isActive) { _, active in
             if active {
                 pinned = false

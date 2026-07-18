@@ -11,6 +11,8 @@ struct OnboardingView: View {
     private var isLastPage: Bool { pageIndex >= pages.count - 1 }
     private var currentPage: OnboardingPageID { pages[pageIndex] }
 
+    private let footerHeight: CGFloat = 44
+
     var body: some View {
         VStack(spacing: 0) {
             heroSection
@@ -20,6 +22,7 @@ struct OnboardingView: View {
 
             footer
                 .padding(.horizontal, 20)
+                .frame(height: footerHeight)
                 .padding(.bottom, 14)
                 .padding(.top, 10)
         }
@@ -36,7 +39,11 @@ struct OnboardingView: View {
                 .id(currentPage)
                 .transition(pageTransition)
                 .padding(16)
+                // Hero pages vary in intrinsic size; always fill the slot so the
+                // footer never jumps when switching illustrations.
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .animation(.easeInOut(duration: 0.28), value: pageIndex)
     }
@@ -55,12 +62,14 @@ struct OnboardingView: View {
 
             Spacer()
 
-            if pageIndex > 0 {
-                Button("Back") {
-                    go(to: pageIndex - 1, forward: false)
-                }
-                .keyboardShortcut(.leftArrow, modifiers: [])
+            // Reserve Back's width on page 1 so Continue doesn't shift horizontally.
+            Button("Back") {
+                go(to: pageIndex - 1, forward: false)
             }
+            .keyboardShortcut(.leftArrow, modifiers: [])
+            .opacity(pageIndex > 0 ? 1 : 0)
+            .disabled(pageIndex == 0)
+            .allowsHitTesting(pageIndex > 0)
 
             Button(isLastPage ? "Get Started" : "Continue") {
                 if isLastPage {
@@ -71,6 +80,7 @@ struct OnboardingView: View {
             }
             .keyboardShortcut(.defaultAction)
             .buttonStyle(.borderedProminent)
+            .frame(minWidth: 110)
         }
     }
 
