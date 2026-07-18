@@ -1,0 +1,21 @@
+README.md
+  s_6d2cea6e857ae8::t_e76cc19c9ead70 50-52
+LICENSE
+  s_6d2cea6e857ae8::t_36f6cdc3f40faa 1-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "e0a929bde9cb9d804c268272208ed85fc693306e",
+  "prompts": {},
+  "sessions": {
+    "s_6d2cea6e857ae8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3522faf1-8961-437e-884d-4b19d9834c7e",
+        "model": "grok-4.5"
+      },
+      "human_author": "zhangyipeng <zhangyipeng@p1.com>"
+    }
+  }
+}
