@@ -33,5 +33,8 @@ if [[ -d "$BIN_DIR/PasteIt_PasteIt.bundle" ]]; then
   cp -R "$BIN_DIR/PasteIt_PasteIt.bundle" "$APP/Contents/Resources/"
 fi
 
+# install_name_tool invalidates the ad-hoc SPM signature; re-sign so Gatekeeper won't SIGKILL.
+codesign --force --deep --sign - "$APP" >/dev/null
+
 echo "Built $APP"
 open "$APP"

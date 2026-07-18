@@ -11,7 +11,7 @@ final class HistoryStore: ObservableObject {
     let container: ModelContainer
     let context: ModelContext
 
-    private let blobStore: BlobStore
+    let blobStore: BlobStore
     private let settings: AppSettings
     private let linkMetadataService = LinkMetadataService.shared
     private let visualCache = ClipVisualCache.shared
@@ -74,6 +74,47 @@ final class HistoryStore: ObservableObject {
         }
         context = ModelContext(container)
         context.autosaveEnabled = false
+    }
+
+    /// In-memory history for Agent API ephemeral timeline screenshots. Never touches disk history.
+    init(ephemeralBlobRoot: URL, settings: AppSettings) {
+        try? FileManager.default.createDirectory(at: ephemeralBlobRoot, withIntermediateDirectories: true)
+        self.blobStore = BlobStore(rootURL: ephemeralBlobRoot)
+        self.settings = settings
+        self.storeURL = ephemeralBlobRoot.appendingPathComponent("ephemeral.store")
+        self.isFreshStore = true
+
+        let schema = Schema([ClipItem.self, Pinboard.self])
+        let configuration = ModelConfiguration(
+            "PasteItEphemeral-\(UUID().uuidString)",
+            schema: schema,
+            isStoredInMemoryOnly: true,
+            cloudKitDatabase: .none
+        )
+        container = try! ModelContainer(for: schema, configurations: [configuration])
+        context = ModelContext(container)
+        context.autosaveEnabled = false
+    }
+
+    /// Stores image bytes into this store's blob root (used by ephemeral seed).
+    func ingestImageData(_ data: Data) throws -> (
+        blobRelativePath: String,
+        thumbnailRelativePath: String?,
+        pixelWidth: Int?,
+        pixelHeight: Int?
+    ) {
+        let id = UUID()
+        let blobPath = try blobStore.store(data: data, preferredExtension: "png", id: id)
+        let thumb = try blobStore.storeThumbnail(fromImageData: data, id: id)
+        return (blobPath, thumb?.path, thumb?.pixelWidth, thumb?.pixelHeight)
+    }
+
+    /// Removes the ephemeral blob root from disk (no-op for persistent stores).
+    func destroyEphemeralFiles() {
+        let root = blobStore.rootURL
+        // Never delete the real Application Support PasteIt root.
+        guard root.path.contains("PasteItEphemeral") else { return }
+        try? FileManager.default.removeItem(at: root)
     }
 
     func load() {
@@ -320,57 +361,106 @@ final class HistoryStore: ObservableObject {
     }
 
     func enrichLinkMetadataIfNeeded(for id: UUID) {
-        guard let item = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else { return }
-        guard item.primaryType == .url else { return }
-        guard item.linkTitle == nil, item.linkIconRelativePath == nil, item.linkImageRelativePath == nil else {
-            return
+        Task { @MainActor in
+            await enrichLinkMetadata(for: id)
         }
-        guard !enrichingIDs.contains(id) else { return }
+    }
+
+    /// Awaits OG/favicon fetch for a URL clip. Still runs when title is present but preview images are missing.
+    @discardableResult
+    func enrichLinkMetadata(for id: UUID) async -> Bool {
+        guard let item = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else { return false }
+        guard item.primaryType == .url else { return false }
+
+        let needsTitle = item.linkTitle == nil || item.linkTitle?.isEmpty == true
+        let needsIcon = item.linkIconRelativePath == nil
+        let needsImage = item.linkImageRelativePath == nil
+        guard needsTitle || needsIcon || needsImage else { return true }
+        guard !enrichingIDs.contains(id) else {
+            // Another enrich in flight — wait briefly for paths to appear.
+            return await waitForLinkPreviewPaths(id: id, timeoutNanoseconds: 12_000_000_000)
+        }
 
         let urlString = item.fileURLString ?? item.plainText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let url = URL(string: urlString), ["http", "https"].contains(url.scheme?.lowercased() ?? "") else {
-            return
+            return false
         }
 
         enrichingIDs.insert(id)
-        Task { @MainActor in
-            defer { enrichingIDs.remove(id) }
-            let metadata = await linkMetadataService.metadata(for: url)
-            guard let liveItem = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else { return }
+        defer { enrichingIDs.remove(id) }
 
-            var didUpdate = false
-            if let title = metadata.title, !title.isEmpty {
-                liveItem.linkTitle = title
-                if liveItem.title == liveItem.plainText || liveItem.title.count > 80 {
-                    liveItem.title = String(title.prefix(80))
-                }
-                didUpdate = true
-            }
-            if let iconData = metadata.iconData {
-                liveItem.linkIconRelativePath = try? blobStore.store(
-                    data: iconData,
-                    preferredExtension: "png",
-                    id: UUID()
-                )
-                didUpdate = true
-            }
-            if let imageData = metadata.imageData {
-                liveItem.linkImageRelativePath = try? blobStore.store(
-                    data: imageData,
-                    preferredExtension: "jpg",
-                    id: UUID()
-                )
-                didUpdate = true
-            }
+        let metadata = await linkMetadataService.metadata(for: url)
+        guard let liveItem = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else { return false }
 
-            if didUpdate {
-                liveItem.updatedAt = Date()
-                visualCache.invalidate(clipID: id)
-                foldedSearchByID[id] = liveItem.foldedSearchHaystack
-                saveQuietly()
-                objectWillChange.send()
+        var didUpdate = false
+        if needsTitle, let title = metadata.title, !title.isEmpty {
+            liveItem.linkTitle = title
+            if liveItem.title == liveItem.plainText || liveItem.title.count > 80 {
+                liveItem.title = String(title.prefix(80))
             }
+            didUpdate = true
         }
+        if needsIcon, let iconData = metadata.iconData {
+            liveItem.linkIconRelativePath = try? blobStore.store(
+                data: iconData,
+                preferredExtension: "png",
+                id: UUID()
+            )
+            didUpdate = true
+        }
+        if needsImage, let imageData = metadata.imageData {
+            liveItem.linkImageRelativePath = try? blobStore.store(
+                data: imageData,
+                preferredExtension: "jpg",
+                id: UUID()
+            )
+            didUpdate = true
+        }
+
+        if didUpdate {
+            liveItem.updatedAt = Date()
+            visualCache.invalidate(clipID: id)
+            foldedSearchByID[id] = liveItem.foldedSearchHaystack
+            saveQuietly()
+            objectWillChange.send()
+        }
+
+        return liveItem.linkImageRelativePath != nil || liveItem.linkIconRelativePath != nil
+    }
+
+    /// Used by Agent API render: fetch missing link previews, then warm the image cache.
+    func awaitMissingLinkPreviews() async {
+        let ids = clips
+            .filter { $0.primaryType == .url }
+            .filter { $0.linkImageRelativePath == nil && $0.linkIconRelativePath == nil }
+            .map(\.id)
+
+        // Sequential is fine (few cards); avoids TaskGroup + MainActor isolation issues.
+        for id in ids {
+            _ = await enrichLinkMetadata(for: id)
+        }
+
+        for item in clips where item.primaryType == .url {
+            _ = await loadLinkPreviewImage(for: item)
+        }
+    }
+
+    private func waitForLinkPreviewPaths(id: UUID, timeoutNanoseconds: UInt64) async -> Bool {
+        let deadline = DispatchTime.now().uptimeNanoseconds + timeoutNanoseconds
+        while DispatchTime.now().uptimeNanoseconds < deadline {
+            if let item = clips.first(where: { $0.id == id }),
+               item.linkImageRelativePath != nil || item.linkIconRelativePath != nil {
+                return true
+            }
+            if !enrichingIDs.contains(id) {
+                break
+            }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
+        if let item = clips.first(where: { $0.id == id }) {
+            return item.linkImageRelativePath != nil || item.linkIconRelativePath != nil
+        }
+        return false
     }
 
     func clearHistory(keepPinned: Bool = true) {

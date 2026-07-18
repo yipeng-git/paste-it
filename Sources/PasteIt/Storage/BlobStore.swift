@@ -9,9 +9,14 @@ final class BlobStore: @unchecked Sendable {
     let blobsURL: URL
     let thumbnailsURL: URL
 
-    init() {
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        rootURL = appSupport.appendingPathComponent("PasteIt", isDirectory: true)
+    convenience init() {
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        self.init(rootURL: appSupport.appendingPathComponent("PasteIt", isDirectory: true))
+    }
+
+    /// Custom root (used by Agent API ephemeral screenshot sessions).
+    init(rootURL: URL) {
+        self.rootURL = rootURL
         blobsURL = rootURL.appendingPathComponent("Blobs", isDirectory: true)
         thumbnailsURL = rootURL.appendingPathComponent("Thumbnails", isDirectory: true)
         createDirectories()

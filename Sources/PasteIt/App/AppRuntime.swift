@@ -105,12 +105,24 @@ final class AppRuntime: NSObject {
                 OnboardingWindowController.shared.show(settings: settings)
             }
         }
+
+        applyAgentAPIEnabled(settings.agentAPIEnabled)
     }
 
     func stop() {
+        AgentAPIServer.shared.stop()
         pasteboardMonitor.stop()
         hotkeyManager.stop()
         pasteStackController.close()
+    }
+
+    func applyAgentAPIEnabled(_ enabled: Bool) {
+        if enabled {
+            // Force rebind so a dead listener after a stuck render can come back.
+            AgentAPIServer.shared.start(forceRestart: true)
+        } else {
+            AgentAPIServer.shared.stop()
+        }
     }
 
     private func configureStatusItem() {
@@ -154,6 +166,12 @@ final class AppRuntime: NSObject {
         menu.addItem(NSMenuItem.separator())
         let pauseTitle = settings.capturePaused ? "Resume Capture" : "Pause Capture"
         menu.addItem(makeMenuItem(title: pauseTitle, action: #selector(togglePause), keyEquivalent: "t", shiftCommand: true))
+        let agentItem = makeMenuItem(title: "MCP", action: #selector(toggleAgentAPI), keyEquivalent: "")
+        agentItem.state = settings.agentAPIEnabled ? .on : .off
+        menu.addItem(agentItem)
+        if settings.agentAPIEnabled {
+            menu.addItem(makeMenuItem(title: "Copy MCP URL", action: #selector(copyAgentAPIURL), keyEquivalent: ""))
+        }
         menu.addItem(makeMenuItem(title: "Preferences…", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(makeMenuItem(
             title: "Check for Updates…",
@@ -253,6 +271,30 @@ final class AppRuntime: NSObject {
 
     @objc private func togglePause() {
         settings.capturePaused.toggle()
+    }
+
+    @objc private func toggleAgentAPI() {
+        settings.agentAPIEnabled.toggle()
+        applyAgentAPIEnabled(settings.agentAPIEnabled)
+        if settings.agentAPIEnabled {
+            copyAgentAPIURLToPasteboard()
+            appState.setStatus("MCP on — URL copied")
+        } else {
+            appState.setStatus("MCP off")
+        }
+    }
+
+    @objc private func copyAgentAPIURL() {
+        copyAgentAPIURLToPasteboard()
+        appState.setStatus("Copied MCP URL — \(AgentAPIServer.defaultBaseURL)")
+    }
+
+    private func copyAgentAPIURLToPasteboard() {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(AgentAPIServer.defaultBaseURL, forType: .string)
+        // Don't capture our own "copy URL" into clipboard history.
+        pasteboardMonitor.suppress(changeCount: pasteboard.changeCount)
     }
 
     @objc private func openSettings() {

@@ -39,6 +39,7 @@ final class AppSettings: ObservableObject {
     @AppStorage("launchAtLogin") var launchAtLogin: Bool = true
     @AppStorage("pasteAsPlainTextByDefault") var pasteAsPlainTextByDefault: Bool = false
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+    @AppStorage("agentAPIEnabled") var agentAPIEnabled: Bool = false
     @AppStorage("pasteStackDefaultDirection") private var pasteStackDefaultDirectionRaw: String =
         PasteStackController.Direction.oldestFirst.rawValue
     @AppStorage("ignoredBundleIdentifiers") private var ignoredBundleIdentifiersRaw: String = defaultIgnoredApps.joined(separator: "\n")

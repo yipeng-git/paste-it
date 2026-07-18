@@ -45,6 +45,10 @@ Selecting a clip only writes it to the system pasteboard. Paste It does not synt
 
 Global shortcuts use `NSEvent` monitors (`Shift+Cmd+V` timeline, `Shift+Cmd+C` Paste Stack, `Cmd+1…9` Quick Copy).
 
+## MCP
+
+Optional local MCP server (Stateless HTTP) for agents: read history + ephemeral timeline screenshots. Off by default; enable from the menu bar **MCP** item. See [`docs/mcp.md`](docs/mcp.md).
+
 ## License
 
 [PolyForm Noncommercial License 1.0.0](LICENSE) — free for personal, educational, research, hobby, and other noncommercial use. **Commercial use requires a separate license** from the copyright holder.
