@@ -2,6 +2,8 @@
 
 A local-only macOS clipboard manager — native SwiftUI, Liquid Glass, and MCP for agents.
 
+**Website:** [paste-it.app](https://paste-it.app)
+
 ![Paste It timeline panel](docs/screenshots/paste-it-history-panel.png)
 
 - **Local only** — No account, no cloud sync. Clipboard history stays on this Mac.
