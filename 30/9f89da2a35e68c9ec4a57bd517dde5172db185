@@ -1,0 +1,19 @@
+README.md
+  s_c97163902de60e::t_d37200d0c4d6a1 5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "309f89da2a35e68c9ec4a57bd517dde5172db185",
+  "prompts": {},
+  "sessions": {
+    "s_c97163902de60e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "84739189-e79c-4318-8929-115df660f7b2",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
