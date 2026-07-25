@@ -61,6 +61,8 @@ final class AppState: ObservableObject {
     @Published var searchFocusRequest: Int = 0
     /// Bumped when the timeline should resign search focus (panel show / Esc).
     @Published var searchBlurRequest: Int = 0
+    /// Bumped when the timeline should scroll back to the first card (panel show / promote).
+    @Published var scrollToStartRequest: Int = 0
     /// When set, the timeline presents the clip editor for this item.
     @Published var editingClip: ClipItem?
     /// When set, the timeline shows the space-bar quick preview for this item.
@@ -115,12 +117,30 @@ final class AppState: ObservableObject {
         selectedSourceApp = nil
         isBatchUpdatingFilters = false
         rebuildVisibleClips()
-        selectFirstIfNeeded()
+        // Always start from the first card — don't preserve prior selection/scroll.
+        selectFirst(scroll: true)
     }
 
     func selectFirstIfNeeded() {
         if selectedClipID == nil || !visibleClips.contains(where: { $0.id == selectedClipID }) {
             selectedClipID = visibleClips.first?.id
+        }
+    }
+
+    func selectFirst(scroll: Bool = false) {
+        selectedClipID = visibleClips.first?.id
+        if scroll {
+            scrollToStartRequest += 1
+        }
+    }
+
+    /// Stages an accessed clip to the front of history and keeps selection/scroll in sync.
+    func promoteAccessedClip(_ item: ClipItem, scroll: Bool = true) {
+        historyStore.promoteToFront(item)
+        rebuildVisibleClips()
+        selectedClipID = item.id
+        if scroll {
+            scrollToStartRequest += 1
         }
     }
 

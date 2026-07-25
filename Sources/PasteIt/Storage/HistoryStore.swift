@@ -26,6 +26,7 @@ final class HistoryStore: ObservableObject {
     private static let didPurgeSourceIconPNGKey = "didPurgeSourceIconPNG_v1"
     private static let needsHistoryStoreVacuumKey = "needsHistoryStoreVacuum_v1"
     private static let didSeedWelcomeClipsKey = "didSeedWelcomeClips_v1"
+    private static let didBackfillLastUsedAtKey = "didBackfillLastUsedAt_v1"
 
     /// True when `history.store` did not exist before this process opened it (true first install).
     private let isFreshStore: Bool
@@ -119,6 +120,7 @@ final class HistoryStore: ObservableObject {
 
     func load() {
         refresh()
+        backfillLastUsedAtIfNeeded()
         if pinboards.isEmpty {
             createDefaultPinboards()
         }
@@ -129,7 +131,7 @@ final class HistoryStore: ObservableObject {
 
     func refresh() {
         let clipDescriptor = FetchDescriptor<ClipItem>(
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            sortBy: [SortDescriptor(\.lastUsedAt, order: .reverse)]
         )
         let pinboardDescriptor = FetchDescriptor<Pinboard>(
             sortBy: [SortDescriptor(\.createdAt, order: .forward)]
@@ -146,6 +148,19 @@ final class HistoryStore: ObservableObject {
         let folded = item.foldedSearchHaystack
         foldedSearchByID[item.id] = folded
         return folded
+    }
+
+    /// Moves a clip to the front of history after copy / paste from the timeline.
+    /// Mirrors Paste: bumps `timestamp` (`lastUsedAt`), keeps original `createdAt`.
+    func promoteToFront(_ item: ClipItem) {
+        guard clips.contains(where: { $0.id == item.id }) else { return }
+        item.touchAccess()
+        if clips.first?.id != item.id {
+            clips.removeAll { $0.id == item.id }
+            clips.insert(item, at: 0)
+        }
+        saveQuietly()
+        objectWillChange.send()
     }
 
     func add(_ capturedClip: CapturedClip) {
@@ -702,6 +717,23 @@ final class HistoryStore: ObservableObject {
             NSLog("PasteIt: SwiftData save failed: \(error)")
             context.rollback()
             return false
+        }
+    }
+
+    /// One-shot: after adding `lastUsedAt`, seed it from `createdAt` so existing
+    /// libraries keep a stable timeline order (matches prior createdAt sort).
+    private func backfillLastUsedAtIfNeeded() {
+        guard !UserDefaults.standard.bool(forKey: Self.didBackfillLastUsedAtKey) else { return }
+        for item in clips {
+            item.lastUsedAt = item.createdAt
+        }
+        if saveQuietly() {
+            UserDefaults.standard.set(true, forKey: Self.didBackfillLastUsedAtKey)
+            clips.sort { $0.lastUsedAt > $1.lastUsedAt }
+            objectWillChange.send()
+            NSLog("PasteIt: backfilled lastUsedAt for \(clips.count) clips")
+        } else {
+            NSLog("PasteIt: failed to backfill lastUsedAt; will retry next launch")
         }
     }
 

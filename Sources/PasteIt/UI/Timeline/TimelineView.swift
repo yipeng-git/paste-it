@@ -51,6 +51,9 @@ struct TimelineView: View {
         return VStack(spacing: 0) {
             toolbar
             ZStack {
+                // Remount on scrollToStartRequest so offset resets to the natural
+                // resting position (with leading inset) — no scroll animation, no
+                // scrollTo(.leading) which would flush the first card to the edge.
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 14) {
                         ForEach(Array(clips.prefix(30).enumerated()), id: \.element.id) { index, item in
@@ -61,6 +64,7 @@ struct TimelineView: View {
                     .padding(.bottom, 18)
                     .padding(.top, 8)
                 }
+                .id(appState.scrollToStartRequest)
 
                 if clips.isEmpty {
                     Text(emptyMessage)
@@ -223,8 +227,9 @@ struct TimelineView: View {
         )
         .frame(width: 238, height: 232)
         .onTapGesture {
+            // Paste: single click only selects — does not reorder or stage.
             resignSearch()
-            stage(item, dismissPanel: false)
+            appState.selectedClipID = item.id
         }
         .onTapGesture(count: 2) {
             resignSearch()
@@ -232,8 +237,8 @@ struct TimelineView: View {
         }
         .draggable(item.id.uuidString)
         .contextMenu {
-            Button("Copy to Clipboard") { stage(item, dismissPanel: true) }
-            Button("Copy as Plain Text") { stage(item, mode: .plainText, dismissPanel: true) }
+            Button("Copy to Clipboard") { stage(item, dismissPanel: false) }
+            Button("Copy as Plain Text") { stage(item, mode: .plainText, dismissPanel: false) }
             Button("Edit") { appState.editingClip = item }
                 .keyboardShortcut("e")
             Divider()
@@ -244,6 +249,7 @@ struct TimelineView: View {
 
     /// Puts the clip on the system pasteboard (replacing current clipboard contents).
     /// Does not auto-paste into the frontmost app.
+    /// Promotes the clip to the front (Paste Cmd-C / Return / Quick Paste behavior).
     private func stage(
         _ item: ClipItem,
         mode: PasteController.PasteMode = .normal,
@@ -256,15 +262,17 @@ struct TimelineView: View {
         if item.primaryType == .image, resolvedMode == .normal {
             Task { @MainActor in
                 guard await pasteController.copyToPasteboardAsync(item, mode: resolvedMode) else { return }
-                appState.setStatus("Copied \(item.title)")
-                if dismissPanel {
-                    appState.panelController?.hide()
-                }
+                promoteAfterStage(item, dismissPanel: dismissPanel)
             }
             return
         }
 
         guard pasteController.copyToPasteboard(item, mode: resolvedMode) else { return }
+        promoteAfterStage(item, dismissPanel: dismissPanel)
+    }
+
+    private func promoteAfterStage(_ item: ClipItem, dismissPanel: Bool) {
+        appState.promoteAccessedClip(item, scroll: !dismissPanel)
         appState.setStatus("Copied \(item.title)")
         if dismissPanel {
             appState.panelController?.hide()
@@ -292,6 +300,14 @@ struct TimelineView: View {
                 }
             }
             .keyboardShortcut(.return, modifiers: [.shift])
+
+            // Paste: ⌘C copies selected item to the clipboard and promotes it.
+            Button("") {
+                if let selected = appState.selectedClip {
+                    stage(selected, dismissPanel: false)
+                }
+            }
+            .keyboardShortcut("c", modifiers: [.command])
 
             Button("") {
                 _ = appState.beginEditingSelectedClip()

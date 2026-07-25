@@ -4,8 +4,11 @@ import SwiftData
 @Model
 final class ClipItem: Identifiable {
     @Attribute(.unique) var id: UUID
+    /// Original capture time (Paste `createdAt`). Shown on cards; used for retention.
     var createdAt: Date
     var updatedAt: Date
+    /// Sort key for timeline order (Paste `timestamp`). Bumped on reuse / copy / paste.
+    var lastUsedAt: Date = Date()
     var title: String
     var plainText: String
     var htmlText: String?
@@ -56,6 +59,7 @@ final class ClipItem: Identifiable {
         self.id = id
         self.createdAt = createdAt
         self.updatedAt = createdAt
+        self.lastUsedAt = createdAt
         self.title = title
         self.plainText = plainText
         self.htmlText = htmlText
@@ -142,9 +146,19 @@ final class ClipItem: Identifiable {
         return (width, height)
     }
 
+    /// External re-copy of the same content (Paste checksum hit).
     func touchDuplicate() {
         copyCount += 1
-        updatedAt = Date()
-        createdAt = Date()
+        let now = Date()
+        updatedAt = now
+        lastUsedAt = now
+        // Keep createdAt — Paste preserves original capture time.
+    }
+
+    /// Copy/paste from history (Paste Cmd-C / Return / Quick Paste).
+    func touchAccess() {
+        let now = Date()
+        updatedAt = now
+        lastUsedAt = now
     }
 }
