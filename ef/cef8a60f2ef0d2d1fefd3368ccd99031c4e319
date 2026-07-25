@@ -1,0 +1,38 @@
+Sources/PasteIt/App/AppState.swift
+  s_ddf051f148cc80::t_a939b3fd152353 64-65
+  s_ddf051f148cc80::t_64c376f8021484 120-121,130-136
+  s_ddf051f148cc80::t_497095a5476bfc 137-146
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_ddf051f148cc80::t_9a4e815e1cfecf 153-154,158-161
+  s_ddf051f148cc80::t_d88222ae1bdc3c 123,134
+  s_ddf051f148cc80::t_829ec5fa13ed17 29
+  s_ddf051f148cc80::t_43f87c8cf4ef58 155-157,162-165
+  s_ddf051f148cc80::t_dfde5caa2d2c75 723-739
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_ddf051f148cc80::t_7e93609d611a8b 265,271-274
+  s_ddf051f148cc80::t_d69cdfec6f25fe 54-56,67
+  s_ddf051f148cc80::t_18f43d4dc3bb35 275
+  s_ddf051f148cc80::t_bed2b587acd423 230,232,240-241,252,304-310
+  s_ddf051f148cc80::t_b7817fb97a9612 311
+Sources/PasteIt/Models/ClipItem.swift
+  s_ddf051f148cc80::t_901eb6fa412955 11
+  s_ddf051f148cc80::t_27868b8670046e 7,10,62,149,152-155,158,160-162
+  s_ddf051f148cc80::t_7bf8fd3be26e0e 157,159
+  s_ddf051f148cc80::t_83ebd08e221316 156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "efcef8a60f2ef0d2d1fefd3368ccd99031c4e319",
+  "prompts": {},
+  "sessions": {
+    "s_ddf051f148cc80": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d4818944-80b2-476a-a120-35904d8c492a",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
