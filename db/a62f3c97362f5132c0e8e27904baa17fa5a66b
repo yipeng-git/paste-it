@@ -1,0 +1,19 @@
+Info.plist
+  s_ddf051f148cc80::t_d9ae28e3472b24 22,24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "dba62f3c97362f5132c0e8e27904baa17fa5a66b",
+  "prompts": {},
+  "sessions": {
+    "s_ddf051f148cc80": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d4818944-80b2-476a-a120-35904d8c492a",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
