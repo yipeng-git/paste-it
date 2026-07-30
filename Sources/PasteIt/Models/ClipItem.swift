@@ -31,6 +31,8 @@ final class ClipItem: Identifiable {
     var pinboardIDsRaw: String
     var contentHash: String
     var copyCount: Int
+    /// Soft-removed from Default; still visible in Pinned / custom folders.
+    var isHiddenFromTimeline: Bool = false
 
     init(
         id: UUID = UUID(),
@@ -81,6 +83,7 @@ final class ClipItem: Identifiable {
         self.pinboardIDsRaw = pinboardIDs.map(\.uuidString).joined(separator: "\n")
         self.contentHash = contentHash
         self.copyCount = 1
+        self.isHiddenFromTimeline = false
     }
 
     var primaryType: ClipType {
@@ -152,6 +155,7 @@ final class ClipItem: Identifiable {
         let now = Date()
         updatedAt = now
         lastUsedAt = now
+        isHiddenFromTimeline = false
         // Keep createdAt — Paste preserves original capture time.
     }
 

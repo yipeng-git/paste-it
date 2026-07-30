@@ -121,8 +121,11 @@ final class HistoryStore: ObservableObject {
     func load() {
         refresh()
         backfillLastUsedAtIfNeeded()
+        migratePinnedPinboardIfNeeded()
         if pinboards.isEmpty {
             createDefaultPinboards()
+        } else {
+            _ = ensurePinnedPinboard()
         }
         seedWelcomeClipsIfNeeded()
         purgeEmbeddedSourceIconsIfNeeded()
@@ -314,6 +317,39 @@ final class HistoryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    /// Context-aware remove: Default hides/deletes; Pinned/folder only leave that board.
+    func removeFromTab(_ item: ClipItem, tab: TimelineTab) {
+        switch tab {
+        case .timeline:
+            if item.pinboardIDs.isEmpty {
+                delete(item)
+            } else {
+                hideFromTimeline(item)
+            }
+        case .pinned:
+            unpinFromPinnedBoard(item)
+        case .folder(let id):
+            guard let board = pinboards.first(where: { $0.id == id }) else { return }
+            unpin(item, from: board)
+        }
+    }
+
+    func hideFromTimeline(_ item: ClipItem) {
+        guard !item.isHiddenFromTimeline else { return }
+        item.isHiddenFromTimeline = true
+        item.updatedAt = Date()
+        saveQuietly()
+        objectWillChange.send()
+    }
+
+    /// After leaving the last pinboard, a timeline-hidden clip has nowhere to live — delete it.
+    private func purgeIfOrphaned(_ item: ClipItem) {
+        guard item.pinboardIDs.isEmpty else { return }
+        if item.isHiddenFromTimeline {
+            delete(item)
+        }
+    }
+
     func thumbnailImage(for item: ClipItem) -> NSImage? {
         visualCache.image(at: item.thumbnailRelativePath, blobStore: blobStore)
     }
@@ -495,6 +531,32 @@ final class HistoryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    static let pinnedBoardName = "Pinned"
+    private static let legacyFavoritesName = "Favorites"
+    static let maxCustomFolders = 3
+
+    /// System board backing the Pinned tab. Created on demand if missing.
+    var pinnedPinboard: Pinboard {
+        ensurePinnedPinboard()
+    }
+
+    /// User-created folders (everything except the system Pinned board).
+    var customFolders: [Pinboard] {
+        pinboards.filter { $0.name != Self.pinnedBoardName }
+    }
+
+    var canCreateCustomFolder: Bool {
+        customFolders.count < Self.maxCustomFolders
+    }
+
+    func isSystemPinnedBoard(_ pinboard: Pinboard) -> Bool {
+        pinboard.name == Self.pinnedBoardName
+    }
+
+    func isPinned(_ item: ClipItem) -> Bool {
+        item.pinboardIDs.contains(pinnedPinboard.id)
+    }
+
     @discardableResult
     func createPinboard(name: String, colorHex: String = "#6C7BFF") -> Pinboard {
         let pinboard = Pinboard(name: name, colorHex: colorHex)
@@ -505,11 +567,32 @@ final class HistoryStore: ObservableObject {
         return pinboard
     }
 
+    /// Creates a custom folder tab. Returns nil if at the limit, name is empty, or reserved.
+    @discardableResult
+    func createCustomFolder(name: String, colorHex: String = "#6C7BFF") -> Pinboard? {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard canCreateCustomFolder else { return nil }
+        guard !trimmed.isEmpty else { return nil }
+        guard trimmed.caseInsensitiveCompare(Self.pinnedBoardName) != .orderedSame else { return nil }
+        return createPinboard(name: trimmed, colorHex: colorHex)
+    }
+
     func renamePinboard(_ pinboard: Pinboard, name: String) {
         pinboard.name = name
         pinboard.updatedAt = Date()
         saveQuietly()
         objectWillChange.send()
+    }
+
+    /// Renames a custom folder. Refuses the system Pinned board and reserved names.
+    @discardableResult
+    func renameCustomFolder(_ pinboard: Pinboard, name: String) -> Bool {
+        guard !isSystemPinnedBoard(pinboard) else { return false }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        guard trimmed.caseInsensitiveCompare(Self.pinnedBoardName) != .orderedSame else { return false }
+        renamePinboard(pinboard, name: trimmed)
+        return true
     }
 
     func deletePinboard(_ pinboard: Pinboard) {
@@ -523,6 +606,14 @@ final class HistoryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    /// Deletes a custom folder. Refuses the system Pinned board.
+    @discardableResult
+    func deleteCustomFolder(_ pinboard: Pinboard) -> Bool {
+        guard !isSystemPinnedBoard(pinboard) else { return false }
+        deletePinboard(pinboard)
+        return true
+    }
+
     func pin(_ item: ClipItem, to pinboard: Pinboard) {
         if !item.pinboardIDs.contains(pinboard.id) {
             item.pinboardIDs.append(pinboard.id)
@@ -534,11 +625,9 @@ final class HistoryStore: ObservableObject {
         objectWillChange.send()
     }
 
-    /// Pins to Favorites (creating it if needed) so the item survives history pruning.
-    func pinToDefaultBoard(_ item: ClipItem) {
-        let board = pinboards.first(where: { $0.name == "Favorites" })
-            ?? createPinboard(name: "Favorites", colorHex: "#6C7BFF")
-        pin(item, to: board)
+    /// Pins to the system Pinned board so the item survives history pruning.
+    func pinToPinnedBoard(_ item: ClipItem) {
+        pin(item, to: pinnedPinboard)
     }
 
     func unpin(_ item: ClipItem, from pinboard: Pinboard? = nil) {
@@ -553,6 +642,12 @@ final class HistoryStore: ObservableObject {
         }
         saveQuietly()
         objectWillChange.send()
+        purgeIfOrphaned(item)
+    }
+
+    /// Removes the item from the system Pinned board only (leaves custom folders alone).
+    func unpinFromPinnedBoard(_ item: ClipItem) {
+        unpin(item, from: pinnedPinboard)
     }
 
     func pruneHistory(force: Bool = true) {
@@ -638,10 +733,30 @@ final class HistoryStore: ObservableObject {
     }
 
     private func createDefaultPinboards() {
-        context.insert(Pinboard(name: "Favorites", colorHex: "#6C7BFF"))
-        context.insert(Pinboard(name: "Templates", colorHex: "#35C759"))
+        context.insert(Pinboard(name: Self.pinnedBoardName, colorHex: "#6C7BFF"))
         saveQuietly()
         refresh()
+    }
+
+    /// Renames legacy "Favorites" → "Pinned" when upgrading existing libraries.
+    private func migratePinnedPinboardIfNeeded() {
+        let hasPinned = pinboards.contains { $0.name == Self.pinnedBoardName }
+        guard let favorites = pinboards.first(where: { $0.name == Self.legacyFavoritesName }) else {
+            return
+        }
+        guard !hasPinned else { return }
+        favorites.name = Self.pinnedBoardName
+        favorites.updatedAt = Date()
+        saveQuietly()
+        objectWillChange.send()
+    }
+
+    @discardableResult
+    private func ensurePinnedPinboard() -> Pinboard {
+        if let board = pinboards.first(where: { $0.name == Self.pinnedBoardName }) {
+            return board
+        }
+        return createPinboard(name: Self.pinnedBoardName, colorHex: "#6C7BFF")
     }
 
     /// First install only: three starter clips. Overwrite/upgrade keeps `history.store`

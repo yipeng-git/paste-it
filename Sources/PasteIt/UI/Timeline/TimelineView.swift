@@ -10,6 +10,8 @@ struct TimelineView: View {
     @FocusState private var isSearchFocused: Bool
     /// When false, the real TextField is not in the hierarchy so the panel can't auto-focus it.
     @State private var isSearchActive = false
+    @State private var isShowingCreateFolderSheet = false
+    @State private var newFolderName = ""
 
     init(appState: AppState, pasteController: PasteController) {
         self.appState = appState
@@ -43,6 +45,16 @@ struct TimelineView: View {
                         self.appState.previewClip = next
                     }
                 }
+            }
+            .sheet(isPresented: $isShowingCreateFolderSheet) {
+                CreateFolderSheet(
+                    name: $newFolderName,
+                    onCreate: { createFolder() },
+                    onCancel: {
+                        isShowingCreateFolderSheet = false
+                        newFolderName = ""
+                    }
+                )
             }
     }
 
@@ -103,30 +115,65 @@ struct TimelineView: View {
     }
 
     private var tabPicker: some View {
-        HStack(spacing: 2) {
-            ForEach(TimelineTab.allCases) { tab in
+        HStack(spacing: 6) {
+            HStack(spacing: 2) {
+                ForEach(TimelineTab.fixedTabs) { tab in
+                    tabButton(tab, title: tab.title, systemImage: tab.systemImage)
+                }
+                ForEach(historyStore.customFolders) { folder in
+                    tabButton(
+                        .folder(folder.id),
+                        title: folder.name,
+                        systemImage: "folder"
+                    )
+                }
+            }
+            .padding(3)
+            .pasteItCapsuleGlass()
+
+            if historyStore.canCreateCustomFolder {
                 Button {
-                    appState.selectedTab = tab
+                    newFolderName = ""
+                    isShowingCreateFolderSheet = true
                 } label: {
-                    Label(tab.title, systemImage: tab.systemImage)
-                        .labelStyle(.titleAndIcon)
-                        .font(.system(size: 12, weight: .semibold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background {
-                            if appState.selectedTab == tab {
-                                Capsule()
-                                    .fill(Color.primary.opacity(0.12))
-                            }
-                        }
-                        .contentShape(Capsule())
+                    Image(systemName: "plus")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(width: 28, height: 28)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(appState.selectedTab == tab ? .primary : .secondary)
+                .foregroundStyle(.secondary)
+                .pasteItControlGlass()
+                .help("New Folder")
             }
         }
-        .padding(3)
-        .pasteItCapsuleGlass()
+    }
+
+    private func tabButton(_ tab: TimelineTab, title: String, systemImage: String) -> some View {
+        Button {
+            appState.selectedTab = tab
+        } label: {
+            Label(title, systemImage: systemImage)
+                .labelStyle(.titleAndIcon)
+                .font(.system(size: 12, weight: .semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background {
+                    if appState.selectedTab == tab {
+                        Capsule()
+                            .fill(Color.primary.opacity(0.12))
+                    }
+                }
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(appState.selectedTab == tab ? .primary : .secondary)
+    }
+
+    private func createFolder() {
+        guard let board = historyStore.createCustomFolder(name: newFolderName) else { return }
+        isShowingCreateFolderSheet = false
+        newFolderName = ""
+        appState.selectedTab = .folder(board.id)
     }
 
     private var searchField: some View {
@@ -201,18 +248,53 @@ struct TimelineView: View {
             return "Copy something to build your clipboard history"
         case .pinned:
             return "Pin clips to keep them here permanently"
+        case .folder:
+            return "Add clips to this folder from the context menu"
         }
     }
 
     @ViewBuilder
     private func pinMenu(for item: ClipItem) -> some View {
-        if item.pinboardIDs.isEmpty {
-            Button("Pin") {
-                historyStore.pinToDefaultBoard(item)
+        // On the Pinned tab, the destructive action already unpins.
+        if case .pinned = appState.selectedTab {
+            // skip Pin/Unpin here
+        } else if historyStore.isPinned(item) {
+            Button("Unpin") {
+                historyStore.unpinFromPinnedBoard(item)
             }
         } else {
-            Button("Unpin") {
-                historyStore.unpin(item)
+            Button("Pin") {
+                historyStore.pinToPinnedBoard(item)
+            }
+        }
+
+        let folders = historyStore.customFolders
+        let currentFolderID: UUID? = {
+            if case .folder(let id) = appState.selectedTab { return id }
+            return nil
+        }()
+        let available = folders.filter { !item.pinboardIDs.contains($0.id) }
+        // Prefer the tab's "Remove from Folder" for the current board.
+        let memberships = folders.filter {
+            item.pinboardIDs.contains($0.id) && $0.id != currentFolderID
+        }
+
+        if !available.isEmpty {
+            Menu("Add to Folder") {
+                ForEach(available) { folder in
+                    Button(folder.name) {
+                        historyStore.pin(item, to: folder)
+                    }
+                }
+            }
+        }
+        if !memberships.isEmpty {
+            Menu("Remove from Folder") {
+                ForEach(memberships) { folder in
+                    Button(folder.name) {
+                        historyStore.unpin(item, from: folder)
+                    }
+                }
             }
         }
     }
@@ -243,7 +325,17 @@ struct TimelineView: View {
                 .keyboardShortcut("e")
             Divider()
             pinMenu(for: item)
-            Button("Delete", role: .destructive) { historyStore.delete(item) }
+            Button(deleteTitle, role: .destructive) {
+                historyStore.removeFromTab(item, tab: appState.selectedTab)
+            }
+        }
+    }
+
+    private var deleteTitle: String {
+        switch appState.selectedTab {
+        case .timeline: return "Delete"
+        case .pinned: return "Unpin"
+        case .folder: return "Remove from Folder"
         }
     }
 
@@ -337,5 +429,37 @@ struct TimelineView: View {
         }
         .frame(width: 0, height: 0)
         .opacity(0)
+    }
+}
+
+private struct CreateFolderSheet: View {
+    @Binding var name: String
+    let onCreate: () -> Void
+    let onCancel: () -> Void
+
+    private var canCreate: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("New Folder")
+                .font(.headline)
+            TextField("Folder name", text: $name)
+                .textFieldStyle(.roundedBorder)
+                .onSubmit {
+                    if canCreate { onCreate() }
+                }
+            HStack {
+                Spacer()
+                Button("Cancel", action: onCancel)
+                    .keyboardShortcut(.cancelAction)
+                Button("Create", action: onCreate)
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(!canCreate)
+            }
+        }
+        .padding(20)
+        .frame(width: 320)
     }
 }

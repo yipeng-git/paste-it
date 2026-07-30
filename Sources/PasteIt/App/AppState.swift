@@ -1,16 +1,27 @@
 import Combine
 import Foundation
 
-enum TimelineTab: String, CaseIterable, Identifiable, Equatable {
+enum TimelineTab: Equatable, Hashable, Identifiable {
     case timeline
     case pinned
+    case folder(UUID)
 
-    var id: String { rawValue }
+    /// Fixed tabs that always appear (Default + Pinned).
+    static let fixedTabs: [TimelineTab] = [.timeline, .pinned]
+
+    var id: String {
+        switch self {
+        case .timeline: return "timeline"
+        case .pinned: return "pinned"
+        case .folder(let id): return "folder-\(id.uuidString)"
+        }
+    }
 
     var title: String {
         switch self {
         case .timeline: return "Default"
         case .pinned: return "Pinned"
+        case .folder: return "Folder"
         }
     }
 
@@ -18,6 +29,7 @@ enum TimelineTab: String, CaseIterable, Identifiable, Equatable {
         switch self {
         case .timeline: return "clock"
         case .pinned: return "pin.fill"
+        case .folder: return "folder"
         }
     }
 }
@@ -35,12 +47,6 @@ final class AppState: ObservableObject {
     @Published var selectedTab: TimelineTab = .timeline {
         didSet {
             guard selectedTab != oldValue, !isBatchUpdatingFilters else { return }
-            rebuildVisibleClips()
-        }
-    }
-    @Published var selectedPinboardID: UUID? {
-        didSet {
-            guard selectedPinboardID != oldValue, !isBatchUpdatingFilters else { return }
             rebuildVisibleClips()
         }
     }
@@ -113,7 +119,6 @@ final class AppState: ObservableObject {
         debouncedQuery = ""
         selectedTab = .timeline
         selectedType = nil
-        selectedPinboardID = nil
         selectedSourceApp = nil
         isBatchUpdatingFilters = false
         rebuildVisibleClips()
@@ -189,12 +194,22 @@ final class AppState: ObservableObject {
     }
 
     private func rebuildVisibleClips() {
+        if case .folder(let id) = selectedTab,
+           !historyStore.customFolders.contains(where: { $0.id == id }) {
+            isBatchUpdatingFilters = true
+            selectedTab = .timeline
+            isBatchUpdatingFilters = false
+        }
+
         let sourceClips: [ClipItem]
         switch selectedTab {
         case .timeline:
-            sourceClips = historyStore.clips
+            sourceClips = historyStore.clips.filter { !$0.isHiddenFromTimeline }
         case .pinned:
-            sourceClips = historyStore.clips.filter { !$0.pinboardIDs.isEmpty }
+            let pinnedID = historyStore.pinnedPinboard.id
+            sourceClips = historyStore.clips.filter { $0.pinboardIDs.contains(pinnedID) }
+        case .folder(let id):
+            sourceClips = historyStore.clips.filter { $0.pinboardIDs.contains(id) }
         }
 
         visibleClips = searchService.search(
@@ -202,7 +217,7 @@ final class AppState: ObservableObject {
             query: debouncedQuery,
             selectedType: selectedType,
             sourceApp: selectedSourceApp,
-            pinboardID: selectedTab == .timeline ? selectedPinboardID : nil,
+            pinboardID: nil,
             foldedHaystack: { [historyStore] item in
                 historyStore.foldedSearchText(for: item)
             }

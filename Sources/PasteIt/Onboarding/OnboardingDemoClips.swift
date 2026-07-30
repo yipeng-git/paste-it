@@ -265,7 +265,7 @@ struct OnboardingTimelineChrome<Content: View>: View {
     private var toolbar: some View {
         HStack(spacing: 8) {
             HStack(spacing: 2) {
-                ForEach(TimelineTab.allCases) { tab in
+                ForEach(TimelineTab.fixedTabs) { tab in
                     Label(tab.title, systemImage: tab.systemImage)
                         .labelStyle(.titleAndIcon)
                         .font(.system(size: 12, weight: .semibold))

@@ -30,13 +30,17 @@ struct SettingsView: View {
                     .tabItem { Label("Privacy", systemImage: "hand.raised") }
                     .tag(2)
 
+                FoldersSettingsView(historyStore: historyStore)
+                    .tabItem { Label("Folders", systemImage: "folder") }
+                    .tag(3)
+
                 stack
                     .tabItem { Label("Stack", systemImage: "tray.full") }
-                    .tag(3)
+                    .tag(4)
 
                 storage
                     .tabItem { Label("Storage", systemImage: "internaldrive") }
-                    .tag(4)
+                    .tag(5)
             }
 
             versionFooter
@@ -103,6 +107,7 @@ struct SettingsView: View {
                     launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
                 }
             ))
+            .disabled(!LaunchAtLoginManager.supportsLaunchAtLogin)
             .onAppear {
                 launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
             }
