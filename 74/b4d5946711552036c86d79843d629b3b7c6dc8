@@ -1,0 +1,62 @@
+Sources/PasteIt/Settings/LaunchAtLoginManager.swift
+  s_ad8c5b7f673818::t_3b875d77c621cd 7-21,25,43
+Sources/PasteIt/Models/ClipItem.swift
+  s_a607571c9cdfe6::t_a129d59faa6b3d 34-35,86
+  s_a607571c9cdfe6::t_421aed1b891ee5 158
+Sources/PasteIt/App/AppState.swift
+  s_a607571c9cdfe6::t_c8be484dc3e417 4
+  s_a607571c9cdfe6::t_7154cde03c03a3 7,9-18,24,32,197-203,209-212,220
+  s_a607571c9cdfe6::t_9ced3080b06427 207
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_a607571c9cdfe6::t_14704490b5f91b 736,741-760
+  s_a607571c9cdfe6::t_ba10de84b0f561 534-559,570-579,587-597,609-616,628-630,646-650
+  s_a607571c9cdfe6::t_1a2ef5d6af7caf 124,127-128
+  s_a607571c9cdfe6::t_25b59ffff22d4a 320-352
+  s_a607571c9cdfe6::t_8ab4790750c3f8 645
+  s_a607571c9cdfe6::t_7d4be13f4fadcf 761
+Sources/PasteIt/AgentAPI/EphemeralTimelineView.swift
+  s_a607571c9cdfe6::t_cfddb2639e75f0 66
+Sources/PasteIt/Settings/FoldersSettingsView.swift
+  s_a607571c9cdfe6::t_4092d54e534747 1-196
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_a607571c9cdfe6::t_3db180fe89d2f4 251-252,262-263,266-271,283,285,287-289,296-297
+  s_a607571c9cdfe6::t_492ed9515c747c 118,120,122-123,129,133
+  s_a607571c9cdfe6::t_5a67b1ed98e503 434-465
+  s_a607571c9cdfe6::t_32f91a0d3f316d 258-261,272-275,277-280
+  s_a607571c9cdfe6::t_65a8035382ca72 119,121,124-128,131-132,141,144-145,149-169
+  s_a607571c9cdfe6::t_481e9c681bfd22 328-338
+  s_a607571c9cdfe6::t_70c2fa12f29500 140,146
+  s_a607571c9cdfe6::t_a7c1fb67db122b 13-14
+  s_a607571c9cdfe6::t_ceb305b4d62437 276,281-282,284,286,290-295
+  s_a607571c9cdfe6::t_ade1ee7dafa216 49-58
+  s_a607571c9cdfe6::t_3da34229b8f733 130,134,136-137,139,170-176
+Sources/PasteIt/Onboarding/OnboardingDemoClips.swift
+  s_a607571c9cdfe6::t_aab518ab263674 268
+Sources/PasteIt/Settings/SettingsView.swift
+  s_a607571c9cdfe6::t_3aa098c1bcb94f 33-36,39,43
+  s_ad8c5b7f673818::t_84ff7d2a2b0ff5 110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "74b4d5946711552036c86d79843d629b3b7c6dc8",
+  "prompts": {},
+  "sessions": {
+    "s_a607571c9cdfe6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e737a208-8617-4bc5-b47f-b78b7b374762",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_ad8c5b7f673818": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ced04a46-d834-47d2-a8bd-d4aaab028225",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
