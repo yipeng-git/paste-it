@@ -32,6 +32,9 @@ updates/*
 # Release packaging output
 dist/
 
+# Local analytics credentials (never commit)
+Secrets/posthog.env
+
 # Pinned Sparkle tools (auto-downloaded by scripts/generate-appcast.sh)
 .tools/
 

@@ -315,12 +315,12 @@ struct TimelineView: View {
         }
         .onTapGesture(count: 2) {
             resignSearch()
-            stage(item, dismissPanel: true)
+            stage(item, trigger: "double_click", dismissPanel: true)
         }
         .draggable(item.id.uuidString)
         .contextMenu {
-            Button("Copy to Clipboard") { stage(item, dismissPanel: false) }
-            Button("Copy as Plain Text") { stage(item, mode: .plainText, dismissPanel: false) }
+            Button("Copy to Clipboard") { stage(item, trigger: "context_menu", dismissPanel: false) }
+            Button("Copy as Plain Text") { stage(item, mode: .plainText, trigger: "context_menu", dismissPanel: false) }
             Button("Edit") { appState.editingClip = item }
                 .keyboardShortcut("e")
             Divider()
@@ -345,6 +345,7 @@ struct TimelineView: View {
     private func stage(
         _ item: ClipItem,
         mode: PasteController.PasteMode = .normal,
+        trigger: String,
         dismissPanel: Bool
     ) {
         appState.selectedClipID = item.id
@@ -354,16 +355,28 @@ struct TimelineView: View {
         if item.primaryType == .image, resolvedMode == .normal {
             Task { @MainActor in
                 guard await pasteController.copyToPasteboardAsync(item, mode: resolvedMode) else { return }
-                promoteAfterStage(item, dismissPanel: dismissPanel)
+                promoteAfterStage(item, mode: resolvedMode, trigger: trigger, dismissPanel: dismissPanel)
             }
             return
         }
 
         guard pasteController.copyToPasteboard(item, mode: resolvedMode) else { return }
-        promoteAfterStage(item, dismissPanel: dismissPanel)
+        promoteAfterStage(item, mode: resolvedMode, trigger: trigger, dismissPanel: dismissPanel)
     }
 
-    private func promoteAfterStage(_ item: ClipItem, dismissPanel: Bool) {
+    private func promoteAfterStage(
+        _ item: ClipItem,
+        mode: PasteController.PasteMode,
+        trigger: String,
+        dismissPanel: Bool
+    ) {
+        Analytics.clipStaged(
+            mode: mode == .plainText ? "plain" : "normal",
+            trigger: trigger,
+            clipType: item.primaryType.rawValue,
+            tab: analyticsTabKind(appState.selectedTab),
+            ageBucket: Analytics.Buckets.age(since: item.createdAt)
+        )
         appState.promoteAccessedClip(item, scroll: !dismissPanel)
         appState.setStatus("Copied \(item.title)")
         if dismissPanel {
@@ -371,24 +384,32 @@ struct TimelineView: View {
         }
     }
 
+    private func analyticsTabKind(_ tab: TimelineTab) -> String {
+        switch tab {
+        case .timeline: return "default"
+        case .pinned: return "pinned"
+        case .folder: return "folder"
+        }
+    }
+
     private func hiddenShortcuts(for clips: [ClipItem]) -> some View {
         Group {
             ForEach(Array(clips.enumerated()), id: \.element.id) { index, item in
                 Button("") {
-                    stage(item, dismissPanel: true)
+                    stage(item, trigger: "hotkey_1_9", dismissPanel: true)
                 }
                 .keyboardShortcut(KeyEquivalent(Character("\(index + 1)")), modifiers: [.command])
             }
             Button("") {
                 if let selected = appState.selectedClip {
-                    stage(selected, dismissPanel: true)
+                    stage(selected, trigger: "return", dismissPanel: true)
                 }
             }
             .keyboardShortcut(.return, modifiers: [])
 
             Button("") {
                 if let selected = appState.selectedClip {
-                    stage(selected, mode: .plainText, dismissPanel: true)
+                    stage(selected, mode: .plainText, trigger: "shift_return", dismissPanel: true)
                 }
             }
             .keyboardShortcut(.return, modifiers: [.shift])
@@ -396,7 +417,7 @@ struct TimelineView: View {
             // Paste: ⌘C copies selected item to the clipboard and promotes it.
             Button("") {
                 if let selected = appState.selectedClip {
-                    stage(selected, dismissPanel: false)
+                    stage(selected, trigger: "cmd_c", dismissPanel: false)
                 }
             }
             .keyboardShortcut("c", modifiers: [.command])

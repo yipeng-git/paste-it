@@ -189,6 +189,7 @@ final class AppState: ObservableObject {
             try? await Task.sleep(nanoseconds: 160_000_000)
             guard !Task.isCancelled else { return }
             debouncedQuery = next
+            Analytics.notePanelSearch()
             rebuildVisibleClips()
         }
     }

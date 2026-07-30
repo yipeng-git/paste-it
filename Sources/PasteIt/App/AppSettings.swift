@@ -40,6 +40,8 @@ final class AppSettings: ObservableObject {
     @AppStorage("pasteAsPlainTextByDefault") var pasteAsPlainTextByDefault: Bool = false
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("agentAPIEnabled") var agentAPIEnabled: Bool = false
+    /// Anonymous usage analytics (PostHog). Never includes clipboard contents.
+    @AppStorage("analyticsEnabled") var analyticsEnabled: Bool = true
     @AppStorage("pasteStackDefaultDirection") private var pasteStackDefaultDirectionRaw: String =
         PasteStackController.Direction.oldestFirst.rawValue
     @AppStorage("ignoredBundleIdentifiers") private var ignoredBundleIdentifiersRaw: String = defaultIgnoredApps.joined(separator: "\n")

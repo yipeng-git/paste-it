@@ -13,6 +13,61 @@ struct PrivacySettingsView: View {
     var body: some View {
         Form {
             Section {
+                Toggle(
+                    "Share anonymous usage analytics",
+                    isOn: Binding(
+                        get: { settings.analyticsEnabled },
+                        set: { enabled in
+                            settings.analyticsEnabled = enabled
+                            Analytics.setEnabled(enabled)
+                        }
+                    )
+                )
+
+                DisclosureGroup("What we collect") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Events help improve Paste It (activation, panel use, updates). Data is anonymous and sent to PostHog when enabled.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text("Never collected")
+                            .font(.caption.weight(.semibold))
+                        ForEach(AnalyticsCatalog.neverCollected, id: \.self) { item in
+                            Text("· \(item)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("Product events")
+                            .font(.caption.weight(.semibold))
+                            .padding(.top, 4)
+                        ForEach(AnalyticsCatalog.lifecycleEvents + AnalyticsCatalog.productEvents) { event in
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(event.name)
+                                    .font(.caption.monospaced())
+                                Text(event.summary)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+
+                        if let url = AnalyticsCatalog.documentationURL {
+                            Link("Full disclosure on GitHub", destination: url)
+                                .font(.caption)
+                                .padding(.top, 4)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 4)
+                }
+            } header: {
+                Text("Analytics")
+            } footer: {
+                Text("Optional. Off means no events are sent. See \(AnalyticsCatalog.documentationPath) in the open-source repo.")
+            }
+
+            Section {
                 if ignoredApps.isEmpty {
                     Text("No ignored apps")
                         .foregroundStyle(.secondary)

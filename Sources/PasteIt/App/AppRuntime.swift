@@ -54,7 +54,7 @@ final class AppRuntime: NSObject {
             historyStore: historyStore
         )
         hotkeyManager = HotkeyManager(
-            showTimeline: { [panelController] in panelController.toggle() },
+            showTimeline: { [panelController] in panelController.toggle(source: .hotkey) },
             togglePasteStack: { [pasteStackController, appState] in
                 pasteStackController.toggle()
                 if pasteStackController.isCollecting {
@@ -98,11 +98,12 @@ final class AppRuntime: NSObject {
         LaunchAtLoginManager.syncAtStartup(enabled: settings.launchAtLogin)
         // Retain Sparkle updater for automatic background checks.
         _ = UpdateChecker.shared
+        Analytics.start(enabled: settings.analyticsEnabled)
 
         if !settings.hasCompletedOnboarding {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [settings] in
                 guard !settings.hasCompletedOnboarding else { return }
-                OnboardingWindowController.shared.show(settings: settings)
+                OnboardingWindowController.shared.show(settings: settings, source: "first_launch")
             }
         }
 
@@ -110,6 +111,7 @@ final class AppRuntime: NSObject {
     }
 
     func stop() {
+        Analytics.stop()
         AgentAPIServer.shared.stop()
         pasteboardMonitor.stop()
         hotkeyManager.stop()
@@ -226,7 +228,7 @@ final class AppRuntime: NSObject {
         if event?.type == .rightMouseUp || event?.modifierFlags.contains(.control) == true {
             showStatusMenu()
         } else {
-            panelController.toggle()
+            panelController.toggle(source: .statusItem)
         }
     }
 
@@ -242,11 +244,11 @@ final class AppRuntime: NSObject {
     }
 
     @objc private func toggleTimeline() {
-        panelController.toggle()
+        panelController.toggle(source: .hotkey)
     }
 
     @objc private func openTimeline() {
-        panelController.show()
+        panelController.show(source: .menu)
     }
 
     @objc private func togglePasteStack() {
@@ -302,7 +304,7 @@ final class AppRuntime: NSObject {
     }
 
     @objc private func checkForUpdates() {
-        UpdateChecker.shared.checkForUpdates()
+        UpdateChecker.shared.checkForUpdates(source: "menu")
     }
 
     @objc private func quit() {

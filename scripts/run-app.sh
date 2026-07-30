@@ -6,6 +6,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# shellcheck source=lib/posthog-secrets.sh
+source "$ROOT/scripts/lib/posthog-secrets.sh"
+
 swift build -c debug
 BIN_DIR="$(swift build -c debug --show-bin-path)"
 BIN="$BIN_DIR/PasteIt"
@@ -17,6 +20,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
 cp "$BIN" "$APP/Contents/MacOS/PasteIt"
 cp "$ROOT/Info.plist" "$APP/Contents/Info.plist"
+inject_posthog_token "$APP/Contents/Info.plist"
 if [[ -f "$ICON" ]]; then
   cp "$ICON" "$APP/Contents/Resources/AppIcon.icns"
 fi

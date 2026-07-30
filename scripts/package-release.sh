@@ -17,6 +17,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# shellcheck source=lib/posthog-secrets.sh
+source "$ROOT/scripts/lib/posthog-secrets.sh"
+
 SKIP_NOTARIZE=0
 SKIP_DMG=0
 CONFIGURATION=release
@@ -35,6 +38,8 @@ Usage: package-release.sh [options]
 Env:
   PASTEIT_CODESIGN_IDENTITY   Full "Developer ID Application: …" string
   PASTEIT_NOTARY_PROFILE      notarytool keychain profile (default: paste-it-notary)
+  POSTHOG_PROJECT_TOKEN       Optional; or put in Secrets/posthog.env (gitignored)
+  POSTHOG_HOST                Optional; default https://us.i.posthog.com
 EOF
 }
 
@@ -260,6 +265,7 @@ assemble_app() {
   mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" "$app/Contents/Frameworks"
   cp "$binary" "$app/Contents/MacOS/PasteIt"
   cp "$ROOT/Info.plist" "$app/Contents/Info.plist"
+  inject_posthog_token "$app/Contents/Info.plist"
   if [[ -f "$ICON" ]]; then
     cp "$ICON" "$app/Contents/Resources/AppIcon.icns"
   fi

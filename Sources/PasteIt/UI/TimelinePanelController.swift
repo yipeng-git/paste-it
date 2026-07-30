@@ -2,6 +2,12 @@ import AppKit
 import QuartzCore
 import SwiftUI
 
+enum TimelinePanelOpenSource: String {
+    case hotkey
+    case statusItem = "status_item"
+    case menu
+}
+
 @MainActor
 final class TimelinePanelController: NSObject, NSWindowDelegate {
     private let appState: AppState
@@ -25,11 +31,11 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         super.init()
     }
 
-    func toggle() {
+    func toggle(source: TimelinePanelOpenSource) {
         if panel?.isVisible == true {
             hide()
         } else {
-            show()
+            show(source: source)
         }
     }
 
@@ -42,9 +48,10 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         panel?.makeFirstResponder(nil)
     }
 
-    func show() {
+    func show(source: TimelinePanelOpenSource = .menu) {
         onShow?()
         guard !isAnimating else { return }
+        let wasVisible = panel?.isVisible == true
         let panel = self.panel ?? makePanel()
         self.panel = panel
         appState.resetFiltersForPanelShow()
@@ -69,6 +76,13 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         // Prevent SwiftUI from parking first-responder in the search field.
         panel.makeFirstResponder(nil)
         startOutsideClickMonitoring()
+
+        if !wasVisible {
+            Analytics.beginPanelSession(
+                source: source.rawValue,
+                historyCount: appState.historyStore.clips.count
+            )
+        }
 
         isAnimating = true
         NSAnimationContext.runAnimationGroup({ context in
@@ -123,6 +137,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
                 panel.orderOut(nil)
                 panel.alphaValue = 1
                 self?.isAnimating = false
+                Analytics.endPanelSession()
             }
         })
     }

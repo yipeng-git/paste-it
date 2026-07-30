@@ -9,13 +9,16 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private var wasAccessory = true
     private var settings: AppSettings?
+    private var analytics: OnboardingAnalyticsHandle?
 
     var isVisible: Bool {
         window?.isVisible == true
     }
 
-    func show(settings: AppSettings) {
+    func show(settings: AppSettings, source: String = "settings") {
         self.settings = settings
+        let session = OnboardingAnalyticsHandle(source: source)
+        self.analytics = session
         wasAccessory = NSApp.activationPolicy() == .accessory
         if wasAccessory {
             NSApp.setActivationPolicy(.regular)
@@ -23,14 +26,14 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
 
         if let existing = window {
             // Recreate content so the carousel always starts at page 1.
-            existing.contentViewController = makeHostingController(settings: settings)
+            existing.contentViewController = makeHostingController(settings: settings, analytics: session)
             NSApp.activate(ignoringOtherApps: true)
             existing.makeKeyAndOrderFront(nil)
             existing.center()
             return
         }
 
-        let window = makeWindow(settings: settings)
+        let window = makeWindow(settings: settings, analytics: session)
         self.window = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
@@ -41,8 +44,8 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         window?.close()
     }
 
-    private func makeWindow(settings: AppSettings) -> NSWindow {
-        let hosting = makeHostingController(settings: settings)
+    private func makeWindow(settings: AppSettings, analytics: OnboardingAnalyticsHandle) -> NSWindow {
+        let hosting = makeHostingController(settings: settings, analytics: analytics)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 640, height: 420),
             styleMask: [.titled, .closable],
@@ -61,14 +64,19 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         return window
     }
 
-    private func makeHostingController(settings: AppSettings) -> NSHostingController<OnboardingView> {
-        let root = OnboardingView(settings: settings) { [weak self] in
+    private func makeHostingController(
+        settings: AppSettings,
+        analytics: OnboardingAnalyticsHandle
+    ) -> NSHostingController<OnboardingView> {
+        let root = OnboardingView(settings: settings, analytics: analytics) { [weak self] in
             self?.close()
         }
         return NSHostingController(rootView: root)
     }
 
     func windowWillClose(_ notification: Notification) {
+        analytics?.markDismissedIfNeeded()
+        analytics = nil
         if let settings, !settings.hasCompletedOnboarding {
             settings.hasCompletedOnboarding = true
         }

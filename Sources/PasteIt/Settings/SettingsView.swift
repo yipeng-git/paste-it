@@ -72,13 +72,13 @@ struct SettingsView: View {
 
             Section {
                 Button("Show Tutorial…") {
-                    OnboardingWindowController.shared.show(settings: settings)
+                    OnboardingWindowController.shared.show(settings: settings, source: "settings")
                 }
             }
 
             Section {
                 Button("Check for Updates…") {
-                    UpdateChecker.shared.checkForUpdates()
+                    UpdateChecker.shared.checkForUpdates(source: "settings")
                     updateStatus = "Checking for updates…"
                 }
                 .disabled(!UpdateChecker.shared.canCheckForUpdates)
