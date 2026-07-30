@@ -1,0 +1,92 @@
+scripts/lib/posthog-secrets.sh
+  s_1202aec029619b::t_6950128631519e 1-49
+scripts/run-app.sh
+  s_1202aec029619b::t_19b69dbea4e0cf 9-11,23
+Sources/PasteIt/App/AppSettings.swift
+  s_1202aec029619b::t_be8120e196f26a 43-44
+Sources/PasteIt/App/AppRuntime.swift
+  s_980bfdc4c594f1::t_94918236a84b43 307
+  s_980bfdc4c594f1::t_9ca4ea615f877e 106
+  s_980bfdc4c594f1::t_7702652ef4f618 57
+  s_1202aec029619b::t_c7c373f7aca1aa 114
+  s_1202aec029619b::t_a822b27227d795 101
+  s_980bfdc4c594f1::t_b59e41fb2fdfcb 231
+  s_980bfdc4c594f1::t_0cbd45252292ec 247,251
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_980bfdc4c594f1::t_fffa3ffc55432a 33-34,39
+  s_980bfdc4c594f1::t_850fade6b1d460 90
+  s_980bfdc4c594f1::t_43627f6d7b394e 175-181,193-199,213-219
+  s_980bfdc4c594f1::t_6ea42bdc70fa9d 220
+Package.swift
+  s_1202aec029619b::t_3f83970da2a3c5 15-16,23-24
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_980bfdc4c594f1::t_9b1ecd81619198 5-10,34,38
+  s_980bfdc4c594f1::t_27babea9d97ffe 51,54,80-85
+  s_980bfdc4c594f1::t_a5a3d6522e018a 140
+  s_980bfdc4c594f1::t_2312a3c1b9278e 86
+Sources/PasteIt/Settings/PrivacySettingsView.swift
+  s_1202aec029619b::t_ecad86def5ef60 16-25,64-66,68-69
+  s_980bfdc4c594f1::t_973672728ad600 26-63,67
+  s_1202aec029619b::t_e47e218005a4df 15
+Sources/PasteIt/Settings/SettingsView.swift
+  s_980bfdc4c594f1::t_04bfa881a0956c 75,81
+Sources/PasteIt/Onboarding/OnboardingWindowController.swift
+  s_980bfdc4c594f1::t_a84b4f20c6273c 12,18,20-21,29,36,47-48,67-71,78-79
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_980bfdc4c594f1::t_da472cbbf70c27 318,322-323
+  s_980bfdc4c594f1::t_076138dc4a246e 348,358,364,367-379,387-394,399,405,412,420
+Sources/PasteIt/App/AppState.swift
+  s_980bfdc4c594f1::t_97fe1bc2552777 192
+Secrets/posthog.env.example
+  s_1202aec029619b::t_79679597eae205 1-10
+scripts/package-release.sh
+  s_1202aec029619b::t_2d8d92f90e8246 20-22
+  s_1202aec029619b::t_8869d65c2d0bc2 268
+  s_1202aec029619b::t_e5c13b4d47255f 41-42
+Sources/PasteIt/Onboarding/OnboardingView.swift
+  s_980bfdc4c594f1::t_ea361824bec3ac 3-36,39,67-68,71,159-160,175-176
+  s_980bfdc4c594f1::t_2db15f9eeb37f6 66,69-70,72,96,118,158,165-174
+README.md
+  s_980bfdc4c594f1::t_77cdc9e9ea13fe 30-33
+  s_980bfdc4c594f1::t_d63837d30db872 25
+Sources/PasteIt/App/UpdateChecker.swift
+  s_980bfdc4c594f1::t_cfb3ea583e3487 116
+  s_980bfdc4c594f1::t_41ae674a3e35a5 6,9-13,16,19,24-26,33-35,37-115,117-171
+  s_980bfdc4c594f1::t_814b1caadf367a 36
+Info.plist
+  s_1202aec029619b::t_4bf369f900d806 37-40
+Sources/PasteIt/Analytics/AnalyticsCatalog.swift
+  s_980bfdc4c594f1::t_22dda1cad31959 1-53
+docs/analytics.md
+  s_980bfdc4c594f1::t_8e126ba138f7ee 1-84
+Sources/PasteIt/Analytics/Analytics.swift
+  s_1202aec029619b::t_07c75cdf1dc6a1 1-4,7-12,16-25,27-45,49-82,262-264,275-332
+  s_980bfdc4c594f1::t_d4c120c56d65d2 5-6,13-15,46-48,83-261,265-274
+  s_1202aec029619b::t_7fe4c611b4ea7d 26
+.gitignore
+  s_1202aec029619b::t_deefa91f15df62 35-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "5aa97e396fee718f5fc8504d24671ba2d74425ac",
+  "prompts": {},
+  "sessions": {
+    "s_1202aec029619b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f311cd68-1991-4e8c-bf22-a6c70b9a5f5c",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_980bfdc4c594f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e1999722-fe68-4ef8-bc5c-5bd4d575dadd",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
