@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import PasteItCore
 
 enum TimelineTab: Equatable, Hashable, Identifiable {
     case timeline
@@ -44,15 +45,17 @@ final class AppState: ObservableObject {
     }
     @Published private(set) var visibleClips: [ClipItem] = []
     @Published var selectedClipID: UUID?
+    /// Multi-select set for ⌘-click. Anchor `selectedClipID` is always in this set when non-empty.
+    @Published private(set) var selectedClipIDs: [UUID] = []
     @Published var selectedTab: TimelineTab = .timeline {
         didSet {
             guard selectedTab != oldValue, !isBatchUpdatingFilters else { return }
             rebuildVisibleClips()
         }
     }
-    @Published var selectedType: ClipType? {
+    @Published var selectedFilter: FilterCategory = .all {
         didSet {
-            guard selectedType != oldValue, !isBatchUpdatingFilters else { return }
+            guard selectedFilter != oldValue, !isBatchUpdatingFilters else { return }
             rebuildVisibleClips()
         }
     }
@@ -111,6 +114,22 @@ final class AppState: ObservableObject {
         return visibleClips.first { $0.id == selectedClipID }
     }
 
+    var isMultiSelecting: Bool {
+        orderedSelectedClips.count > 1
+    }
+
+    /// Selected clips in left-to-right `visibleClips` order.
+    /// Always includes the anchor `selectedClipID` so a default-highlighted card
+    /// is not left out when multi-select expands.
+    var orderedSelectedClips: [ClipItem] {
+        var ids = Set(selectedClipIDs)
+        if let selectedClipID {
+            ids.insert(selectedClipID)
+        }
+        guard !ids.isEmpty else { return [] }
+        return visibleClips.filter { ids.contains($0.id) }
+    }
+
     /// Resets filters when the timeline panel opens, coalescing into one visibleClips rebuild.
     func resetFiltersForPanelShow() {
         isBatchUpdatingFilters = true
@@ -118,7 +137,7 @@ final class AppState: ObservableObject {
         query = ""
         debouncedQuery = ""
         selectedTab = .timeline
-        selectedType = nil
+        selectedFilter = .all
         selectedSourceApp = nil
         isBatchUpdatingFilters = false
         rebuildVisibleClips()
@@ -126,14 +145,73 @@ final class AppState: ObservableObject {
         selectFirst(scroll: true)
     }
 
+    /// Applies a type filter and strips conflicting `type:` tokens from the query.
+    func setFilter(_ filter: FilterCategory) {
+        isBatchUpdatingFilters = true
+        selectedFilter = filter
+        let stripped = SearchQuery.strippingTypeTokens(from: query)
+        if stripped != query {
+            query = stripped
+            debouncedQuery = stripped
+        }
+        isBatchUpdatingFilters = false
+        rebuildVisibleClips()
+        selectFirst(scroll: true)
+    }
+
+    func selectOnly(_ id: UUID) {
+        selectedClipID = id
+        selectedClipIDs = [id]
+    }
+
+    func toggleMultiSelect(_ id: UUID) {
+        // Keep the current single-selection anchor inside the multi-set before
+        // expanding, so the default-highlighted card stays selected.
+        if let anchor = selectedClipID,
+           !selectedClipIDs.contains(anchor) {
+            selectedClipIDs.insert(anchor, at: 0)
+        }
+
+        if let index = selectedClipIDs.firstIndex(of: id) {
+            selectedClipIDs.remove(at: index)
+            if selectedClipIDs.isEmpty {
+                selectOnly(id)
+                return
+            }
+            if selectedClipID == id {
+                selectedClipID = selectedClipIDs.last
+            }
+        } else {
+            selectedClipIDs.append(id)
+            selectedClipID = id
+        }
+    }
+
+    /// After multi paste/copy: keep only the anchor as a single selection.
+    func clearMultiSelectKeepingAnchor() {
+        if let selectedClipID {
+            selectedClipIDs = [selectedClipID]
+        } else if let first = visibleClips.first?.id {
+            selectOnly(first)
+        } else {
+            selectedClipIDs = []
+        }
+    }
+
     func selectFirstIfNeeded() {
+        pruneSelectionToVisibleClips()
         if selectedClipID == nil || !visibleClips.contains(where: { $0.id == selectedClipID }) {
-            selectedClipID = visibleClips.first?.id
+            selectFirst()
         }
     }
 
     func selectFirst(scroll: Bool = false) {
-        selectedClipID = visibleClips.first?.id
+        if let id = visibleClips.first?.id {
+            selectOnly(id)
+        } else {
+            selectedClipID = nil
+            selectedClipIDs = []
+        }
         if scroll {
             scrollToStartRequest += 1
         }
@@ -143,9 +221,20 @@ final class AppState: ObservableObject {
     func promoteAccessedClip(_ item: ClipItem, scroll: Bool = true) {
         historyStore.promoteToFront(item)
         rebuildVisibleClips()
-        selectedClipID = item.id
+        selectOnly(item.id)
         if scroll {
             scrollToStartRequest += 1
+        }
+    }
+
+    private func pruneSelectionToVisibleClips() {
+        let visibleIDs = Set(visibleClips.map(\.id))
+        selectedClipIDs = selectedClipIDs.filter { visibleIDs.contains($0) }
+        if let selectedClipID, !visibleIDs.contains(selectedClipID) {
+            self.selectedClipID = selectedClipIDs.last ?? visibleClips.first?.id
+        }
+        if selectedClipIDs.isEmpty, let selectedClipID, visibleIDs.contains(selectedClipID) {
+            selectedClipIDs = [selectedClipID]
         }
     }
 
@@ -216,7 +305,7 @@ final class AppState: ObservableObject {
         visibleClips = searchService.search(
             clips: sourceClips,
             query: debouncedQuery,
-            selectedType: selectedType,
+            selectedFilter: selectedFilter,
             sourceApp: selectedSourceApp,
             pinboardID: nil,
             foldedHaystack: { [historyStore] item in

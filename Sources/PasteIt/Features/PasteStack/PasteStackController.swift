@@ -45,6 +45,9 @@ final class PasteStackController: ObservableObject {
     nonisolated(unsafe) private var eventTap: CFMachPort?
     nonisolated(unsafe) private var runLoopSource: CFRunLoopSource?
     private var didPromptForAccessibility = false
+    /// Nested suspends so multi-select sequential paste can post ⌘V without
+    /// the Stack intercept swallowing / re-staging mid-sequence.
+    private var pasteInterceptSuspendCount = 0
 
     init(pasteController: PasteController, settings: AppSettings) {
         self.pasteController = pasteController
@@ -214,18 +217,29 @@ final class PasteStackController: ObservableObject {
     }
 
     func ensureAccessibilityIfNeeded() {
-        guard !AXIsProcessTrusted() else { return }
-        guard !didPromptForAccessibility else { return }
-        didPromptForAccessibility = true
-        let promptKey = "AXTrustedCheckOptionPrompt" as CFString
-        _ = AXIsProcessTrustedWithOptions([promptKey: true] as CFDictionary)
-        NSLog("PasteIt: requesting Accessibility for Paste Stack ⌘V")
+        SystemPasteSynthesizer.ensureAccessibilityIfNeeded(didPrompt: &didPromptForAccessibility)
+    }
+
+    /// Temporarily disable ⌘V intercept (e.g. while multi-select pastes its own sequence).
+    func suspendPasteIntercept() {
+        pasteInterceptSuspendCount += 1
+        if pasteInterceptSuspendCount == 1 {
+            tearDownEventTap()
+        }
+    }
+
+    func resumePasteIntercept() {
+        guard pasteInterceptSuspendCount > 0 else { return }
+        pasteInterceptSuspendCount -= 1
+        if pasteInterceptSuspendCount == 0 {
+            refreshPasteIntercept()
+        }
     }
 
     // MARK: - ⌘V intercept (Paste-compatible)
 
     private func refreshPasteIntercept() {
-        if items.isEmpty {
+        if pasteInterceptSuspendCount > 0 || items.isEmpty {
             tearDownEventTap()
         } else {
             installEventTapIfPossible()
@@ -233,7 +247,7 @@ final class PasteStackController: ObservableObject {
     }
 
     private func installEventTapIfPossible() {
-        if eventTap != nil { return }
+        if eventTap != nil || pasteInterceptSuspendCount > 0 { return }
         guard AXIsProcessTrusted() else {
             ensureAccessibilityIfNeeded()
             return
@@ -321,12 +335,6 @@ final class PasteStackController: ObservableObject {
     }
 
     private static func postCommandV() {
-        let source = CGEventSource(stateID: .hidSystemState)
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: true)
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: false)
-        keyDown?.flags = .maskCommand
-        keyUp?.flags = .maskCommand
-        keyDown?.post(tap: .cghidEventTap)
-        keyUp?.post(tap: .cghidEventTap)
+        SystemPasteSynthesizer.postCommandV()
     }
 }

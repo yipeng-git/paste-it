@@ -104,11 +104,12 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         })
     }
 
-    func hide() {
+    func hide(completion: (@Sendable () -> Void)? = nil) {
         guard let panel, panel.isVisible, !isAnimating else {
             if panel?.isVisible != true {
                 stopOutsideClickMonitoring()
             }
+            completion?()
             return
         }
 
@@ -138,6 +139,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
                 panel.alphaValue = 1
                 self?.isAnimating = false
                 Analytics.endPanelSession()
+                completion?()
             }
         })
     }

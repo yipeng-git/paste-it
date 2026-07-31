@@ -1,5 +1,6 @@
 import Foundation
 import MCP
+import PasteItCore
 
 /// Official MCP host: `StatelessHTTPServerTransport` + tool handlers.
 /// Does not bind a port — pair with `AgentAPIServer` NWListener.
@@ -187,13 +188,15 @@ enum PasteItMCPTools {
     private static func listClips(arguments: [String: Value]?) throws -> some Encodable {
         let limit = min(max(intArg(arguments, "limit", default: 50), 1), 500)
         let offset = max(intArg(arguments, "offset", default: 0), 0)
-        let typeFilter = stringArg(arguments, "type").flatMap { ClipType(rawValue: $0) }
+        let typeFilter = stringArg(arguments, "type").flatMap { FilterCategory.from(typeToken: $0) } ?? .all
         let sourceApp = stringArg(arguments, "sourceApp")
 
         let runtime = AppRuntime.shared
         var clips = runtime.historyStore.clips
-        if let typeFilter {
-            clips = clips.filter { $0.primaryType == typeFilter }
+        if typeFilter != .all {
+            clips = clips.filter {
+                typeFilter.matches(primaryTypeRaw: $0.primaryType.rawValue, plainText: $0.plainText)
+            }
         }
         if let sourceApp, !sourceApp.isEmpty {
             clips = clips.filter { $0.sourceAppName == sourceApp }
@@ -234,7 +237,7 @@ enum PasteItMCPTools {
     @MainActor
     private static func search(arguments: [String: Value]?) throws -> some Encodable {
         let q = stringArg(arguments, "q") ?? stringArg(arguments, "query") ?? ""
-        let typeFilter = stringArg(arguments, "type").flatMap { ClipType(rawValue: $0) }
+        let typeFilter = stringArg(arguments, "type").flatMap { FilterCategory.from(typeToken: $0) } ?? .all
         let sourceApp = stringArg(arguments, "sourceApp")
         let limit = min(max(intArg(arguments, "limit", default: 50), 1), 500)
 
@@ -242,7 +245,7 @@ enum PasteItMCPTools {
         let results = runtime.searchService.search(
             clips: runtime.historyStore.clips,
             query: q,
-            selectedType: typeFilter,
+            selectedFilter: typeFilter,
             sourceApp: sourceApp,
             pinboardID: nil,
             foldedHaystack: { item in

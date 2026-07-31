@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import PasteItCore
 
 @MainActor
 final class PasteboardMonitor: NSObject {
@@ -102,20 +103,26 @@ final class PasteboardMonitor: NSObject {
 
         let first = pasteboardItems[0]
         let types = Array(Set(pasteboardItems.flatMap { $0.types.map(\.rawValue) })).sorted()
-        let fileURL = first.string(forType: .fileURL).flatMap(URL.init(string:))
-        let url = first.string(forType: NSPasteboard.PasteboardType("public.url")).flatMap(URL.init(string:))
-        let plainText = first.string(forType: .string) ?? fileURL?.path ?? url?.absoluteString ?? ""
+        let fileURLs = Self.collectFileURLs(from: pasteboard, items: pasteboardItems)
+        let url = first.string(forType: NSPasteboard.PasteboardType("public.url"))
+            .flatMap(URL.init(string:))
+            .flatMap { ClipTypeResolver.isWebURL($0) ? $0 : nil }
+        let plainText = first.string(forType: .string)
+            ?? fileURLs.first?.path
+            ?? url?.absoluteString
+            ?? ""
         let html = first.string(forType: .html)
         let rtf = first.data(forType: .rtf)
-        let pngData = first.data(forType: .png)
-        let tiffData = first.data(forType: .tiff)
+        // Only treat bitmap as image content when this is not a Finder file copy.
+        let pngData = fileURLs.isEmpty ? first.data(forType: .png) : nil
+        let tiffData = fileURLs.isEmpty ? first.data(forType: .tiff) : nil
         let imageData = pngData ?? tiffData
         let imageExtension = pngData != nil ? "png" : "tiff"
 
         return PasteboardSnapshot(
             itemCount: pasteboardItems.count,
             types: types,
-            fileURL: fileURL,
+            fileURLs: fileURLs,
             url: url,
             plainText: plainText,
             html: html,
@@ -127,44 +134,80 @@ final class PasteboardMonitor: NSObject {
         )
     }
 
+    private static func collectFileURLs(
+        from pasteboard: NSPasteboard,
+        items: [NSPasteboardItem]
+    ) -> [URL] {
+        var urls: [URL] = []
+
+        if let objects = pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        ) as? [URL] {
+            urls.append(contentsOf: objects.filter(\.isFileURL))
+        }
+
+        for item in items {
+            if let string = item.string(forType: .fileURL),
+               let url = URL(string: string),
+               url.isFileURL {
+                urls.append(url)
+            }
+        }
+
+        if let paths = pasteboard.propertyList(
+            forType: NSPasteboard.PasteboardType("NSFilenamesPboardType")
+        ) as? [String] {
+            urls.append(contentsOf: paths.map { URL(fileURLWithPath: $0) })
+        }
+
+        var seen = Set<String>()
+        return urls.filter { seen.insert($0.absoluteString).inserted }
+    }
+
     /// Blob write / thumbnail / hash — safe to run off the main actor.
     private nonisolated static func normalize(
         snapshot: PasteboardSnapshot,
         blobStore: BlobStore
     ) async -> CapturedClip? {
-        let fileURL = snapshot.fileURL
+        let fileURLs = snapshot.fileURLs
         let url = snapshot.url
         let plainText = snapshot.plainText
         let html = snapshot.html
         let rtf = snapshot.rtf
         let imageData = snapshot.imageData
 
-        var blobPath: String?
-        var thumbnailPath: String?
-        var imagePixelWidth: Int?
-        var imagePixelHeight: Int?
-        var primaryType = determinePrimaryType(
-            fileURL: fileURL,
-            url: url,
-            plainText: plainText,
-            html: html,
-            rtf: rtf,
-            hasImage: imageData != nil
+        let resolved = ClipTypeResolver.resolve(
+            .init(
+                fileURLs: fileURLs,
+                webURL: url,
+                plainText: plainText,
+                hasHTML: html?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false,
+                hasRTF: rtf?.isEmpty == false,
+                hasImageData: imageData != nil
+            )
         )
+        let primaryType = ClipType(rawValue: resolved.primaryTypeRaw) ?? .text
 
         guard hasCapturableContent(
             plainText: plainText,
             html: html,
             rtf: rtf,
-            fileURL: fileURL,
+            fileURLs: fileURLs,
             url: url,
             hasImage: imageData != nil
         ) else {
             return nil
         }
 
+        var blobPath: String?
+        var thumbnailPath: String?
+        var imagePixelWidth: Int?
+        var imagePixelHeight: Int?
         var pendingOCRBlobRelativePath: String?
-        if let imageData {
+
+        // File copies may include a TIFF preview — never promote them to Image.
+        if let imageData, fileURLs.isEmpty {
             let imageID = UUID()
             blobPath = try? blobStore.store(
                 data: imageData,
@@ -179,19 +222,23 @@ final class PasteboardMonitor: NSObject {
                 }
             }
             pendingOCRBlobRelativePath = blobPath
-            primaryType = .image
         }
 
         let title = makeTitle(
             primaryType: primaryType,
             plainText: plainText,
-            fileURL: fileURL ?? url,
-            itemCount: snapshot.itemCount
+            fileURLs: fileURLs,
+            webURL: url,
+            isDirectory: resolved.isDirectory
         )
 
         let hashSeed: Data
-        if let imageData {
+        if let imageData, fileURLs.isEmpty {
             hashSeed = imageData
+        } else if !fileURLs.isEmpty {
+            hashSeed = Data(
+                (["file"] + resolved.fileURLStrings).joined(separator: "\n").utf8
+            )
         } else if let rtf {
             hashSeed = rtf
         } else {
@@ -200,7 +247,6 @@ final class PasteboardMonitor: NSObject {
                     primaryType.rawValue,
                     plainText,
                     html ?? "",
-                    fileURL?.absoluteString ?? "",
                     url?.absoluteString ?? ""
                 ]
                 .joined(separator: "\n")
@@ -208,18 +254,28 @@ final class PasteboardMonitor: NSObject {
             )
         }
 
+        let fileURLString: String? = {
+            if !resolved.fileURLStrings.isEmpty {
+                return resolved.fileURLStrings.joined(separator: "\n")
+            }
+            if primaryType == .url {
+                return url?.absoluteString
+            }
+            return nil
+        }()
+
         return CapturedClip(
             title: title,
             plainText: plainText,
             htmlText: html,
             rtfData: rtf,
-            primaryType: snapshot.itemCount > 1 ? .mixed : primaryType,
+            primaryType: primaryType,
             pasteboardTypes: snapshot.types,
             sourceAppName: snapshot.sourceAppName,
             sourceBundleIdentifier: snapshot.sourceBundleIdentifier,
             blobRelativePath: blobPath,
             thumbnailRelativePath: thumbnailPath,
-            fileURLString: (fileURL ?? url)?.absoluteString,
+            fileURLString: fileURLString,
             ocrText: nil,
             linkTitle: nil,
             linkIconRelativePath: nil,
@@ -231,31 +287,15 @@ final class PasteboardMonitor: NSObject {
         )
     }
 
-    private nonisolated static func determinePrimaryType(
-        fileURL: URL?,
-        url: URL?,
-        plainText: String,
-        html: String?,
-        rtf: Data?,
-        hasImage: Bool
-    ) -> ClipType {
-        if hasImage { return .image }
-        if fileURL != nil { return .file }
-        if url != nil || plainText.looksLikeURL { return .url }
-        if rtf != nil { return .richText }
-        if html != nil { return .html }
-        return .text
-    }
-
     private nonisolated static func hasCapturableContent(
         plainText: String,
         html: String?,
         rtf: Data?,
-        fileURL: URL?,
+        fileURLs: [URL],
         url: URL?,
         hasImage: Bool
     ) -> Bool {
-        if hasImage || fileURL != nil || url != nil { return true }
+        if hasImage || !fileURLs.isEmpty || url != nil { return true }
         if rtf?.isEmpty == false { return true }
         if html?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false { return true }
         return !plainText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -264,14 +304,25 @@ final class PasteboardMonitor: NSObject {
     private nonisolated static func makeTitle(
         primaryType: ClipType,
         plainText: String,
-        fileURL: URL?,
-        itemCount: Int
+        fileURLs: [URL],
+        webURL: URL?,
+        isDirectory: Bool
     ) -> String {
-        if itemCount > 1 {
-            return "\(itemCount) copied items"
+        if fileURLs.count > 1 {
+            return "\(fileURLs.count) copied items"
         }
-        if let fileURL {
-            return fileURL.lastPathComponent.isEmpty ? fileURL.absoluteString : fileURL.lastPathComponent
+        if let fileURL = fileURLs.first {
+            let name = fileURL.lastPathComponent
+            if name.isEmpty {
+                return fileURL.absoluteString
+            }
+            if isDirectory, !name.hasSuffix("/") {
+                return name
+            }
+            return name
+        }
+        if let webURL {
+            return webURL.absoluteString
         }
         let trimmed = plainText
             .replacingOccurrences(of: "\n", with: " ")
@@ -287,7 +338,7 @@ final class PasteboardMonitor: NSObject {
 private struct PasteboardSnapshot: Sendable {
     let itemCount: Int
     let types: [String]
-    let fileURL: URL?
+    let fileURLs: [URL]
     let url: URL?
     let plainText: String
     let html: String?

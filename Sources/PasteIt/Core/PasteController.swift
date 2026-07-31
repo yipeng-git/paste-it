@@ -86,9 +86,9 @@ final class PasteController {
             }
             return pasteboard.writeObjects([pasteboardItem])
         case .file:
-            if let fileURLString = item.fileURLString,
-               let url = URL(string: fileURLString) {
-                return pasteboard.writeObjects([url as NSURL])
+            let urls = item.storedFileURLs
+            if !urls.isEmpty {
+                return pasteboard.writeObjects(urls as [NSURL])
             }
             return pasteboard.setString(item.previewText, forType: .string)
         case .html, .richText, .mixed, .url, .text:

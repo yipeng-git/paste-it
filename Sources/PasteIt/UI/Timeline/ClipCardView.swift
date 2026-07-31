@@ -44,7 +44,7 @@ struct ClipCardView: View {
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.primaryType.displayTitle)
+                Text(item.cardDisplayTitle)
                     .font(.system(size: 15, weight: .bold))
                 Text(item.createdAt.pasteItCopiedLabel())
                     .font(.system(size: 11, weight: .medium))
@@ -172,11 +172,16 @@ struct ClipCardView: View {
 
     private var fileContent: some View {
         VStack(spacing: 10) {
-            Image(systemName: "doc.fill")
+            Image(systemName: item.isDirectoryFileClip ? "folder.fill" : "doc.fill")
                 .font(.system(size: 34))
                 .foregroundStyle(.secondary)
             highlightedText(item.previewText, font: .system(size: 13, weight: .medium), lineLimit: 3)
                 .multilineTextAlignment(.center)
+            if item.storedFileURLs.count > 1 {
+                Text("\(item.storedFileURLs.count) items")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 14)

@@ -1,4 +1,6 @@
+import AppKit
 import SwiftUI
+import PasteItCore
 
 struct TimelineView: View {
     @ObservedObject var appState: AppState
@@ -79,10 +81,20 @@ struct TimelineView: View {
                 .id(appState.scrollToStartRequest)
 
                 if clips.isEmpty {
-                    Text(emptyMessage)
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                        .padding(.bottom, 12)
+                    VStack(spacing: 10) {
+                        Text(emptyMessage)
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                        if appState.selectedFilter != .all, appState.query.isEmpty {
+                            Button("Clear filter") {
+                                appState.setFilter(.all)
+                            }
+                            .buttonStyle(.plain)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                        }
+                    }
+                    .padding(.bottom, 12)
                 }
 
                 hiddenShortcuts(for: Array(clips.prefix(9)))
@@ -93,8 +105,9 @@ struct TimelineView: View {
 
     private var toolbar: some View {
         HStack(spacing: 8) {
+            TimelineFilterButton(appState: appState)
             tabPicker
-            if let status = appState.statusMessage {
+            if let status = toolbarStatusText {
                 Text(status)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
@@ -112,6 +125,17 @@ struct TimelineView: View {
         .padding(.top, 14)
         .padding(.bottom, 2)
         .animation(.easeOut(duration: 0.15), value: appState.statusMessage)
+        .animation(.easeOut(duration: 0.15), value: appState.selectedClipIDs.count)
+    }
+
+    /// Prefer transient status; otherwise hint while multi-selecting.
+    private var toolbarStatusText: String? {
+        if let status = appState.statusMessage {
+            return status
+        }
+        let count = appState.orderedSelectedClips.count
+        guard count > 1 else { return nil }
+        return "\(count) selected — Return to paste"
     }
 
     private var tabPicker: some View {
@@ -243,6 +267,17 @@ struct TimelineView: View {
         if !appState.query.isEmpty {
             return "No matching clips"
         }
+        if appState.selectedFilter != .all {
+            let label = appState.selectedFilter.title
+            switch appState.selectedTab {
+            case .pinned:
+                return "No \(label) clips in Pinned"
+            case .folder:
+                return "No \(label) clips in this folder"
+            case .timeline:
+                return "No \(label) clips"
+            }
+        }
         switch appState.selectedTab {
         case .timeline:
             return "Copy something to build your clipboard history"
@@ -303,19 +338,28 @@ struct TimelineView: View {
         ClipCardView(
             item: item,
             historyStore: historyStore,
-            isSelected: appState.selectedClipID == item.id,
+            isSelected: appState.orderedSelectedClips.contains(where: { $0.id == item.id }),
             quickIndex: quickIndex,
             query: appState.query
         )
         .frame(width: 238, height: 232)
+        // Gestures under the overlay so ⌘-clicks handled by CardClickOverlay
+        // are not also delivered to onTapGesture (which would toggle twice).
         .onTapGesture {
             // Paste: single click only selects — does not reorder or stage.
             resignSearch()
-            appState.selectedClipID = item.id
+            appState.selectOnly(item.id)
         }
         .onTapGesture(count: 2) {
             resignSearch()
+            appState.selectOnly(item.id)
             stage(item, trigger: "double_click", dismissPanel: true)
+        }
+        .overlay {
+            CardClickOverlay {
+                resignSearch()
+                appState.toggleMultiSelect(item.id)
+            }
         }
         .draggable(item.id.uuidString)
         .contextMenu {
@@ -348,7 +392,7 @@ struct TimelineView: View {
         trigger: String,
         dismissPanel: Bool
     ) {
-        appState.selectedClipID = item.id
+        appState.selectOnly(item.id)
         let resolvedMode: PasteController.PasteMode =
             settings.pasteAsPlainTextByDefault && mode == .normal ? .plainText : mode
 
@@ -362,6 +406,89 @@ struct TimelineView: View {
 
         guard pasteController.copyToPasteboard(item, mode: resolvedMode) else { return }
         promoteAfterStage(item, mode: resolvedMode, trigger: trigger, dismissPanel: dismissPanel)
+    }
+
+    /// ⌘C with multi-select: copy first selected item only, then collapse selection.
+    private func copyFirstOfSelection(trigger: String) {
+        let ordered = appState.orderedSelectedClips
+        guard let first = ordered.first else { return }
+        if ordered.count > 1 {
+            appState.selectedClipID = first.id
+            stage(first, trigger: trigger, dismissPanel: false)
+            appState.clearMultiSelectKeepingAnchor()
+        } else {
+            stage(first, trigger: trigger, dismissPanel: false)
+        }
+    }
+
+    /// Return with multi-select: paste each item natively in order into the frontmost app.
+    private func pasteSelectionSequentially(
+        mode: PasteController.PasteMode = .normal,
+        trigger: String
+    ) {
+        let ordered = appState.orderedSelectedClips
+        guard !ordered.isEmpty else { return }
+
+        if ordered.count == 1, let only = ordered.first {
+            stage(only, mode: mode, trigger: trigger, dismissPanel: true)
+            return
+        }
+
+        var didPromptForAccessibility = false
+        SystemPasteSynthesizer.ensureAccessibilityIfNeeded(didPrompt: &didPromptForAccessibility)
+        guard SystemPasteSynthesizer.isAccessibilityTrusted else {
+            appState.setStatus("Grant Accessibility to paste multiple items")
+            return
+        }
+
+        let resolvedMode: PasteController.PasteMode =
+            settings.pasteAsPlainTextByDefault && mode == .normal ? .plainText : mode
+        // Capture items before clearing selection and hiding the panel.
+        let items = ordered
+        appState.clearMultiSelectKeepingAnchor()
+        let pasteStack = appState.pasteStackController
+
+        Task { @MainActor in
+            // Don't let Paste Stack's ⌘V tap swallow / re-stage our synthesized pastes.
+            pasteStack?.suspendPasteIntercept()
+            defer { pasteStack?.resumePasteIntercept() }
+
+            // Wait until the panel has fully dismissed and the previous app is key;
+            // otherwise the first synthesized ⌘V is swallowed / lost.
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                if let panelController = appState.panelController {
+                    panelController.hide {
+                        continuation.resume()
+                    }
+                } else {
+                    continuation.resume()
+                }
+            }
+            try? await Task.sleep(nanoseconds: 100_000_000)
+
+            var pasted = 0
+            for item in items {
+                let wrote: Bool
+                if item.primaryType == .image, resolvedMode == .normal {
+                    wrote = await pasteController.copyToPasteboardAsync(item, mode: resolvedMode)
+                } else {
+                    wrote = pasteController.copyToPasteboard(item, mode: resolvedMode)
+                }
+                guard wrote else { continue }
+                // Settle write → ⌘V → wait for the target app to consume before
+                // overwriting the pasteboard (avoids skip/duplicate under load).
+                await SystemPasteSynthesizer.pasteWrittenItem()
+                pasted += 1
+            }
+            Analytics.clipStaged(
+                mode: resolvedMode == .plainText ? "plain" : "normal",
+                trigger: trigger,
+                clipType: "multi",
+                tab: analyticsTabKind(appState.selectedTab),
+                ageBucket: "multi"
+            )
+            appState.setStatus("Pasted \(pasted) items")
+        }
     }
 
     private func promoteAfterStage(
@@ -401,24 +528,18 @@ struct TimelineView: View {
                 .keyboardShortcut(KeyEquivalent(Character("\(index + 1)")), modifiers: [.command])
             }
             Button("") {
-                if let selected = appState.selectedClip {
-                    stage(selected, trigger: "return", dismissPanel: true)
-                }
+                pasteSelectionSequentially(trigger: "return")
             }
             .keyboardShortcut(.return, modifiers: [])
 
             Button("") {
-                if let selected = appState.selectedClip {
-                    stage(selected, mode: .plainText, trigger: "shift_return", dismissPanel: true)
-                }
+                pasteSelectionSequentially(mode: .plainText, trigger: "shift_return")
             }
             .keyboardShortcut(.return, modifiers: [.shift])
 
             // Paste: ⌘C copies selected item to the clipboard and promotes it.
             Button("") {
-                if let selected = appState.selectedClip {
-                    stage(selected, trigger: "cmd_c", dismissPanel: false)
-                }
+                copyFirstOfSelection(trigger: "cmd_c")
             }
             .keyboardShortcut("c", modifiers: [.command])
 

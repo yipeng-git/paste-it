@@ -8,7 +8,8 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "PasteIt", targets: ["PasteIt"])
+        .executable(name: "PasteIt", targets: ["PasteIt"]),
+        .library(name: "PasteItCore", targets: ["PasteItCore"])
     ],
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.0"),
@@ -16,9 +17,14 @@ let package = Package(
         .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.59.3")
     ],
     targets: [
+        .target(
+            name: "PasteItCore",
+            path: "Sources/PasteItCore"
+        ),
         .executableTarget(
             name: "PasteIt",
             dependencies: [
+                "PasteItCore",
                 .product(name: "Sparkle", package: "Sparkle"),
                 .product(name: "MCP", package: "swift-sdk"),
                 .product(name: "PostHog", package: "posthog-ios")
@@ -27,6 +33,11 @@ let package = Package(
             resources: [
                 .process("../../Resources")
             ]
+        ),
+        .testTarget(
+            name: "PasteItTests",
+            dependencies: ["PasteItCore"],
+            path: "Tests/PasteItTests"
         )
     ]
 )

@@ -1,4 +1,5 @@
 import SwiftUI
+import PasteItCore
 
 /// Read-only timeline chrome for Agent API ephemeral screenshot sessions.
 struct EphemeralTimelineView: View {
@@ -9,11 +10,16 @@ struct EphemeralTimelineView: View {
 
     private let searchService = SearchService()
 
+    private var selectedFilter: FilterCategory {
+        guard let selectedType else { return .all }
+        return FilterCategory.from(typeToken: selectedType.rawValue) ?? .all
+    }
+
     private var visibleClips: [ClipItem] {
         searchService.search(
             clips: historyStore.clips,
             query: query,
-            selectedType: selectedType,
+            selectedFilter: selectedFilter,
             sourceApp: nil,
             pinboardID: nil,
             foldedHaystack: { [historyStore] item in

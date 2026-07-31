@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import PasteItCore
 
 /// Slide-from-below frame for panel show/hide animations.
 ///
@@ -29,11 +30,8 @@ private func screenExistsBelow(_ screen: NSScreen) -> Bool {
 }
 
 extension String {
+    /// Web URL heuristic for capture / save-as-new. Does not treat `file://` as a link.
     var looksLikeURL: Bool {
-        guard let url = URL(string: self.trimmingCharacters(in: .whitespacesAndNewlines)),
-              let scheme = url.scheme?.lowercased() else {
-            return false
-        }
-        return ["http", "https", "file", "mailto"].contains(scheme)
+        ClipTypeResolver.looksLikeWebURL(self)
     }
 }
