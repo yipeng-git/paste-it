@@ -1,0 +1,103 @@
+Sources/PasteIt/UI/Components/TimelineFilterButton.swift
+  s_9110c3654c6a5b::t_042458376be184 1-77
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_9110c3654c6a5b::t_9a016ad512e7f4 84-97
+  s_9110c3654c6a5b::t_1a2b22c947fefe 341
+  s_9110c3654c6a5b::t_7aa8a283683358 488
+  s_9110c3654c6a5b::t_77b232e874d6a2 449,452-455,467,469,478-481,490
+  s_9110c3654c6a5b::t_3bc4736a809450 270-280
+  s_9110c3654c6a5b::t_7857bf956ab5c5 110,128-135,137-138
+  s_9110c3654c6a5b::t_1d5968dbf6e28b 1
+  s_9110c3654c6a5b::t_be73f186237384 136
+  s_9110c3654c6a5b::t_f1b6a199cba476 3
+  s_9110c3654c6a5b::t_0c5fd4251fb0f7 346-347,351,358-362
+  s_9110c3654c6a5b::t_65056af90d1f05 355,363,395,411-445,447-448,450-451,470-477,482-487,489,491-493,531,536,542
+  s_9110c3654c6a5b::t_a40973446cba8c 446,456-466,468
+  s_9110c3654c6a5b::t_6692d19a557864 108
+Sources/PasteIt/UI/Timeline/ClipCardView.swift
+  s_9110c3654c6a5b::t_6e140b554a1b34 47
+  s_9110c3654c6a5b::t_4b2c1a9c128c5f 175,180-184
+Sources/PasteItCore/ClipTypeResolver.swift
+  s_9110c3654c6a5b::t_1f9c974f015639 1-117
+Sources/PasteIt/Models/ClipType.swift
+  s_9110c3654c6a5b::t_f367f5d32ee6b7 3,40,45-46,50-53,58-59,62-96
+Sources/PasteIt/Utilities/AppKitExtensions.swift
+  s_9110c3654c6a5b::t_b1f78988d58954 3
+  s_9110c3654c6a5b::t_83ca4c1d0dc08f 33,35
+Sources/PasteIt/AgentAPI/EphemeralTimelineView.swift
+  s_9110c3654c6a5b::t_6a97abc216cc7c 2,13-17,22
+Sources/PasteIt/Core/SystemPasteSynthesizer.swift
+  s_9110c3654c6a5b::t_1263376bea850b 2-3
+  s_9110c3654c6a5b::t_77630729ec96ef 8-15,31-42,49,51-58
+  s_9110c3654c6a5b::t_117c66dfc26ce3 1,4-7,16-30,43-48,50,59-60
+Tests/PasteItTests/LooksLikeNumberTests.swift
+  s_9110c3654c6a5b::t_a2c188937a34ed 1-56
+Tests/PasteItTests/FilterCategoryTests.swift
+  s_9110c3654c6a5b::t_26455314d46034 1-38
+Sources/PasteIt/App/AppState.swift
+  s_9110c3654c6a5b::t_e99ccd2e30affa 168-174
+  s_9110c3654c6a5b::t_29e156be19112d 308
+  s_9110c3654c6a5b::t_5a8432096ff29b 3
+  s_9110c3654c6a5b::t_543316272726aa 140,148-158
+  s_9110c3654c6a5b::t_3e11989aa7e23d 118
+  s_9110c3654c6a5b::t_b48a46f596859d 48-49
+  s_9110c3654c6a5b::t_0b994b25386edd 56,58
+  s_9110c3654c6a5b::t_4a3aa5868dab8f 117,119-121,124,128,130-132,160-167,175-200,202,204,209-214,224,230-239
+  s_9110c3654c6a5b::t_f8e3e29e05b15b 122-123,125-127,129
+  s_9110c3654c6a5b::t_6f3be9d68b1501 159
+  s_9110c3654c6a5b::t_d18623bf2195ee 240
+Sources/PasteIt/Features/PasteStack/PasteStackController.swift
+  s_9110c3654c6a5b::t_f72136275c5742 221,223-236,242,250
+  s_9110c3654c6a5b::t_766f2531b1abcb 48-50
+  s_9110c3654c6a5b::t_4394418d6e034d 220,338
+  s_9110c3654c6a5b::t_d67176d01b91eb 222
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_9110c3654c6a5b::t_ee5a1fb28c8032 107
+  s_9110c3654c6a5b::t_b5aa4003a3c19a 112,142
+Sources/PasteIt/Core/PasteboardMonitor.swift
+  s_9110c3654c6a5b::t_e554c98d4aefe5 3,106-113,116-118,125,137-167,173,180-188,190,196,203-206,208-210,230-232,236,238-241,257-266,272,278,294,298,307-309,311-322,324-325,341
+Sources/PasteItCore/LooksLikeNumber.swift
+  s_9110c3654c6a5b::t_e09aa8ebddd2f1 1-103
+Sources/PasteIt/UI/Components/CardClickOverlay.swift
+  s_9110c3654c6a5b::t_302a4f0196a81f 4-5,30-35,38-42,46-50,52
+  s_9110c3654c6a5b::t_e6137ed8560804 26-29,36,43-45,51
+  s_9110c3654c6a5b::t_fca361db644623 23
+  s_9110c3654c6a5b::t_77695aa563d232 9-10,15,20
+  s_9110c3654c6a5b::t_55af19e1eb766f 1-3,6-8,11-14,16-19,21-22,24-25,37,53-54
+Sources/PasteIt/Core/PasteController.swift
+  s_9110c3654c6a5b::t_7f5c0b3ddcf829 89-91
+Sources/PasteIt/AgentAPI/PasteItMCPServer.swift
+  s_9110c3654c6a5b::t_59fc260d9fd379 3
+  s_9110c3654c6a5b::t_f3ddecf5f6dd22 240,248
+  s_9110c3654c6a5b::t_70ddd72c139eb1 191,196-199
+Sources/PasteIt/Search/SearchService.swift
+  s_9110c3654c6a5b::t_63f18e763aa6dd 2,8,17-21,24-27,54,60,67,78,83-88
+  s_9110c3654c6a5b::t_73058c042421d7 89-90
+Package.swift
+  s_9110c3654c6a5b::t_7f4ef66c9f9fe9 11-12,20-23,27,36-40
+AGENTS.md
+  s_9110c3654c6a5b::t_5cad7c79f1b22e 1-17
+Sources/PasteItCore/FilterCategory.swift
+  s_9110c3654c6a5b::t_3aa3c68980b396 1-28,30-46,48,50-82
+  s_9110c3654c6a5b::t_7157a4e4e77d98 29
+  s_9110c3654c6a5b::t_69fb1d02044fa1 47,49
+Tests/PasteItTests/ClipTypeResolveTests.swift
+  s_9110c3654c6a5b::t_3e9225ad3ce158 1-73,75-82
+  s_9110c3654c6a5b::t_ccf74e2ba4d3a8 74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "e35a1c3306dd6ae1a0cf7b13b570ce8307f1b215",
+  "prompts": {},
+  "sessions": {
+    "s_9110c3654c6a5b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "22f713ec-c576-4b66-bd5a-5a7c674087ee",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
