@@ -2,78 +2,91 @@
 import AppKit
 import Foundation
 
-/// Generates Paste It app icon assets.
+/// Generates Paste It Liquid Glass app icon assets via Icon Composer.
 /// Brand mark B: dark ink P (#12141A) on acid green (#C8F031).
 ///
-/// macOS HIG / Tahoe:
-/// - Provide artwork on the 1024pt icon grid: ~100pt margin each side (824pt plate).
-/// - Transparent outside the continuous-corner squircle — do NOT full-bleed the canvas.
-///   (Full-bleed squares look undersized next to system/Icon Composer icons on macOS 26.)
-/// - System / Assets.car apply glass; .icns is the legacy fallback.
+/// Pipeline (same as Magic Remote):
+/// 1. Rasterize a transparent P glyph (no baked squircle / shadows / highlights)
+/// 2. `icon-composer` → `design/AppIcon.icon` with glass + light/dark fills
+/// 3. `actool` compiles `.icon` → `Resources/Assets.car` + `AppIcon.icns`
+/// 4. Marketing flat PNG → `Resources/AppIcon.png` (+ optional web favicons)
 ///
-/// Web favicons stay near-edge rounded tiles with transparent corners only.
+/// Requires: Xcode (ictool / actool), Node (`npx icon-composer-mcp`).
 
 let ink = NSColor(srgbRed: 0x12 / 255, green: 0x14 / 255, blue: 0x1A / 255, alpha: 1)
-let accent = NSColor(srgbRed: 0xC8 / 255, green: 0xF0 / 255, blue: 0x31 / 255, alpha: 1)
-
-/// Apple macOS icon template: 100pt margin on 1024 → 824pt plate (~80.5%).
-let macGridMarginFraction: CGFloat = 100.0 / 1024.0
-/// Continuous-corner radius relative to plate side (~iOS/macOS squircle approximation).
-let plateCornerFraction: CGFloat = 0.2237
-/// Glyph size relative to the green plate (not the full canvas).
-let glyphFractionOfPlate: CGFloat = 0.88
+let accentHex = "#C8F031"
+let darkAccentHex = "#8FB01F"
+/// Glyph size relative to the full 1024 canvas (Icon Composer applies system mask).
+let glyphFractionOfCanvas: CGFloat = 0.62
 
 let scriptURL = URL(fileURLWithPath: CommandLine.arguments[0]).standardizedFileURL
 let root = scriptURL.deletingLastPathComponent().deletingLastPathComponent()
+let designDir = root.appendingPathComponent("design")
+let layersDir = designDir.appendingPathComponent("layers")
 let resourcesDir = root.appendingPathComponent("Resources")
-let iconsetDir = root.appendingPathComponent(".build/AppIcon.iconset")
-let xcassetsDir = root.appendingPathComponent(".build/AppIcon.xcassets")
-let appiconsetDir = xcassetsDir.appendingPathComponent("AppIcon.appiconset")
+let iconBundle = designDir.appendingPathComponent("AppIcon.icon")
+let glyphURL = layersDir.appendingPathComponent("glyph-p.png")
+let actoolOut = root.appendingPathComponent(".build/actool-icon-out")
 
+try FileManager.default.createDirectory(at: layersDir, withIntermediateDirectories: true)
 try FileManager.default.createDirectory(at: resourcesDir, withIntermediateDirectories: true)
-try? FileManager.default.removeItem(at: iconsetDir)
-try FileManager.default.createDirectory(at: iconsetDir, withIntermediateDirectories: true)
-try? FileManager.default.removeItem(at: xcassetsDir)
-try FileManager.default.createDirectory(at: appiconsetDir, withIntermediateDirectories: true)
 
-enum IconPlate {
-    /// macOS App Icon grid: inset continuous squircle, transparent outside.
-    case macOSGrid
-    /// Web favicon / apple-touch: near-full rounded rect, transparent corners only.
-    case webRounded
-}
-
-func plateRect(in bounds: NSRect, plate: IconPlate) -> (rect: NSRect, radius: CGFloat) {
-    switch plate {
-    case .macOSGrid:
-        let margin = bounds.width * macGridMarginFraction
-        let rect = bounds.insetBy(dx: margin, dy: margin)
-        return (rect, rect.width * plateCornerFraction)
-    case .webRounded:
-        return (bounds, bounds.width * plateCornerFraction)
+func run(_ executable: String, _ arguments: [String], cwd: URL? = nil) throws {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: executable)
+    process.arguments = arguments
+    if let cwd {
+        process.currentDirectoryURL = cwd
+    }
+    let err = Pipe()
+    process.standardError = err
+    try process.run()
+    process.waitUntilExit()
+    if process.terminationStatus != 0 {
+        let data = err.fileHandleForReading.readDataToEndOfFile()
+        if let text = String(data: data, encoding: .utf8), !text.isEmpty {
+            FileHandle.standardError.write(Data(text.utf8))
+        }
+        fatalError("\(executable) failed with status \(process.terminationStatus)")
     }
 }
 
-/// Draw at exact pixel dimensions. `points` is the logical size iconutil/actool expect
-/// (half of pixels for @2x). Wrong point size causes iconutil to drop retina slots → blurry icons.
-func drawExactPixels(_ pixels: Int, points: CGFloat? = nil, plate: IconPlate) -> NSBitmapImageRep {
+func which(_ name: String) -> String? {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+    process.arguments = [name]
+    let out = Pipe()
+    process.standardOutput = out
+    process.standardError = FileHandle.nullDevice
+    try? process.run()
+    process.waitUntilExit()
+    guard process.terminationStatus == 0 else { return nil }
+    let data = out.fileHandleForReading.readDataToEndOfFile()
+    return String(data: data, encoding: .utf8)?
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+        .split(separator: "\n").first
+        .map(String.init)
+}
+
+// MARK: - 1. Glyph (transparent; glass comes from Icon Composer)
+
+func renderGlyph(to url: URL) throws {
+    let size = 1024
     guard let rep = NSBitmapImageRep(
         bitmapDataPlanes: nil,
-        pixelsWide: pixels,
-        pixelsHigh: pixels,
+        pixelsWide: size,
+        pixelsHigh: size,
         bitsPerSample: 8,
         samplesPerPixel: 4,
         hasAlpha: true,
         isPlanar: false,
-        colorSpaceName: .calibratedRGB,
+        colorSpaceName: .deviceRGB,
         bytesPerRow: 0,
         bitsPerPixel: 0
     ) else {
-        fatalError("Failed to create bitmap")
+        fatalError("Failed to create glyph bitmap")
     }
-    // Logical size must match icon slot (e.g. 512pt for walt.e@example.net at 1024px).
-    let pointSize = points ?? CGFloat(pixels)
-    rep.size = NSSize(width: pointSize, height: pointSize)
+    rep.size = NSSize(width: size, height: size)
 
     NSGraphicsContext.saveGraphicsState()
     guard let ctx = NSGraphicsContext(bitmapImageRep: rep) else {
@@ -83,20 +96,10 @@ func drawExactPixels(_ pixels: Int, points: CGFloat? = nil, plate: IconPlate) ->
     ctx.imageInterpolation = .high
     ctx.shouldAntialias = true
 
-    // Draw in point space; bitmap pixels provide retina density.
-    let size = pointSize
-    let bounds = NSRect(x: 0, y: 0, width: size, height: size)
-
     NSColor.clear.setFill()
-    bounds.fill()
+    NSRect(x: 0, y: 0, width: size, height: size).fill()
 
-    let (fillRect, radius) = plateRect(in: bounds, plate: plate)
-
-    let path = NSBezierPath(roundedRect: fillRect, xRadius: radius, yRadius: radius)
-    accent.setFill()
-    path.fill()
-
-    let fontSize = fillRect.width * glyphFractionOfPlate
+    let fontSize = CGFloat(size) * glyphFractionOfCanvas
     let font = NSFont.systemFont(ofSize: fontSize, weight: .bold)
     let paragraph = NSMutableParagraphStyle()
     paragraph.alignment = .center
@@ -109,147 +112,149 @@ func drawExactPixels(_ pixels: Int, points: CGFloat? = nil, plate: IconPlate) ->
     let text = NSAttributedString(string: "P", attributes: attrs)
     let textSize = text.size()
     let drawRect = NSRect(
-        x: fillRect.midX - textSize.width / 2,
-        y: fillRect.midY - textSize.height / 2 - fillRect.height * 0.015,
+        x: (CGFloat(size) - textSize.width) / 2,
+        y: (CGFloat(size) - textSize.height) / 2 - CGFloat(size) * 0.012,
         width: textSize.width,
         height: textSize.height
     )
     text.draw(in: drawRect)
-
     NSGraphicsContext.restoreGraphicsState()
-    return rep
-}
 
-func writePNG(_ rep: NSBitmapImageRep, to url: URL) throws {
-    guard let data = rep.representation(using: .png, properties: [:]) else {
-        fatalError("Failed to encode PNG for \(url.path)")
+    guard let png = rep.representation(using: .png, properties: [:]) else {
+        fatalError("Failed to encode glyph PNG")
     }
-    try data.write(to: url)
+    try png.write(to: url)
+    print("Wrote \(url.path)")
 }
 
-// Master + iconset (macOS grid). Master is 1024px at 1024pt for editing/preview.
-try writePNG(drawExactPixels(1024, points: 1024, plate: .macOSGrid), to: resourcesDir.appendingPathComponent("AppIcon.png"))
+try renderGlyph(to: glyphURL)
 
-// (name, pixels, points) — @2x must report half the pixels as point size or iconutil drops them.
-// Build "@" + "2x.png" at runtime — avoid a contiguous email-like "@2x.png" token in source.
-let retinaSuffix = "@" + "2x.png"
-let iconsetEntries: [(name: String, pixels: Int, points: CGFloat)] = [
-    ("icon_16x16.png", 16, 16),
-    ("icon_16x16" + retinaSuffix, 32, 16),
-    ("icon_32x32.png", 32, 32),
-    ("icon_32x32" + retinaSuffix, 64, 32),
-    ("icon_128x128.png", 128, 128),
-    ("icon_128x128" + retinaSuffix, 256, 128),
-    ("icon_256x256.png", 256, 256),
-    ("icon_256x256" + retinaSuffix, 512, 256),
-    ("icon_512x512.png", 512, 512),
-    ("icon_512x512" + retinaSuffix, 1024, 512),
-]
+// MARK: - 2. Icon Composer → .icon
 
-for entry in iconsetEntries {
-    try writePNG(
-        drawExactPixels(entry.pixels, points: entry.points, plate: .macOSGrid),
-        to: iconsetDir.appendingPathComponent(entry.name)
-    )
+guard let npx = which("npx") else {
+    fatalError("npx not found — install Node.js to run icon-composer-mcp")
 }
 
-// NSBitmapImageRep PNG export always tags 72 DPI. iconutil drops @2x unless DPI is 144.
-for entry in iconsetEntries where entry.pixels != Int(entry.points) {
-    let url = iconsetDir.appendingPathComponent(entry.name)
-    let sips = Process()
-    sips.executableURL = URL(fileURLWithPath: "/usr/bin/sips")
-    sips.arguments = ["-s", "dpiWidth", "144", "-s", "dpiHeight", "144", url.path]
-    sips.standardOutput = FileHandle.nullDevice
-    sips.standardError = FileHandle.nullDevice
-    try sips.run()
-    sips.waitUntilExit()
-    guard sips.terminationStatus == 0 else {
-        fatalError("sips DPI fix failed for \(entry.name)")
-    }
-}
+try? FileManager.default.removeItem(at: iconBundle)
 
-let icnsURL = resourcesDir.appendingPathComponent("AppIcon.icns")
-let iconutil = Process()
-iconutil.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
-iconutil.arguments = ["-c", "icns", iconsetDir.path, "-o", icnsURL.path]
-try iconutil.run()
-iconutil.waitUntilExit()
-guard iconutil.terminationStatus == 0 else {
-    fatalError("iconutil failed with status \(iconutil.terminationStatus)")
-}
+try run(npx, [
+    "-y", "--package=icon-composer-mcp", "icon-composer", "create",
+    glyphURL.path,
+    designDir.path,
+    "--bundle-name", "AppIcon",
+    "--bg-color", accentHex,
+    "--dark-bg-color", darkAccentHex,
+    "--glyph-scale", "1",
+    "--no-split-layers",
+    "--specular",
+    "--shadow-kind", "layer-color",
+    "--shadow-opacity", "0.45",
+], cwd: root)
 
-// Asset catalog for Tahoe (CFBundleIconName → Assets.car).
-let contentsJSON = """
-{
-  "images" : [
-    { "filename" : "icon_16x16.png", "idiom" : "mac", "scale" : "1x", "size" : "16x16" },
-    { "filename" : "\("icon_16x16" + retinaSuffix)", "idiom" : "mac", "scale" : "2x", "size" : "16x16" },
-    { "filename" : "icon_32x32.png", "idiom" : "mac", "scale" : "1x", "size" : "32x32" },
-    { "filename" : "\("icon_32x32" + retinaSuffix)", "idiom" : "mac", "scale" : "2x", "size" : "32x32" },
-    { "filename" : "icon_128x128.png", "idiom" : "mac", "scale" : "1x", "size" : "128x128" },
-    { "filename" : "\("icon_128x128" + retinaSuffix)", "idiom" : "mac", "scale" : "2x", "size" : "128x128" },
-    { "filename" : "icon_256x256.png", "idiom" : "mac", "scale" : "1x", "size" : "256x256" },
-    { "filename" : "\("icon_256x256" + retinaSuffix)", "idiom" : "mac", "scale" : "2x", "size" : "256x256" },
-    { "filename" : "icon_512x512.png", "idiom" : "mac", "scale" : "1x", "size" : "512x512" },
-    { "filename" : "\("icon_512x512" + retinaSuffix)", "idiom" : "mac", "scale" : "2x", "size" : "512x512" }
-  ],
-  "info" : { "author" : "xcode", "version" : 1 }
-}
-"""
-try contentsJSON.write(to: appiconsetDir.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
-for entry in iconsetEntries {
-    let src = iconsetDir.appendingPathComponent(entry.name)
-    let dst = appiconsetDir.appendingPathComponent(entry.name)
-    try? FileManager.default.removeItem(at: dst)
-    try FileManager.default.copyItem(at: src, to: dst)
-}
+try run(npx, [
+    "-y", "--package=icon-composer-mcp", "icon-composer", "glass",
+    iconBundle.path,
+    "--group-index", "0",
+    "--specular",
+    "--shadow-kind", "layer-color",
+    "--shadow-opacity", "0.5",
+    "--blur-material", "0",
+    "--no-translucency-enabled",
+    "--lighting", "individual",
+], cwd: root)
 
-let actoolOut = root.appendingPathComponent(".build/actool-out")
+let liquidPreview = designDir.appendingPathComponent("app-icon-liquid-glass.png")
+let marketingPNG = designDir.appendingPathComponent("app-icon-marketing.png")
+
+try run(npx, [
+    "-y", "--package=icon-composer-mcp", "icon-composer", "render",
+    iconBundle.path, liquidPreview.path,
+], cwd: root)
+
+try run(npx, [
+    "-y", "--package=icon-composer-mcp", "icon-composer", "export-marketing",
+    iconBundle.path, marketingPNG.path,
+], cwd: root)
+
+print("Wrote \(iconBundle.path)")
+print("Wrote \(liquidPreview.path)")
+print("Wrote \(marketingPNG.path)")
+
+// MARK: - 3. actool → Assets.car + AppIcon.icns
+
 try? FileManager.default.removeItem(at: actoolOut)
 try FileManager.default.createDirectory(at: actoolOut, withIntermediateDirectories: true)
 let partialPlist = root.appendingPathComponent(".build/assetcatalog_generated_info.plist")
 
-let actool = Process()
-actool.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
-actool.arguments = [
+try run("/usr/bin/xcrun", [
     "actool",
-    xcassetsDir.path,
+    iconBundle.path,
     "--compile", actoolOut.path,
     "--platform", "macosx",
     "--minimum-deployment-target", "14.0",
     "--app-icon", "AppIcon",
     "--output-partial-info-plist", partialPlist.path,
-]
-actool.standardOutput = FileHandle.nullDevice
-var actoolErr = Data()
-let errPipe = Pipe()
-actool.standardError = errPipe
-try actool.run()
-actool.waitUntilExit()
-actoolErr = errPipe.fileHandleForReading.readDataToEndOfFile()
-if actool.terminationStatus != 0 {
-    FileHandle.standardError.write(actoolErr)
-    fatalError("actool failed with status \(actool.terminationStatus)")
+])
+
+func install(_ name: String) throws {
+    let src = actoolOut.appendingPathComponent(name)
+    let dst = resourcesDir.appendingPathComponent(name)
+    guard FileManager.default.fileExists(atPath: src.path) else {
+        fatalError("actool did not produce \(name)")
+    }
+    try? FileManager.default.removeItem(at: dst)
+    try FileManager.default.copyItem(at: src, to: dst)
+    print("Wrote \(dst.path)")
 }
 
-let compiledCar = actoolOut.appendingPathComponent("Assets.car")
-let destCar = resourcesDir.appendingPathComponent("Assets.car")
-if FileManager.default.fileExists(atPath: compiledCar.path) {
-    try? FileManager.default.removeItem(at: destCar)
-    try FileManager.default.copyItem(at: compiledCar, to: destCar)
-    print("Wrote \(destCar.path)")
-} else {
-    print("warning: actool did not produce Assets.car")
-}
+try install("Assets.car")
+try install("AppIcon.icns")
 
-// Web: rounded mark with transparent corners (no macOS 100pt grid).
-let webAppDir = root.deletingLastPathComponent().appendingPathComponent("web/app")
+let appIconPNG = resourcesDir.appendingPathComponent("AppIcon.png")
+try? FileManager.default.removeItem(at: appIconPNG)
+try FileManager.default.copyItem(at: marketingPNG, to: appIconPNG)
+print("Wrote \(appIconPNG.path)")
+
+// MARK: - 4. Optional web favicons (sibling paste-it-web)
+
+let webAppDir = root.deletingLastPathComponent().appendingPathComponent("paste-it-web/app")
 if FileManager.default.fileExists(atPath: webAppDir.path) {
-    try writePNG(drawExactPixels(512, points: 512, plate: .webRounded), to: webAppDir.appendingPathComponent("icon.png"))
-    try writePNG(drawExactPixels(180, points: 180, plate: .webRounded), to: webAppDir.appendingPathComponent("apple-icon.png"))
-    print("Wrote \(webAppDir.appendingPathComponent("icon.png").path)")
-    print("Wrote \(webAppDir.appendingPathComponent("apple-icon.png").path)")
+    func scaleMarketing(to pixels: Int, dest: URL) throws {
+        guard let src = NSImage(contentsOf: marketingPNG) else {
+            fatalError("Failed to load marketing PNG")
+        }
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: pixels,
+            pixelsHigh: pixels,
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ) else {
+            fatalError("Failed to create web icon bitmap")
+        }
+        rep.size = NSSize(width: pixels, height: pixels)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        // Near-full rounded tile for web (transparent corners only).
+        let bounds = NSRect(x: 0, y: 0, width: pixels, height: pixels)
+        NSColor.clear.setFill()
+        bounds.fill()
+        let radius = bounds.width * 0.2237
+        let path = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
+        path.addClip()
+        src.draw(in: bounds, from: .zero, operation: .copy, fraction: 1)
+        NSGraphicsContext.restoreGraphicsState()
+        guard let png = rep.representation(using: .png, properties: [:]) else {
+            fatalError("Failed to encode web icon")
+        }
+        try png.write(to: dest)
+        print("Wrote \(dest.path)")
+    }
+    try scaleMarketing(to: 512, dest: webAppDir.appendingPathComponent("icon.png"))
+    try scaleMarketing(to: 180, dest: webAppDir.appendingPathComponent("apple-icon.png"))
 }
-
-print("Wrote \(resourcesDir.appendingPathComponent("AppIcon.png").path)")
-print("Wrote \(icnsURL.path)")
