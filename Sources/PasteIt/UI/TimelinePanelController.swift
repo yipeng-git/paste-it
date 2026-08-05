@@ -43,9 +43,20 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         panel?.isVisible == true
     }
 
+    /// Screen frame of the floating timeline panel (bubble anchors above this).
+    var panelFrame: NSRect? {
+        panel?.frame
+    }
+
     /// Clears first responder so space-bar / shortcuts aren't eaten by the search field.
     func resignFirstResponder() {
         panel?.makeFirstResponder(nil)
+    }
+
+    func restoreKeyFocus() {
+        guard let panel, panel.isVisible else { return }
+        panel.makeKey()
+        panel.makeFirstResponder(nil)
     }
 
     func show(source: TimelinePanelOpenSource = .menu) {
@@ -113,7 +124,10 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
             return
         }
 
-        // Detached edit/preview windows stay open on their own.
+        // Detached edit windows stay open on their own; preview bubble is timeline-anchored.
+        if appState.previewClip != nil {
+            appState.dismissPreview()
+        }
         isAnimating = true
         stopOutsideClickMonitoring()
 
@@ -214,11 +228,35 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
             if self.shouldIgnoreOutsideClick(for: event) {
                 return event
             }
+
+            // Peek matrix: clicks on the timeline while a bubble is open.
+            // Same card / chrome → dismiss; other card → let selection retarget the bubble.
+            if self.appState.previewClip != nil,
+               event.window === self.panel,
+               event.type == .leftMouseDown {
+                self.handlePreviewOpenPanelClick()
+                return event
+            }
+
             if event.window !== self.panel {
                 self.hide()
             }
             return event
         }
+    }
+
+    /// Resolve Space-preview dismiss vs retarget from a click on the timeline panel.
+    private func handlePreviewOpenPanelClick() {
+        let point = NSEvent.mouseLocation
+        if let hitID = ClipCardFrameRegistry.cardID(atScreenPoint: point) {
+            if hitID == appState.previewClip?.id {
+                appState.dismissPreview()
+            }
+            // Different card: SwiftUI card tap selects → syncPreviewToSelection retargets.
+            return
+        }
+        // Toolbar / blank / gaps — leave the peeked context.
+        appState.dismissPreview()
     }
 
     private func stopOutsideClickMonitoring() {
@@ -237,13 +275,15 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         let mouse = NSEvent.mouseLocation
         if panel.frame.contains(mouse) { return }
         // Clicks on detached edit/preview / Paste Stack should not dismiss the timeline.
+        // Only count *visible* windows — ordered-out panels keep their last frame and would
+        // otherwise swallow outside clicks (especially a centered preview bubble).
         if let detached = detachedWindowController {
-            for window in NSApp.windows where detached.owns(window) && window.frame.contains(mouse) {
+            for window in NSApp.windows where detached.owns(window) && window.isVisible && window.frame.contains(mouse) {
                 return
             }
         }
         if let stackPanel = pasteStackPanelController, stackPanel.isVisible {
-            for window in NSApp.windows where stackPanel.owns(window) && window.frame.contains(mouse) {
+            for window in NSApp.windows where stackPanel.owns(window) && window.isVisible && window.frame.contains(mouse) {
                 return
             }
         }

@@ -172,10 +172,19 @@ final class PasteboardMonitor: NSObject {
     ) async -> CapturedClip? {
         let fileURLs = snapshot.fileURLs
         let url = snapshot.url
-        let plainText = snapshot.plainText
+        var plainText = snapshot.plainText
         let html = snapshot.html
         let rtf = snapshot.rtf
         let imageData = snapshot.imageData
+
+        // Some apps put content only in HTML/RTF (empty or whitespace plain text).
+        // Derive a real plain string so title / cards / search match Space preview & edit.
+        if plainText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let derived = RichPlainText.extract(htmlText: html, rtfData: rtf)
+            if !derived.isEmpty {
+                plainText = derived
+            }
+        }
 
         let resolved = ClipTypeResolver.resolve(
             .init(

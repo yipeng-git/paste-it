@@ -230,15 +230,37 @@ final class HistoryStore: ObservableObject {
         enrichLinkMetadataIfNeeded(for: item.id)
     }
 
-    func updateOCRText(for id: UUID, text: String?) {
-        guard let text, !text.isEmpty else { return }
+    /// Updates searchable OCR text for an image clip.
+    /// - Parameter allowEmpty: When true, `nil` / blank clears `ocrText` (user edit).
+    ///   When false (default), empty results are ignored so a failed re-run cannot wipe text.
+    func updateOCRText(for id: UUID, text: String?, allowEmpty: Bool = false) {
         guard let item = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else { return }
-        item.ocrText = text
+        let normalized = text?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if let normalized, !normalized.isEmpty {
+            item.ocrText = normalized
+        } else if allowEmpty {
+            item.ocrText = nil
+        } else {
+            return
+        }
         item.updatedAt = Date()
         foldedSearchByID[id] = item.foldedSearchHaystack
         saveQuietly()
         // Avoid full array replace — notify observers that searchable content changed.
         objectWillChange.send()
+    }
+
+    /// Re-runs Vision OCR on the clip's image blob and writes the result back.
+    func rerunOCR(for item: ClipItem) async {
+        guard let blobPath = item.blobRelativePath, !blobPath.isEmpty else { return }
+        let store = blobStore
+        let id = item.id
+        let text = await Task.detached(priority: .utility) { () -> String? in
+            guard let data = store.data(for: blobPath) else { return nil }
+            return await OCRService.recognizeText(in: data)
+        }.value
+        updateOCRText(for: id, text: text)
     }
 
     func update(

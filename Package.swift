@@ -19,7 +19,10 @@ let package = Package(
     targets: [
         .target(
             name: "PasteItCore",
-            path: "Sources/PasteItCore"
+            path: "Sources/PasteItCore",
+            linkerSettings: [
+                .linkedFramework("AppKit")
+            ]
         ),
         .executableTarget(
             name: "PasteIt",
@@ -32,6 +35,9 @@ let package = Package(
             path: "Sources/PasteIt",
             resources: [
                 .process("../../Resources")
+            ],
+            linkerSettings: [
+                .linkedFramework("WebKit")
             ]
         ),
         .testTarget(

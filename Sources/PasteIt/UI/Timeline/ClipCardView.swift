@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import PasteItCore
 
 struct ClipCardView: View {
     let item: ClipItem
@@ -97,10 +98,20 @@ struct ClipCardView: View {
     /// the stutter while scrolling. The full rendered version is available via the
     /// space-bar quick preview (`ClipQuickPreview`) instead.
     private var textContent: some View {
-        highlightedText(item.previewText, font: .system(size: 14, weight: .regular), lineLimit: 8)
-            .padding(.horizontal, 14)
-            .padding(.top, 14)
-            .padding(.bottom, 8)
+        Group {
+            let text = item.previewText.trimmingCharacters(in: .whitespacesAndNewlines)
+            if text.isEmpty {
+                Text("Empty")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundStyle(.tertiary)
+            } else {
+                highlightedText(item.previewText, font: .system(size: 14, weight: .regular), lineLimit: 8)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.horizontal, 14)
+        .padding(.top, 14)
+        .padding(.bottom, 8)
     }
 
     private var imageContent: some View {
@@ -202,10 +213,7 @@ struct ClipCardView: View {
     private var metadataFooterText: String? {
         switch item.primaryType {
         case .text, .richText, .html, .mixed:
-            guard !item.plainText.isEmpty else { return nil }
-            // utf16.count is O(1); Character.count walks grapheme clusters.
-            let count = item.plainText.utf16.count
-            return count == 1 ? "1 character" : "\(count) characters"
+            return ClipPreviewText.characterFooter(forPreviewText: item.previewText)
         case .image:
             guard let size = historyStore.imagePixelSize(for: item) else { return nil }
             return "\(size.width) × \(size.height)"

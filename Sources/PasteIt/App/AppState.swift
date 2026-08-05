@@ -130,14 +130,13 @@ final class AppState: ObservableObject {
         return visibleClips.filter { ids.contains($0.id) }
     }
 
-    /// Resets filters when the timeline panel opens, coalescing into one visibleClips rebuild.
+    /// Resets search / tab when the timeline panel opens; type filter is kept for the session.
     func resetFiltersForPanelShow() {
         isBatchUpdatingFilters = true
         searchDebounceTask?.cancel()
         query = ""
         debouncedQuery = ""
         selectedTab = .timeline
-        selectedFilter = .all
         selectedSourceApp = nil
         isBatchUpdatingFilters = false
         rebuildVisibleClips()
@@ -147,6 +146,7 @@ final class AppState: ObservableObject {
 
     /// Applies a type filter and strips conflicting `type:` tokens from the query.
     func setFilter(_ filter: FilterCategory) {
+        dismissPreview()
         isBatchUpdatingFilters = true
         selectedFilter = filter
         let stripped = SearchQuery.strippingTypeTokens(from: query)
@@ -159,9 +159,50 @@ final class AppState: ObservableObject {
         selectFirst(scroll: true)
     }
 
+    /// Matching clip count for a type under the current tab / query / source-app filters.
+    func countMatching(filter: FilterCategory) -> Int {
+        searchService.search(
+            clips: sourceClipsForCurrentTab(),
+            query: debouncedQuery,
+            selectedFilter: filter,
+            sourceApp: selectedSourceApp,
+            pinboardID: nil,
+            foldedHaystack: { [historyStore] item in
+                historyStore.foldedSearchText(for: item)
+            }
+        ).count
+    }
+
     func selectOnly(_ id: UUID) {
         selectedClipID = id
         selectedClipIDs = [id]
+    }
+
+    /// Single-click a timeline card while a Space preview may be open.
+    /// Same card → dismiss preview; other card → select (preview retargets via selection sync).
+    func handlePreviewAwareCardClick(_ id: UUID) {
+        if previewClip?.id == id {
+            dismissPreview()
+            return
+        }
+        selectOnly(id)
+    }
+
+    func dismissPreview() {
+        guard previewClip != nil else { return }
+        previewClip = nil
+    }
+
+    /// Keep an open preview bound to the current selection (Quick Look retarget), or close if none.
+    func syncPreviewToSelection() {
+        guard previewClip != nil else { return }
+        if let selectedClip {
+            if previewClip?.id != selectedClip.id {
+                previewClip = selectedClip
+            }
+        } else {
+            dismissPreview()
+        }
     }
 
     func toggleMultiSelect(_ id: UUID) {
@@ -249,7 +290,7 @@ final class AppState: ObservableObject {
     /// clip, or closes it if one is already showing.
     func togglePreviewForSelectedClip() {
         if previewClip != nil {
-            previewClip = nil
+            dismissPreview()
         } else {
             previewClip = selectedClip
         }
@@ -291,19 +332,8 @@ final class AppState: ObservableObject {
             isBatchUpdatingFilters = false
         }
 
-        let sourceClips: [ClipItem]
-        switch selectedTab {
-        case .timeline:
-            sourceClips = historyStore.clips.filter { !$0.isHiddenFromTimeline }
-        case .pinned:
-            let pinnedID = historyStore.pinnedPinboard.id
-            sourceClips = historyStore.clips.filter { $0.pinboardIDs.contains(pinnedID) }
-        case .folder(let id):
-            sourceClips = historyStore.clips.filter { $0.pinboardIDs.contains(id) }
-        }
-
         visibleClips = searchService.search(
-            clips: sourceClips,
+            clips: sourceClipsForCurrentTab(),
             query: debouncedQuery,
             selectedFilter: selectedFilter,
             sourceApp: selectedSourceApp,
@@ -313,5 +343,17 @@ final class AppState: ObservableObject {
             }
         )
         selectFirstIfNeeded()
+    }
+
+    private func sourceClipsForCurrentTab() -> [ClipItem] {
+        switch selectedTab {
+        case .timeline:
+            return historyStore.clips.filter { !$0.isHiddenFromTimeline }
+        case .pinned:
+            let pinnedID = historyStore.pinnedPinboard.id
+            return historyStore.clips.filter { $0.pinboardIDs.contains(pinnedID) }
+        case .folder(let id):
+            return historyStore.clips.filter { $0.pinboardIDs.contains(id) }
+        }
     }
 }

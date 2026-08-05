@@ -28,9 +28,12 @@ struct TimelineView: View {
             .pasteItPanelGlass()
             .onChange(of: historyStore.clips.count) { _, _ in appState.selectFirstIfNeeded() }
             .onChange(of: appState.selectedTab) { _, _ in
+                // Tab switch leaves the peeked clip's context — dismiss, then reselect.
+                appState.dismissPreview()
                 appState.selectFirstIfNeeded()
             }
             .onChange(of: appState.searchFocusRequest) { _, _ in
+                appState.dismissPreview()
                 isSearchActive = true
                 isSearchFocused = true
             }
@@ -38,14 +41,11 @@ struct TimelineView: View {
                 resignSearch()
             }
             .onChange(of: appState.selectedClipID) { _, _ in
-                // Mirrors Quick Look: switching selection updates an already-open preview window.
-                // Defer the write so we don't nest @Published mutations during view update.
+                // Quick Look retarget: ←/→ or click another card keeps the bubble, swaps content.
+                // Defer so we don't nest @Published mutations during view update.
                 guard appState.previewClip != nil else { return }
-                let next = appState.selectedClip
                 DispatchQueue.main.async {
-                    if self.appState.previewClip != nil {
-                        self.appState.previewClip = next
-                    }
+                    self.appState.syncPreviewToSelection()
                 }
             }
             .sheet(isPresented: $isShowingCreateFolderSheet) {
@@ -62,16 +62,26 @@ struct TimelineView: View {
 
     private var content: some View {
         let clips = appState.visibleClips
+        let quickIndexes = Dictionary(
+            uniqueKeysWithValues: clips.prefix(9).enumerated().map { ($1.id, $0 + 1) }
+        )
+        // Avoid per-card `orderedSelectedClips` (scans full visible list).
+        var selectedIDs = Set(appState.selectedClipIDs)
+        if let id = appState.selectedClipID {
+            selectedIDs.insert(id)
+        }
         return VStack(spacing: 0) {
             toolbar
             ZStack {
                 // Remount on scrollToStartRequest so offset resets to the natural
                 // resting position (with leading inset) — no scroll animation, no
                 // scrollTo(.leading) which would flush the first card to the edge.
+                // LazyHStack: create cards on demand. Avoid windowed spacers sized to
+                // full history — multi-million-pt clear views stall panel open.
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 14) {
-                        ForEach(Array(clips.prefix(30).enumerated()), id: \.element.id) { index, item in
-                            card(item, quickIndex: index < 9 ? index + 1 : nil)
+                        ForEach(clips) { item in
+                            card(item, quickIndex: quickIndexes[item.id], isSelected: selectedIDs.contains(item.id))
                         }
                     }
                     .padding(.horizontal, 18)
@@ -115,6 +125,10 @@ struct TimelineView: View {
                     .transition(.opacity)
             }
             Spacer(minLength: 8)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    appState.dismissPreview()
+                }
             HStack(spacing: 8) {
                 searchField
                 menuButton
@@ -157,6 +171,7 @@ struct TimelineView: View {
 
             if historyStore.canCreateCustomFolder {
                 Button {
+                    appState.dismissPreview()
                     newFolderName = ""
                     isShowingCreateFolderSheet = true
                 } label: {
@@ -174,7 +189,11 @@ struct TimelineView: View {
 
     private func tabButton(_ tab: TimelineTab, title: String, systemImage: String) -> some View {
         Button {
-            appState.selectedTab = tab
+            if appState.selectedTab == tab {
+                appState.dismissPreview()
+            } else {
+                appState.selectedTab = tab
+            }
         } label: {
             Label(title, systemImage: systemImage)
                 .labelStyle(.titleAndIcon)
@@ -242,11 +261,12 @@ struct TimelineView: View {
     }
 
     private var menuButton: some View {
-        AppMenuButton()
+        AppMenuButton(onWillOpen: { appState.dismissPreview() })
             .frame(height: 30)
     }
 
     private func activateSearch() {
+        appState.dismissPreview()
         isSearchActive = true
         // Defer focus so the TextField exists before FocusState applies.
         DispatchQueue.main.async {
@@ -334,32 +354,37 @@ struct TimelineView: View {
         }
     }
 
-    private func card(_ item: ClipItem, quickIndex: Int?) -> some View {
+    private func card(_ item: ClipItem, quickIndex: Int?, isSelected: Bool) -> some View {
         ClipCardView(
             item: item,
             historyStore: historyStore,
-            isSelected: appState.orderedSelectedClips.contains(where: { $0.id == item.id }),
+            isSelected: isSelected,
             quickIndex: quickIndex,
             query: appState.query
         )
         .frame(width: 238, height: 232)
-        // Gestures under the overlay so ⌘-clicks handled by CardClickOverlay
-        // are not also delivered to onTapGesture (which would toggle twice).
-        .onTapGesture {
-            // Paste: single click only selects — does not reorder or stage.
-            resignSearch()
-            appState.selectOnly(item.id)
+        .background {
+            ClipCardFrameRegistrar(id: item.id)
         }
-        .onTapGesture(count: 2) {
-            resignSearch()
-            appState.selectOnly(item.id)
-            stage(item, trigger: "double_click", dismissPanel: true)
-        }
+        // AppKit CardClickOverlay owns click handling so single-select is
+        // immediate (SwiftUI single+double onTapGesture waits ~400ms).
         .overlay {
-            CardClickOverlay {
-                resignSearch()
-                appState.toggleMultiSelect(item.id)
-            }
+            CardClickOverlay(
+                onSingleClick: {
+                    resignSearch()
+                    appState.handlePreviewAwareCardClick(item.id)
+                },
+                onDoubleClick: {
+                    resignSearch()
+                    appState.dismissPreview()
+                    appState.selectOnly(item.id)
+                    stage(item, trigger: "double_click", dismissPanel: true)
+                },
+                onCommandClick: {
+                    resignSearch()
+                    appState.toggleMultiSelect(item.id)
+                }
+            )
         }
         .draggable(item.id.uuidString)
         .contextMenu {
@@ -555,7 +580,7 @@ struct TimelineView: View {
 
             Button("") {
                 if appState.previewClip != nil {
-                    appState.previewClip = nil
+                    appState.dismissPreview()
                 } else if isSearchActive || isSearchFocused {
                     resignSearch()
                 } else {

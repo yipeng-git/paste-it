@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import PasteItCore
 
 @Model
 final class ClipItem: Identifiable {
@@ -110,16 +111,18 @@ final class ClipItem: Identifiable {
     }
 
     var previewText: String {
-        if !plainText.isEmpty {
-            return plainText
-        }
-        if let ocrText, !ocrText.isEmpty {
-            return ocrText
-        }
-        if let fileURLString {
-            return URL(string: fileURLString)?.lastPathComponent ?? fileURLString
-        }
-        return primaryType.title
+        let hasRich = htmlText != nil || rtfData != nil
+        let richPlain: String? = hasRich
+            ? RichPlainText.extract(htmlText: htmlText, rtfData: rtfData)
+            : nil
+        return ClipPreviewText.resolve(
+            plainText: plainText,
+            richPlainText: richPlain,
+            hasRichPayload: hasRich,
+            ocrText: ocrText,
+            fileURLString: fileURLString,
+            typeTitle: primaryType.title
+        )
     }
 
     /// Fields used for full-text search. Intentionally excludes `htmlText` —

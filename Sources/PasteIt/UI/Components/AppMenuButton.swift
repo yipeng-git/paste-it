@@ -5,8 +5,10 @@ import SwiftUI
 /// Menu contents are owned by `AppRuntime.makeAppMenu()` so status-bar-adjacent
 /// AppKit menus stay in sync.
 struct AppMenuButton: View {
+    var onWillOpen: (() -> Void)? = nil
+
     var body: some View {
-        AppMenuHost()
+        AppMenuHost(onWillOpen: onWillOpen)
             .frame(width: 38, height: 28)
             .pasteItControlGlass()
             .help("More")
@@ -15,6 +17,8 @@ struct AppMenuButton: View {
 }
 
 private struct AppMenuHost: NSViewRepresentable {
+    var onWillOpen: (() -> Void)?
+
     func makeNSView(context: Context) -> NSButton {
         let button = NSButton(frame: .zero)
         button.title = ""
@@ -32,15 +36,24 @@ private struct AppMenuHost: NSViewRepresentable {
         return button
     }
 
-    func updateNSView(_ nsView: NSButton, context: Context) {}
+    func updateNSView(_ nsView: NSButton, context: Context) {
+        context.coordinator.onWillOpen = onWillOpen
+    }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(onWillOpen: onWillOpen)
     }
 
     @MainActor
     final class Coordinator: NSObject {
+        var onWillOpen: (() -> Void)?
+
+        init(onWillOpen: (() -> Void)?) {
+            self.onWillOpen = onWillOpen
+        }
+
         @objc func showMenu(_ sender: NSButton) {
+            onWillOpen?()
             AppRuntime.shared.popUpAppMenu(relativeTo: sender)
         }
     }

@@ -1,7 +1,8 @@
 import SwiftUI
 import PasteItCore
 
-/// Leading toolbar control: opens an upward type-filter menu.
+/// Leading toolbar control: type filter. Inactive = icon only; active = one chip
+/// with type · count and a clear affordance.
 struct TimelineFilterButton: View {
     @ObservedObject var appState: AppState
     @State private var isPresented = false
@@ -9,25 +10,54 @@ struct TimelineFilterButton: View {
     private var isActive: Bool { appState.selectedFilter != .all }
 
     var body: some View {
-        Button {
-            isPresented.toggle()
-        } label: {
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: "line.3.horizontal.decrease.circle")
-                    .font(.system(size: 13, weight: .semibold))
-                    .frame(width: 28, height: 28)
-                if isActive {
-                    Circle()
-                        .fill(Color.accentColor)
-                        .frame(width: 6, height: 6)
-                        .offset(x: -3, y: 3)
+        HStack(spacing: 0) {
+            Button {
+                appState.dismissPreview()
+                isPresented.toggle()
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: isActive
+                          ? appState.selectedFilter.systemImage
+                          : "line.3.horizontal.decrease.circle")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(width: isActive ? nil : 28, height: 28)
+
+                    if isActive {
+                        Text("\(appState.selectedFilter.title) · \(appState.visibleClips.count)")
+                            .font(.system(size: 11, weight: .semibold))
+                            .monospacedDigit()
+                            .lineLimit(1)
+                    }
                 }
+                .padding(.leading, isActive ? 8 : 0)
+                .padding(.trailing, isActive ? 4 : 0)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if isActive {
+                Button {
+                    appState.setFilter(.all)
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 22, height: 28)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Clear type filter")
+                .padding(.trailing, 4)
             }
         }
-        .buttonStyle(.plain)
         .foregroundStyle(isActive ? Color.accentColor : .secondary)
         .pasteItControlGlass()
-        .help(isActive ? "Filter: \(appState.selectedFilter.title)" : "Filter by type")
+        .help(isActive
+              ? "Filter: \(appState.selectedFilter.title) · \(appState.visibleClips.count)"
+              : "Filter by type")
+        .animation(.easeOut(duration: 0.15), value: isActive)
+        .animation(.easeOut(duration: 0.15), value: appState.selectedFilter)
+        .animation(.easeOut(duration: 0.15), value: appState.visibleClips.count)
         .popover(isPresented: $isPresented, arrowEdge: .bottom) {
             filterMenu
         }
@@ -52,10 +82,16 @@ struct TimelineFilterButton: View {
                             .frame(width: 16)
                         Text(category.title)
                         Spacer(minLength: 12)
+                        Text("\(appState.countMatching(filter: category))")
+                            .font(.system(size: 11, weight: .medium).monospacedDigit())
+                            .foregroundStyle(.secondary)
                         if appState.selectedFilter == category {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundStyle(Color.accentColor)
+                                .frame(width: 12)
+                        } else {
+                            Color.clear.frame(width: 12)
                         }
                     }
                     .contentShape(Rectangle())
@@ -72,6 +108,6 @@ struct TimelineFilterButton: View {
             }
         }
         .padding(.bottom, 6)
-        .frame(width: 180)
+        .frame(width: 200)
     }
 }

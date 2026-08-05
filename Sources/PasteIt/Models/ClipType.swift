@@ -94,4 +94,20 @@ extension ClipItem {
             .split(whereSeparator: \.isNewline)
             .compactMap { URL(string: String($0)) }
     }
+
+    /// Window title for Space quick preview (Preview.app-style document name).
+    var previewWindowTitle: String {
+        let collapsed = title
+            .split(whereSeparator: \.isNewline)
+            .joined(separator: " ")
+            .split(whereSeparator: { $0.isWhitespace })
+            .joined(separator: " ")
+        if collapsed.isEmpty {
+            return cardDisplayTitle
+        }
+        if collapsed.count <= 60 {
+            return collapsed
+        }
+        return String(collapsed.prefix(59)) + "…"
+    }
 }

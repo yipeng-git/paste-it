@@ -21,6 +21,8 @@ final class AppRuntime: NSObject {
     var state: AppState { appState }
 
     private var statusItem: NSStatusItem?
+    private var keycapsView: MenuBarKeycapsView?
+    private var cmdCVFlashMonitor: CmdCVKeyFlashMonitor?
     private var didStart = false
 
     private override init() {
@@ -78,6 +80,7 @@ final class AppRuntime: NSObject {
         appState.pasteStackController = pasteStackController
         appState.panelController = panelController
         panelController.detachedWindowController = detachedWindowController
+        detachedWindowController.timelinePanelController = panelController
         panelController.pasteStackPanelController = pasteStackPanelController
         super.init()
 
@@ -95,6 +98,7 @@ final class AppRuntime: NSObject {
         hotkeyManager.start()
         detachedWindowController.start()
         configureStatusItem()
+        startCmdCVFlashMonitor()
         LaunchAtLoginManager.syncAtStartup(enabled: settings.launchAtLogin)
         // Retain Sparkle updater for automatic background checks.
         _ = UpdateChecker.shared
@@ -115,6 +119,8 @@ final class AppRuntime: NSObject {
         AgentAPIServer.shared.stop()
         pasteboardMonitor.stop()
         hotkeyManager.stop()
+        cmdCVFlashMonitor?.stop()
+        cmdCVFlashMonitor = nil
         pasteStackController.close()
     }
 
@@ -128,19 +134,52 @@ final class AppRuntime: NSObject {
     }
 
     private func configureStatusItem() {
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        item.button?.toolTip = "Paste It"
-        item.button?.target = self
-        item.button?.action = #selector(statusItemClicked)
-        item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        let size = MenuBarKeycapsView.preferredSize
+        let item = NSStatusBar.system.statusItem(withLength: size.width)
+        guard let button = item.button else {
+            statusItem = item
+            return
+        }
+
+        button.title = ""
+        button.image = nil
+        button.toolTip = "Paste It"
+        button.target = self
+        button.action = #selector(statusItemClicked)
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item.menu = nil
+
+        let keycaps = MenuBarKeycapsView(frame: NSRect(origin: .zero, size: size))
+        keycaps.autoresizingMask = [.width, .height]
+        // Clear any previous keycaps if we reconfigure.
+        button.subviews
+            .filter { $0 is MenuBarKeycapsView }
+            .forEach { $0.removeFromSuperview() }
+        button.addSubview(keycaps)
+        keycapsView = keycaps
+
         statusItem = item
         refreshStatusItem()
     }
 
+    private func startCmdCVFlashMonitor() {
+        let monitor = CmdCVKeyFlashMonitor(
+            onCommandC: { [weak self] in self?.keycapsView?.flash(.c) },
+            onCommandV: { [weak self] in self?.keycapsView?.flash(.v) }
+        )
+        monitor.start()
+        cmdCVFlashMonitor = monitor
+    }
+
     private func refreshStatusItem() {
-        statusItem?.button?.title = pasteStackController.statusTitle
-        statusItem?.button?.toolTip = "Paste It\nRight-click for menu"
+        let stack = pasteStackController.statusTitle
+        let stackLine = stack == "Paste" ? nil : stack
+        var tip = "Paste It — ⌘C / ⌘V flash the keys"
+        if let stackLine {
+            tip += "\n\(stackLine)"
+        }
+        tip += "\nLeft-click: timeline · Right-click: menu"
+        statusItem?.button?.toolTip = tip
     }
 
     /// Shared app menu used by the timeline's "…" button.

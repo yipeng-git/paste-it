@@ -40,4 +40,14 @@ extension View {
             background(.ultraThinMaterial, in: Capsule())
         }
     }
+
+    /// Toolbar / title-bar control: Liquid Glass button on macOS 26+, borderless below.
+    @ViewBuilder
+    func pasteItGlassButtonStyle() -> some View {
+        if #available(macOS 26, *) {
+            buttonStyle(.glass)
+        } else {
+            buttonStyle(.borderless)
+        }
+    }
 }
