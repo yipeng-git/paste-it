@@ -1,0 +1,58 @@
+docs/analytics-dashboard.md
+  s_8790fadee9803f::t_2e92c16c5d988a 63,66,71
+  s_8790fadee9803f::t_348815d47ebd46 193,196
+  s_8790fadee9803f::t_43121da6fb1d50 149
+  s_8790fadee9803f::t_564fba88070d6f 72,98-101,103-108,110-113,129,146-147
+  s_8790fadee9803f::t_027bb44700a32f 1-62,64-65,67-70,73-97,102,109,114-128,130-145,148,150-192,195,197-204,216-284,288-300,304-313
+  s_8790fadee9803f::t_52c04e429acb5d 194,205-215
+  s_8790fadee9803f::t_7a125c2435889d 301,303
+  s_8790fadee9803f::t_ffe8e839ea1665 302
+  s_8790fadee9803f::t_18696b3cdeb116 286-287
+  s_8790fadee9803f::t_9185e6a900f3e8 285
+Sources/PasteIt/Analytics/Analytics.swift
+  s_8790fadee9803f::t_dcfa3dbf600c56 306-314,326-338
+  s_8790fadee9803f::t_fbb97e1452e3c4 52
+  s_8790fadee9803f::t_95eba6c51b9a67 156,163,167-169,172-179,182-186,188-207,209,225
+  s_8790fadee9803f::t_f1954d3a7614ed 16-18
+  s_8790fadee9803f::t_4e7cac010bccca 210-224
+  s_8790fadee9803f::t_7c84d8d8034467 164
+  s_8790fadee9803f::t_4157b0260661b2 228
+  s_8790fadee9803f::t_a63f797b91f08c 229
+Sources/PasteIt/Features/PasteStack/PasteStackController.swift
+  s_8790fadee9803f::t_da982a7a1c31f8 85,90
+  s_8790fadee9803f::t_7aa8d771faab8f 356-362
+  s_8790fadee9803f::t_5a461c6d8f9055 191,199-203
+  s_8790fadee9803f::t_5c7c589f2ccffc 116
+  s_8790fadee9803f::t_cd2ecb3cd79e14 187-190,195-198
+  s_8790fadee9803f::t_a28ba50af82e31 335-339
+README.md
+  s_8790fadee9803f::t_d5f93dfdf7fbce 25
+  s_8790fadee9803f::t_4b98652d718f8a 32
+docs/analytics.md
+  s_8790fadee9803f::t_9c7d86d4507281 74-75
+  s_8790fadee9803f::t_90791081ed0920 49
+  s_8790fadee9803f::t_48e0898c94e523 92
+  s_8790fadee9803f::t_07ebb4d8c9c3a9 51,59,69-73
+  s_8790fadee9803f::t_7445d098e8b8c7 76
+Sources/PasteIt/Analytics/AnalyticsCatalog.swift
+  s_8790fadee9803f::t_6ebb67874ff116 37
+  s_8790fadee9803f::t_ba6422d0b88f75 35
+Sources/PasteIt/App/AppState.swift
+  s_8790fadee9803f::t_1f174887fff4e8 334
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "9f97a5826ca4db31fd58f867e9f70e16374e1031",
+  "prompts": {},
+  "sessions": {
+    "s_8790fadee9803f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ceaeaa71-221b-4ff1-bc87-ede579a90b4b",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
