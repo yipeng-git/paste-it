@@ -355,49 +355,59 @@ struct TimelineView: View {
     }
 
     private func card(_ item: ClipItem, quickIndex: Int?, isSelected: Bool) -> some View {
-        ClipCardView(
+        TimelineCardCell(
             item: item,
             historyStore: historyStore,
             isSelected: isSelected,
             quickIndex: quickIndex,
-            query: appState.query
-        )
-        .frame(width: 238, height: 232)
-        .background {
-            ClipCardFrameRegistrar(id: item.id)
-        }
-        // AppKit CardClickOverlay owns click handling so single-select is
-        // immediate (SwiftUI single+double onTapGesture waits ~400ms).
-        .overlay {
-            CardClickOverlay(
-                onSingleClick: {
-                    resignSearch()
-                    appState.handlePreviewAwareCardClick(item.id)
-                },
-                onDoubleClick: {
-                    resignSearch()
-                    appState.dismissPreview()
-                    appState.selectOnly(item.id)
-                    stage(item, trigger: "double_click", dismissPanel: true)
-                },
-                onCommandClick: {
-                    resignSearch()
-                    appState.toggleMultiSelect(item.id)
+            query: appState.query,
+            isPinned: historyStore.isPinned(item),
+            deleteHelp: deleteTitle,
+            onSingleClick: {
+                resignSearch()
+                appState.handlePreviewAwareCardClick(item.id)
+            },
+            onDoubleClick: {
+                resignSearch()
+                appState.dismissPreview()
+                appState.selectOnly(item.id)
+                stage(item, trigger: "double_click", dismissPanel: true)
+            },
+            onCommandClick: {
+                resignSearch()
+                appState.toggleMultiSelect(item.id)
+            },
+            onCopy: {
+                resignSearch()
+                appState.dismissPreview()
+                stage(item, trigger: "card_hover", dismissPanel: false)
+            },
+            onCopyPlain: {
+                resignSearch()
+                appState.dismissPreview()
+                stage(item, mode: .plainText, trigger: "context_menu", dismissPanel: false)
+            },
+            canEdit: item.supportsBubbleEditing,
+            onEdit: {
+                resignSearch()
+                _ = appState.beginEditingClip(item)
+            },
+            onPin: {
+                resignSearch()
+                appState.dismissPreview()
+                if historyStore.isPinned(item) {
+                    historyStore.unpinFromPinnedBoard(item)
+                } else {
+                    historyStore.pinToPinnedBoard(item)
                 }
-            )
-        }
-        .draggable(item.id.uuidString)
-        .contextMenu {
-            Button("Copy to Clipboard") { stage(item, trigger: "context_menu", dismissPanel: false) }
-            Button("Copy as Plain Text") { stage(item, mode: .plainText, trigger: "context_menu", dismissPanel: false) }
-            Button("Edit") { appState.editingClip = item }
-                .keyboardShortcut("e")
-            Divider()
-            pinMenu(for: item)
-            Button(deleteTitle, role: .destructive) {
+            },
+            onDelete: {
+                resignSearch()
+                appState.dismissPreview()
                 historyStore.removeFromTab(item, tab: appState.selectedTab)
-            }
-        }
+            },
+            pinMenu: { pinMenu(for: item) }
+        )
     }
 
     private var deleteTitle: String {
@@ -596,6 +606,84 @@ struct TimelineView: View {
         }
         .frame(width: 0, height: 0)
         .opacity(0)
+    }
+}
+
+/// Per-card wrapper so hover state stays local and the action bar sits above
+/// `CardClickOverlay` (so button clicks are not also treated as card selects).
+private struct TimelineCardCell<PinMenu: View>: View {
+    let item: ClipItem
+    let historyStore: HistoryStore
+    let isSelected: Bool
+    let quickIndex: Int?
+    let query: String
+    let isPinned: Bool
+    let deleteHelp: String
+    let onSingleClick: () -> Void
+    let onDoubleClick: () -> Void
+    let onCommandClick: () -> Void
+    let onCopy: () -> Void
+    let onCopyPlain: () -> Void
+    let canEdit: Bool
+    let onEdit: () -> Void
+    let onPin: () -> Void
+    let onDelete: () -> Void
+    @ViewBuilder let pinMenu: () -> PinMenu
+
+    @State private var isHovered = false
+
+    var body: some View {
+        ClipCardView(
+            item: item,
+            historyStore: historyStore,
+            isSelected: isSelected,
+            quickIndex: quickIndex,
+            query: query
+        )
+        .frame(width: 238, height: 232)
+        .background {
+            ClipCardFrameRegistrar(id: item.id)
+        }
+        // AppKit CardClickOverlay owns click handling so single-select is
+        // immediate (SwiftUI single+double onTapGesture waits ~400ms).
+        .overlay {
+            CardClickOverlay(
+                onSingleClick: onSingleClick,
+                onDoubleClick: onDoubleClick,
+                onCommandClick: onCommandClick
+            )
+        }
+        .overlay(alignment: .bottom) {
+            if isHovered {
+                CardHoverActionBar(
+                    isPinned: isPinned,
+                    canEdit: canEdit,
+                    deleteHelp: deleteHelp,
+                    onCopy: onCopy,
+                    onEdit: onEdit,
+                    onPin: onPin,
+                    onDelete: onDelete
+                )
+                .padding(.bottom, 10)
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
+        }
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.12)) {
+                isHovered = hovering
+            }
+        }
+        .draggable(item.id.uuidString)
+        .contextMenu {
+            Button("Copy to Clipboard", action: onCopy)
+            Button("Copy as Plain Text", action: onCopyPlain)
+            Button("Edit", action: onEdit)
+                .keyboardShortcut("e")
+                .disabled(!canEdit)
+            Divider()
+            pinMenu()
+            Button(deleteHelp, role: .destructive, action: onDelete)
+        }
     }
 }
 

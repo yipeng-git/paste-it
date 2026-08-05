@@ -6,6 +6,8 @@ import SwiftUI
 struct ClipQuickPreview: View {
     let item: ClipItem
     @ObservedObject var historyStore: HistoryStore
+    /// Bumped by AppState to enter text editing (hover Edit / ⌘E).
+    var editRequest: Int = 0
     let onClose: () -> Void
     /// Text / OCR editing focus so the host bubble can take/resign key.
     var onEditingChanged: (Bool) -> Void = { _ in }
@@ -35,11 +37,13 @@ struct ClipQuickPreview: View {
     init(
         item: ClipItem,
         historyStore: HistoryStore,
+        editRequest: Int = 0,
         onClose: @escaping () -> Void,
         onEditingChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.item = item
         self.historyStore = historyStore
+        self.editRequest = editRequest
         self.onClose = onClose
         self.onEditingChanged = onEditingChanged
 
@@ -107,6 +111,9 @@ struct ClipQuickPreview: View {
                 isRerunningOCR = false
                 // Keep timeline key so Space can dismiss without typing into the bubble.
                 onEditingChanged(false)
+            }
+            .onChange(of: editRequest) { _, _ in
+                beginTextEditing()
             }
             .onChange(of: item.ocrText) { _, newValue in
                 guard !isEditingOCR else { return }

@@ -2,11 +2,10 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// Owns the standalone edit / preview panels so they never overlay or block the timeline.
+/// Owns the Space-preview bubble panel so it never overlays or blocks the timeline.
 @MainActor
 final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
     private let appState: AppState
-    private var editWindow: NSPanel?
     private var previewWindow: NSPanel?
     private var cancellables = Set<AnyCancellable>()
     /// Prevents re-entrant AppState writes while a Combine delivery is in flight.
@@ -14,7 +13,6 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
     /// Used to return key focus after inline editing in the preview bubble.
     weak var timelinePanelController: TimelinePanelController?
 
-    private let editSize = NSSize(width: 680, height: 520)
     /// Gap between timeline panel top edge and bubble bottom.
     private let bubbleGap: CGFloat = 8
 
@@ -24,14 +22,6 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
     }
 
     func start() {
-        appState.$editingClip
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] item in
-                self?.schedule { $0.syncEditWindow(with: item) }
-            }
-            .store(in: &cancellables)
-
         appState.$previewClip
             .dropFirst()
             .receive(on: DispatchQueue.main)
@@ -39,51 +29,25 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
                 self?.schedule { $0.syncPreviewWindow(with: item) }
             }
             .store(in: &cancellables)
+
+        appState.$previewEditRequest
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.schedule { $0.refreshPreviewRootIfNeeded() }
+            }
+            .store(in: &cancellables)
     }
 
     func owns(_ window: NSWindow?) -> Bool {
         guard let window else { return false }
-        return window === editWindow || window === previewWindow
+        return window === previewWindow
     }
 
     private func schedule(_ work: @escaping (ClipDetachedWindowController) -> Void) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             work(self)
-        }
-    }
-
-    // MARK: - Edit
-
-    private func syncEditWindow(with item: ClipItem?) {
-        guard let item else {
-            closeEditWindow()
-            return
-        }
-
-        if appState.previewClip != nil, !isApplyingState {
-            isApplyingState = true
-            appState.previewClip = nil
-            isApplyingState = false
-        }
-
-        let root = ClipEditView(item: item, historyStore: appState.historyStore) { [weak self] in
-            self?.scheduleClearEditing()
-        }
-        presentEdit(root, size: editSize, title: "Edit Clip")
-    }
-
-    private func closeEditWindow() {
-        guard let window = editWindow, window.isVisible else { return }
-        window.orderOut(nil)
-    }
-
-    private func scheduleClearEditing() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self, self.appState.editingClip != nil else { return }
-            self.isApplyingState = true
-            self.appState.editingClip = nil
-            self.isApplyingState = false
         }
     }
 
@@ -94,19 +58,21 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
             closePreviewWindow()
             return
         }
-        if appState.editingClip != nil {
-            if !isApplyingState {
-                isApplyingState = true
-                appState.previewClip = nil
-                isApplyingState = false
-            }
-            return
-        }
 
         let frame = bubbleFrame(for: item)
-        let root = ClipQuickPreview(
+        presentBubble(makePreviewRoot(for: item), frame: frame)
+    }
+
+    private func refreshPreviewRootIfNeeded() {
+        guard let item = appState.previewClip, let window = previewWindow, window.isVisible else { return }
+        presentBubble(makePreviewRoot(for: item), frame: window.frame)
+    }
+
+    private func makePreviewRoot(for item: ClipItem) -> ClipQuickPreview {
+        ClipQuickPreview(
             item: item,
             historyStore: appState.historyStore,
+            editRequest: appState.previewEditRequest,
             onClose: { [weak self] in
                 self?.scheduleClearPreview()
             },
@@ -114,8 +80,6 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
                 self?.setPreviewKeyFocus(editing)
             }
         )
-
-        presentBubble(root, frame: frame)
     }
 
     private func closePreviewWindow() {
@@ -181,7 +145,9 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
     private func presentBubble(_ content: ClipQuickPreview, frame: NSRect) {
         let hosting = NSHostingController(rootView: content)
         if let existing = previewWindow {
-            if let current = existing.contentViewController as? NSHostingController<ClipQuickPreview> {
+            // Replace hosting when the clip changes so @State cannot stick to the prior item.
+            if let current = existing.contentViewController as? NSHostingController<ClipQuickPreview>,
+               current.rootView.item.id == content.item.id {
                 current.rootView = content
             } else {
                 existing.contentViewController = hosting
@@ -206,32 +172,6 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
         PanelCornerMask.apply(to: panel.contentView)
     }
 
-    private func presentEdit<Content: View>(_ content: Content, size: NSSize, title: String) {
-        let hosting = NSHostingController(rootView: content)
-        let alreadyVisible = editWindow?.isVisible == true
-        let panel: NSPanel
-        if let existing = editWindow {
-            panel = existing
-            if let current = panel.contentViewController as? NSHostingController<Content> {
-                current.rootView = content
-            } else {
-                panel.contentViewController = hosting
-            }
-        } else {
-            panel = makeEditPanel(size: size, title: title)
-            panel.contentViewController = hosting
-            editWindow = panel
-        }
-
-        panel.title = title
-        if !alreadyVisible {
-            panel.setContentSize(size)
-            positionCentered(panel, size: size)
-        }
-        panel.orderFrontRegardless()
-        panel.makeKey()
-    }
-
     private func makeBubblePanel(size: NSSize) -> NSPanel {
         let panel = PreviewBubblePanel(
             contentRect: NSRect(origin: .zero, size: size),
@@ -243,7 +183,7 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
         panel.level = .floating
         panel.hidesOnDeactivate = false
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        // False so text selection / image pan aren't stolen as window drags.
+        // False so text selection isn't stolen as a window drag.
         panel.isMovableByWindowBackground = false
         panel.backgroundColor = .clear
         panel.hasShadow = false
@@ -254,44 +194,7 @@ final class ClipDetachedWindowController: NSObject, NSWindowDelegate {
         return panel
     }
 
-    private func makeEditPanel(size: NSSize, title: String) -> NSPanel {
-        let panel = DetachedClipPanel(
-            contentRect: NSRect(origin: .zero, size: size),
-            styleMask: [.titled, .closable, .resizable, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.title = title
-        panel.isFloatingPanel = true
-        panel.level = .floating
-        panel.hidesOnDeactivate = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.isMovableByWindowBackground = true
-        panel.backgroundColor = .windowBackgroundColor
-        panel.hasShadow = true
-        panel.isOpaque = true
-        panel.delegate = self
-        panel.minSize = NSSize(width: 420, height: 280)
-        return panel
-    }
-
-    private func positionCentered(_ panel: NSPanel, size: NSSize) {
-        let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) }
-            ?? NSScreen.main
-        guard let visible = screen?.visibleFrame else { return }
-        let origin = NSPoint(
-            x: visible.midX - size.width / 2,
-            y: visible.midY - size.height / 2 + 40
-        )
-        panel.setFrame(NSRect(origin: origin, size: size), display: false)
-    }
-
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        if sender === editWindow {
-            sender.orderOut(nil)
-            scheduleClearEditing()
-            return false
-        }
         if sender === previewWindow {
             sender.orderOut(nil)
             scheduleClearPreview()
@@ -356,11 +259,9 @@ enum PreviewBubbleMetrics {
     }
 }
 
-private class DetachedClipPanel: NSPanel {
+/// Bubble stays non-key until the user starts editing (click), so Space keeps
+/// dismissing via the timeline panel shortcuts.
+private final class PreviewBubblePanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 }
-
-/// Bubble stays non-key until the user starts editing (click), so Space keeps
-/// dismissing via the timeline panel shortcuts.
-private final class PreviewBubblePanel: DetachedClipPanel {}

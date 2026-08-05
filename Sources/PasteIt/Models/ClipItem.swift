@@ -92,6 +92,15 @@ final class ClipItem: Identifiable {
         set { primaryTypeRaw = newValue.rawValue }
     }
 
+    /// Space-bubble text editing. Images / links are view-only in the bubble
+    /// (images use OCR on the Text tab; links show the web preview).
+    var supportsBubbleEditing: Bool {
+        switch primaryType {
+        case .image, .url: return false
+        default: return true
+        }
+    }
+
     var pasteboardTypes: [String] {
         pasteboardTypesRaw
             .split(whereSeparator: \.isNewline)

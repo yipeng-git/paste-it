@@ -71,9 +71,7 @@ final class AppRuntime: NSObject {
                 return pasteStackController.pasteNext(panelController: panelController)
             },
             editSelected: { [appState, panelController] in
-                guard panelController.isVisible || appState.editingClip != nil else {
-                    return false
-                }
+                guard panelController.isVisible else { return false }
                 return appState.beginEditingSelectedClip()
             }
         )

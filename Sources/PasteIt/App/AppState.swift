@@ -72,10 +72,10 @@ final class AppState: ObservableObject {
     @Published var searchBlurRequest: Int = 0
     /// Bumped when the timeline should scroll back to the first card (panel show / promote).
     @Published var scrollToStartRequest: Int = 0
-    /// When set, the timeline presents the clip editor for this item.
-    @Published var editingClip: ClipItem?
     /// When set, the timeline shows the space-bar quick preview for this item.
     @Published var previewClip: ClipItem?
+    /// Bumped to ask the open preview bubble to enter text-editing mode.
+    @Published var previewEditRequest: Int = 0
 
     let settings: AppSettings
     let historyStore: HistoryStore
@@ -159,18 +159,17 @@ final class AppState: ObservableObject {
         selectFirst(scroll: true)
     }
 
-    /// Matching clip count for a type under the current tab / query / source-app filters.
-    func countMatching(filter: FilterCategory) -> Int {
-        searchService.search(
+    /// Per-type counts under the current tab / query / source-app filters (single pass).
+    func countsMatchingAllFilters() -> [FilterCategory: Int] {
+        searchService.countsByFilter(
             clips: sourceClipsForCurrentTab(),
             query: debouncedQuery,
-            selectedFilter: filter,
             sourceApp: selectedSourceApp,
             pinboardID: nil,
             foldedHaystack: { [historyStore] item in
                 historyStore.foldedSearchText(for: item)
             }
-        ).count
+        )
     }
 
     func selectOnly(_ id: UUID) {
@@ -279,11 +278,23 @@ final class AppState: ObservableObject {
         }
     }
 
+    /// Opens (or focuses) the Space preview bubble and enters text editing when supported.
+    @discardableResult
+    func beginEditingClip(_ clip: ClipItem) -> Bool {
+        guard clip.supportsBubbleEditing else { return false }
+        selectOnly(clip.id)
+        previewClip = clip
+        // Defer so ClipQuickPreview is mounted / updated before it observes the bump.
+        DispatchQueue.main.async {
+            self.previewEditRequest += 1
+        }
+        return true
+    }
+
     @discardableResult
     func beginEditingSelectedClip() -> Bool {
         guard let clip = selectedClip else { return false }
-        editingClip = clip
-        return true
+        return beginEditingClip(clip)
     }
 
     /// Space-bar "Quick Look" toggle: opens a full-fidelity preview of the selected

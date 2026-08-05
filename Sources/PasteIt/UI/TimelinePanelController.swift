@@ -17,7 +17,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
     private var localOutsideClickMonitor: Any?
     private var isAnimating = false
     var onShow: (() -> Void)?
-    /// Set by AppRuntime so outside-click dismiss can ignore detached edit/preview windows.
+    /// Set by AppRuntime so outside-click dismiss can ignore detached preview / stack windows.
     weak var detachedWindowController: ClipDetachedWindowController?
     weak var pasteStackPanelController: PasteStackPanelController?
 
@@ -124,7 +124,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
             return
         }
 
-        // Detached edit windows stay open on their own; preview bubble is timeline-anchored.
+        // Preview bubble is timeline-anchored; dismiss it with the panel.
         if appState.previewClip != nil {
             appState.dismissPreview()
         }
@@ -274,7 +274,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         guard let panel, panel.isVisible else { return }
         let mouse = NSEvent.mouseLocation
         if panel.frame.contains(mouse) { return }
-        // Clicks on detached edit/preview / Paste Stack should not dismiss the timeline.
+        // Clicks on detached preview / Paste Stack should not dismiss the timeline.
         // Only count *visible* windows — ordered-out panels keep their last frame and would
         // otherwise swallow outside clicks (especially a centered preview bubble).
         if let detached = detachedWindowController {
@@ -290,7 +290,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         hide()
     }
 
-    /// Ignore outside-dismiss when the click lands on a detached edit/preview window
+    /// Ignore outside-dismiss when the click lands on a detached preview window
     /// or any sheet/child of the timeline panel.
     private func shouldIgnoreOutsideClick(for event: NSEvent) -> Bool {
         guard let panel else { return false }

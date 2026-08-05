@@ -6,6 +6,9 @@ import PasteItCore
 struct TimelineFilterButton: View {
     @ObservedObject var appState: AppState
     @State private var isPresented = false
+    /// Filled after the popover paints (single-pass scan); nil while loading.
+    @State private var filterCounts: [FilterCategory: Int]?
+    @State private var countsTask: Task<Void, Never>?
 
     private var isActive: Bool { appState.selectedFilter != .all }
 
@@ -61,6 +64,15 @@ struct TimelineFilterButton: View {
         .popover(isPresented: $isPresented, arrowEdge: .bottom) {
             filterMenu
         }
+        .onChange(of: isPresented) { _, presented in
+            if presented {
+                scheduleFilterCounts()
+            } else {
+                countsTask?.cancel()
+                countsTask = nil
+                filterCounts = nil
+            }
+        }
     }
 
     private var filterMenu: some View {
@@ -82,9 +94,10 @@ struct TimelineFilterButton: View {
                             .frame(width: 16)
                         Text(category.title)
                         Spacer(minLength: 12)
-                        Text("\(appState.countMatching(filter: category))")
+                        Text(countLabel(for: category))
                             .font(.system(size: 11, weight: .medium).monospacedDigit())
                             .foregroundStyle(.secondary)
+                            .frame(minWidth: 28, alignment: .trailing)
                         if appState.selectedFilter == category {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 11, weight: .semibold))
@@ -109,5 +122,23 @@ struct TimelineFilterButton: View {
         }
         .padding(.bottom, 6)
         .frame(width: 200)
+    }
+
+    private func countLabel(for category: FilterCategory) -> String {
+        guard let filterCounts, let count = filterCounts[category] else { return "—" }
+        return "\(count)"
+    }
+
+    /// Paint the menu first, then fill counts in one pass on the next turn.
+    private func scheduleFilterCounts() {
+        filterCounts = nil
+        countsTask?.cancel()
+        countsTask = Task { @MainActor in
+            await Task.yield()
+            guard !Task.isCancelled else { return }
+            let counts = appState.countsMatchingAllFilters()
+            guard !Task.isCancelled else { return }
+            filterCounts = counts
+        }
     }
 }
