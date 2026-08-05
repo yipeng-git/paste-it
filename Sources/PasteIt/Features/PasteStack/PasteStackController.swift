@@ -82,10 +82,12 @@ final class PasteStackController: ObservableObject {
         refreshPasteIntercept()
         notifyChange()
         onPanelSync?(true)
+        Analytics.beginPasteStackSession(direction: analyticsDirection)
         NSLog("PasteIt: Paste Stack opened")
     }
 
     func close() {
+        Analytics.endPasteStackSession()
         isCollecting = false
         items = []
         tearDownEventTap()
@@ -111,6 +113,7 @@ final class PasteStackController: ObservableObject {
         refreshPasteIntercept()
         notifyChange()
         onPanelSync?(true)
+        Analytics.notePasteStackCollected(count: items.count)
         NSLog("PasteIt: Paste Stack +1 → \(items.count) — \(item.title)")
     }
 
@@ -181,11 +184,23 @@ final class PasteStackController: ObservableObject {
     /// Stage next item and synthesize ⌘V (⌥⌘V / Paste Next button).
     @discardableResult
     func pasteNext(panelController: TimelinePanelController? = nil) -> Bool {
-        guard !items.isEmpty else { return false }
+        guard !items.isEmpty else {
+            Analytics.notePasteStackPasteNext(success: false, failReason: "empty")
+            return false
+        }
+        let accessibilityTrusted = SystemPasteSynthesizer.isAccessibilityTrusted
         panelController?.hide()
         ensureAccessibilityIfNeeded()
         Task { @MainActor in
-            guard await self.stageNextAsync() else { return }
+            guard await self.stageNextAsync() else {
+                Analytics.notePasteStackPasteNext(success: false, failReason: "stage_failed")
+                return
+            }
+            if accessibilityTrusted {
+                Analytics.notePasteStackPasteNext(success: true, failReason: nil)
+            } else {
+                Analytics.notePasteStackPasteNext(success: false, failReason: "accessibility")
+            }
             try? await Task.sleep(nanoseconds: 50_000_000)
             Self.postCommandV()
         }
@@ -317,7 +332,11 @@ final class PasteStackController: ObservableObject {
         // Never block the event-tap thread with main.sync — that stalls the
         // system keyboard path whenever the main actor is busy.
         Task { @MainActor in
-            guard await self.stageNextAsync() else { return }
+            guard await self.stageNextAsync() else {
+                Analytics.notePasteStackPasteNext(success: false, failReason: "stage_failed")
+                return
+            }
+            Analytics.notePasteStackPasteNext(success: true, failReason: nil)
             // Brief yield so the pasteboard write is visible to the target app.
             try? await Task.sleep(nanoseconds: 20_000_000)
             Self.postCommandV()
@@ -332,6 +351,13 @@ final class PasteStackController: ObservableObject {
 
     private func notifyChange() {
         onChange?()
+    }
+
+    private var analyticsDirection: String {
+        switch direction {
+        case .oldestFirst: return "fifo"
+        case .newestFirst: return "lifo"
+        }
     }
 
     private static func postCommandV() {

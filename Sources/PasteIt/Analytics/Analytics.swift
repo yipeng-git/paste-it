@@ -13,6 +13,9 @@ enum Analytics {
     /// Active timeline panel session (P0). Reset on `panel_closed`.
     private static var panelSession = PanelSession()
 
+    /// Active Paste Stack session. Flushed as one `paste_stack_session` on close (quota-friendly).
+    private static var pasteStackSession: PasteStackSession?
+
     /// Call once at launch. No-ops when the project token is missing or analytics is disabled.
     static func start(enabled: Bool) {
         guard !didSetup else {
@@ -46,6 +49,7 @@ enum Analytics {
         if panelSession.isOpen {
             endPanelSession()
         }
+        endPasteStackSession()
         capture("app_exit")
         PostHogSDK.shared.flush()
     }
@@ -134,7 +138,6 @@ enum Analytics {
         let sessionID = panelSession.sessionID
         let stages = panelSession.stages
         let searches = panelSession.searches
-        let captures = panelSession.captures
 
         capture(
             "panel_closed",
@@ -150,38 +153,79 @@ enum Analytics {
                 "opens": 1,
                 "stages": stages,
                 "searches": searches,
-                "captures_while_open": captures,
+                "search_had_zero_results": panelSession.searchHadZeroResults,
                 "session_id": sessionID as Any
             ]
         )
         panelSession = PanelSession()
     }
 
-    static func notePanelSearch() {
+    /// Debounced typed search during an open panel. In-memory only until `session_summary`.
+    static func notePanelSearch(resultCount: Int) {
         guard panelSession.isOpen else { return }
         panelSession.searches += 1
-    }
-
-    static func notePanelCapture() {
-        guard panelSession.isOpen else { return }
-        panelSession.captures += 1
-    }
-
-    // MARK: - P0: Capture / stage
-
-    static func clipCaptured(clipType: String, hasOCRScheduled: Bool, isDuplicateSkip: Bool) {
-        capture(
-            "clip_captured",
-            properties: [
-                "clip_type": clipType,
-                "has_ocr_scheduled": hasOCRScheduled,
-                "is_duplicate_skip": isDuplicateSkip
-            ]
-        )
-        if !isDuplicateSkip {
-            notePanelCapture()
+        if resultCount == 0 {
+            panelSession.searchHadZeroResults = true
         }
     }
+
+    // MARK: - Paste Stack (one event per open→close)
+
+    static func beginPasteStackSession(direction: String) {
+        pasteStackSession = PasteStackSession(
+            openedAt: Date(),
+            direction: direction,
+            accessibilityTrustedAtOpen: SystemPasteSynthesizer.isAccessibilityTrusted
+        )
+    }
+
+    static func notePasteStackCollected(count: Int) {
+        guard var session = pasteStackSession else { return }
+        session.maxCollected = max(session.maxCollected, count)
+        pasteStackSession = session
+    }
+
+    static func notePasteStackPasteNext(success: Bool, failReason: String?) {
+        guard var session = pasteStackSession else { return }
+        session.pasteNextAttempts += 1
+        if success {
+            session.pasteNextSuccesses += 1
+        } else if let failReason {
+            session.lastFailReason = failReason
+            if failReason == "empty" {
+                session.emptyPasteNextCount += 1
+            } else if failReason == "accessibility" {
+                session.pasteNextWithoutAccessibility += 1
+            }
+        }
+        pasteStackSession = session
+    }
+
+    static func endPasteStackSession() {
+        guard let session = pasteStackSession, let openedAt = session.openedAt else {
+            pasteStackSession = nil
+            return
+        }
+        let durationMS = Int(Date().timeIntervalSince(openedAt) * 1000)
+        var props: [String: Any] = [
+            "direction": session.direction,
+            "duration_ms_bucket": Buckets.durationMS(durationMS),
+            "collected_count_bucket": Buckets.stackCollected(session.maxCollected),
+            "paste_next_count": session.pasteNextSuccesses,
+            "paste_next_attempts": session.pasteNextAttempts,
+            "empty_paste_next_count": session.emptyPasteNextCount,
+            "paste_next_without_ax": session.pasteNextWithoutAccessibility,
+            "accessibility_trusted_at_open": session.accessibilityTrustedAtOpen,
+            "accessibility_trusted_at_close": SystemPasteSynthesizer.isAccessibilityTrusted
+        ]
+        if let reason = session.lastFailReason {
+            props["last_fail_reason"] = reason
+        }
+        capture("paste_stack_session", properties: props)
+        pasteStackSession = nil
+    }
+
+    // MARK: - P0: Stage
 
     static func clipStaged(
         mode: String,
@@ -259,6 +303,15 @@ enum Analytics {
             default: return "older"
             }
         }
+
+        static func stackCollected(_ count: Int) -> String {
+            switch count {
+            case 0: return "0"
+            case 1...3: return "1-3"
+            case 4...10: return "4-10"
+            default: return "11+"
+            }
+        }
     }
 
     // MARK: - Private
@@ -270,7 +323,19 @@ enum Analytics {
         var openedAt: Date?
         var stages = 0
         var searches = 0
-        var captures = 0
+        var searchHadZeroResults = false
+    }
+
+    private struct PasteStackSession {
+        var openedAt: Date?
+        var direction: String
+        var accessibilityTrustedAtOpen: Bool
+        var maxCollected = 0
+        var pasteNextAttempts = 0
+        var pasteNextSuccesses = 0
+        var emptyPasteNextCount = 0
+        var pasteNextWithoutAccessibility = 0
+        var lastFailReason: String?
     }
 
     private static var isEnabled: Bool {

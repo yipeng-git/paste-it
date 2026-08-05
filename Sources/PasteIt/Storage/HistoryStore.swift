@@ -30,13 +30,10 @@ final class HistoryStore: ObservableObject {
 
     /// True when `history.store` did not exist before this process opened it (true first install).
     private let isFreshStore: Bool
-    /// Agent API ephemeral stores must not emit product analytics.
-    private let recordsAnalytics: Bool
 
     init(blobStore: BlobStore, settings: AppSettings) {
         self.blobStore = blobStore
         self.settings = settings
-        self.recordsAnalytics = true
 
         let schema = Schema([ClipItem.self, Pinboard.self])
         // Never use the SwiftData default URL (`Application Support/default.store`):
@@ -87,7 +84,6 @@ final class HistoryStore: ObservableObject {
         self.settings = settings
         self.storeURL = ephemeralBlobRoot.appendingPathComponent("ephemeral.store")
         self.isFreshStore = true
-        self.recordsAnalytics = false
 
         let schema = Schema([ClipItem.self, Pinboard.self])
         let configuration = ModelConfiguration(
@@ -172,13 +168,6 @@ final class HistoryStore: ObservableObject {
 
     func add(_ capturedClip: CapturedClip) {
         if clips.first?.duplicateContentKey == capturedClip.duplicateContentKey {
-            if recordsAnalytics {
-                Analytics.clipCaptured(
-                    clipType: capturedClip.primaryType.rawValue,
-                    hasOCRScheduled: false,
-                    isDuplicateSkip: true
-                )
-            }
             return
         }
 
@@ -190,13 +179,6 @@ final class HistoryStore: ObservableObject {
             clips.insert(existing, at: 0)
             saveQuietly()
             objectWillChange.send()
-            if recordsAnalytics {
-                Analytics.clipCaptured(
-                    clipType: existing.primaryType.rawValue,
-                    hasOCRScheduled: false,
-                    isDuplicateSkip: true
-                )
-            }
             return
         }
 
@@ -209,14 +191,6 @@ final class HistoryStore: ObservableObject {
         contentHashIndex[item.contentHash] = item.id
         foldedSearchByID[item.id] = item.foldedSearchHaystack
         objectWillChange.send()
-
-        if recordsAnalytics {
-            Analytics.clipCaptured(
-                clipType: item.primaryType.rawValue,
-                hasOCRScheduled: capturedClip.pendingOCRBlobRelativePath != nil,
-                isDuplicateSkip: false
-            )
-        }
 
         if let blobPath = capturedClip.pendingOCRBlobRelativePath {
             scheduleOCR(for: item.id, blobRelativePath: blobPath)

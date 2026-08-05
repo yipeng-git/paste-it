@@ -32,9 +32,9 @@ enum AnalyticsCatalog {
         Event(name: "onboarding_completed", summary: "Tutorial finished, skipped, or dismissed"),
         Event(name: "panel_opened", summary: "Timeline panel shown (hotkey / menu / status item)"),
         Event(name: "panel_closed", summary: "Timeline panel hidden (duration bucket, did stage?)"),
-        Event(name: "session_summary", summary: "Per panel session counts (stages / searches / captures)"),
-        Event(name: "clip_captured", summary: "Clipboard item captured or deduped (type only, never content)"),
+        Event(name: "session_summary", summary: "Per panel session counts (stages / searches) plus search zero-result flag"),
         Event(name: "clip_staged", summary: "Item copied to system pasteboard from timeline"),
+        Event(name: "paste_stack_session", summary: "Paste Stack open→close summary (collect / paste-next / Accessibility)"),
         Event(name: "update_interaction", summary: "Sparkle update check / find / download / install / fail")
     ]
 

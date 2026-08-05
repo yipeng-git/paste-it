@@ -22,14 +22,14 @@ Search finds text inside screenshots and images — not only plain clipboard tex
 - Paste Stack (**Shift + Command + C**) — collect, reorder, and prepare sequential pastes.
 - Quick Copy with **Command + 1…9**, paste as plain text, and multi-item text copy.
 - Privacy controls: pause capture, ignore apps or pasteboard types, retention, and storage pruning.
-- Optional anonymous usage analytics (PostHog) — never clipboard contents; see [`docs/analytics.md`](docs/analytics.md). Toggle in Settings → Privacy.
+- Optional anonymous usage analytics (PostHog) — never clipboard contents; see [`docs/analytics.md`](docs/analytics.md) and dashboard guide [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md). Toggle in Settings → Privacy.
 - In-app updates via Sparkle.
 
 Selecting a clip stages it on the system pasteboard (no Accessibility needed). Paste Stack’s “Paste Next” optionally synthesizes **Command + V** and requires Accessibility.
 
 ## Privacy & analytics
 
-Clipboard history is **local-only**. Optional PostHog analytics (on by default in official builds) reports anonymous product events such as panel open/close, staging, onboarding, and update funnel — **never** clipboard text, OCR, paths, or search queries. Full event list: [`docs/analytics.md`](docs/analytics.md). Disable anytime in **Settings → Privacy**.
+Clipboard history is **local-only**. Optional PostHog analytics (on by default in official builds) reports anonymous product events such as panel open/close, staging, onboarding, and update funnel — **never** clipboard text, OCR, paths, or search queries. Full event list: [`docs/analytics.md`](docs/analytics.md). How to build the product dashboard: [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md). Disable anytime in **Settings → Privacy**.
 
 ## MCP for agents
 
