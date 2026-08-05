@@ -1,0 +1,192 @@
+Sources/PasteIt/Utilities/LiquidGlass.swift
+  s_59f16c8fb0ff94::t_1347f2663a9be2 43-52
+Sources/PasteIt/UI/Components/TimelineFilterButton.swift
+  s_7c9e0770c4443c::t_26bd9f5f0eb4f0 4-5,13-34,36,38-46,48-50,55-60
+  s_7c9e0770c4443c::t_fa5aefb6d875c1 35,37,85-87,92-94,111
+Sources/PasteIt/UI/Components/AppMenuButton.swift
+  s_bc5c35b0d8d247::t_38c797c92fd6d1 8-9,11,20-21,39-41,44,49-54,56
+Tests/PasteItTests/ClipPreviewTextTests.swift
+  s_bc5c35b0d8d247::t_485080301793a2 1-153
+Sources/PasteIt/UI/Timeline/ClipQuickPreview.swift
+  s_7c9e0770c4443c::t_21f077d09ef616 4
+  s_59f16c8fb0ff94::t_262436f9182334 10-11,20,22-23,26,31-32,82,91,93-94,96,100,111-113,115,123,125,145,148,151-152,194-195,237,239-241,261,266,279,281-283,310,333,337,342,347,353,359,377-378,398-400,407,409-410,412-416,425-430,438,440-444,447,450,452-453,455-458,462
+  s_bc5c35b0d8d247::t_a45ec0a33e4266 35-45,47-66,446
+  s_bc5c35b0d8d247::t_cc12e95bec9b28 401-405,431-434
+  s_59f16c8fb0ff94::t_c1ba209f6e1b67 493-495
+  s_59f16c8fb0ff94::t_a71044a57ee0b6 5,13-18,24,27,83-86,92,95,102-103,106-107,127,131-134,139-141,143,159,163,178-179,227,236,238,242-252,256-260,264-265,270-274,276-278,280,326-327,329,367,370-374,380,383,387,392,467,491
+  s_7c9e0770c4443c::t_292736754287c3 117-121
+  s_7c9e0770c4443c::t_debbb390ded19a 197-208,210,212-224,228-233
+  s_bc5c35b0d8d247::t_0de42c87cc0ceb 406
+  s_7c9e0770c4443c::t_519294b402e44f 104-105,108-109,135-138,150,160-162,164-168,173-177
+  s_59f16c8fb0ff94::t_5784f2cb9824ea 19,97-99,101,116,122,126,129-130,146-147,149,153-155,408,420-424,435-437,439,445,448-449,454,459
+  s_bc5c35b0d8d247::t_28de18113bcdfb 69-72,211,268-269,275,284-309
+  s_59f16c8fb0ff94::t_fceef8853b361f 253-255
+  s_59f16c8fb0ff94::t_48e88f1fb330da 144,328,330-332,334-336,338-341,343-346,348-352,354-356,358,360-363
+  s_59f16c8fb0ff94::t_d56c2ed13bbc49 8,28-30,33,75-81,110,114,124,128,157,180-181,262-263,364-366,368-369,375-376,379,381-382,384-386,389,391,395,417-418,451,460-461,463-466,468-490,492
+  s_7c9e0770c4443c::t_3441d2d5e72143 25,46
+  s_7c9e0770c4443c::t_2ca5e1025b5483 311-314,319
+  s_7c9e0770c4443c::t_5270bb20e2580d 156,209,225-226,234-235
+  s_59f16c8fb0ff94::t_3e92632c360add 90
+  s_59f16c8fb0ff94::t_6f89999852da84 158
+  s_59f16c8fb0ff94::t_9ac419e62dfb6f 419
+Sources/PasteIt/UI/ClipDetachedWindowController.swift
+  s_59f16c8fb0ff94::t_192eaa646e6e49 14,73,90,113,117,142-144,148-149,166,170-171,176-178,181,183,185-186,188,192,194-195,199,207,209-211,213,221,223,232,235,237,239-245,248-251,254-257,304,356
+  s_bc5c35b0d8d247::t_d0d132b07e6a03 236,246-247
+  s_bc5c35b0d8d247::t_639eb5a5e7b177 359,363
+  s_bc5c35b0d8d247::t_2aa45ffe987b9e 190,197,200-206
+  s_59f16c8fb0ff94::t_c2e4af948d4dc4 15,107-112,114-116,124,136-141
+  s_7c9e0770c4443c::t_d89e6a6e3e5d62 305,309-310,313,323-324,334,337,343
+  s_59f16c8fb0ff94::t_37e1aa3b56461b 106,118,146,158-160,163-164,175,184,187,189,191,193,196,198,238,252-253,306-308,311-312,314-322,325-333,335-336,338-342,344-355
+  s_7c9e0770c4443c::t_2c2475026ecaab 145,150-157,161-162,165,167-169
+  s_7c9e0770c4443c::t_13539b155547d6 364-366
+  s_7c9e0770c4443c::t_4437087bde1386 147,172-174
+  s_7c9e0770c4443c::t_11ed6f70aad36e 18-19
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_59f16c8fb0ff94::t_25ab2072809933 366
+  s_7c9e0770c4443c::t_b75c3a5fb7d411 369-370
+  s_bc5c35b0d8d247::t_ce2361b222bdad 367
+  s_bc5c35b0d8d247::t_cef12d6fff2254 583
+  s_7c9e0770c4443c::t_676fec25e37095 357,361
+  s_bc5c35b0d8d247::t_d8d6a5435de48b 192-196
+  s_322fc85ace28ab::t_de4b6b7386c73c 372-387
+  s_7c9e0770c4443c::t_2f4ef41c53686a 65-67
+  s_bc5c35b0d8d247::t_0b769b856fa2b6 31-32,36,44-45,48
+  s_7c9e0770c4443c::t_3da5817b88ce5c 68-72,84
+  s_bc5c35b0d8d247::t_c24b28594e99bc 174
+  s_bc5c35b0d8d247::t_681baefdd3f797 128-131
+  s_bc5c35b0d8d247::t_d17d3421359fc1 264,269
+  s_7c9e0770c4443c::t_bdfab9bdb9b3bd 79-80,83
+Sources/PasteIt/UI/MenuBar/MenuBarKeycapsView.swift
+  s_19052209a1d002::t_fb971d7e4dbe1b 5
+  s_19052209a1d002::t_e25bbe4f86b216 3,17,30,49,60,72-78,92,98,101,114,121-122
+  s_19052209a1d002::t_27a925201a78a1 23-26,28,33-34,39-40,45-46,50,59,79,83,91,110,123
+  s_19052209a1d002::t_4aa35724abee12 53-57
+  s_19052209a1d002::t_52c9c086151b56 1-2,6-16,18-22,27,29,31-32,35-38,41-44,47-48,108-109,112-113,120,124-140
+  s_19052209a1d002::t_5f4fa7fd6cf863 4,51-52,58,61-71,80-82,84-90,93-97,99-100,102-107,111,115-119
+Sources/PasteIt/UI/Components/RichTextEditor.swift
+  s_bc5c35b0d8d247::t_fcd29f329cad21 136-138,140-143,150-151,153
+  s_bc5c35b0d8d247::t_4f521e319b3af6 131-135,139,144-145,147-149
+  s_bc5c35b0d8d247::t_069cc6cd843028 146
+  s_bc5c35b0d8d247::t_a183f3eddf0409 3
+  s_bc5c35b0d8d247::t_ae799d8a40baef 126-127
+  s_bc5c35b0d8d247::t_ca7396e564394c 11,35-36,70-75,88-94
+  s_59f16c8fb0ff94::t_a23d66f6719c18 9-10,31,45-46,61,63-69,82,129
+  s_bc5c35b0d8d247::t_4df252104f5911 47-54,56-60,62
+  s_bc5c35b0d8d247::t_b513e444ab8ac2 116,119-121,128
+  s_bc5c35b0d8d247::t_f5b3770d5097a4 95
+Package.swift
+  s_bc5c35b0d8d247::t_f8e81beefae66d 22-25
+  s_59f16c8fb0ff94::t_a79d59426a9c70 38-40
+Sources/PasteIt/Core/PasteboardMonitor.swift
+  s_bc5c35b0d8d247::t_b75dff775837c2 175,180-182,184-187
+  s_bc5c35b0d8d247::t_eae980f8508a6e 183
+  s_bc5c35b0d8d247::t_187977d234eb1b 188
+Sources/PasteIt/UI/Components/CardClickOverlay.swift
+  s_322fc85ace28ab::t_79d2d602bc5393 60,66-73
+  s_322fc85ace28ab::t_dc2c6b1d8d7767 4-8,10-11,16-17,23-24,30-31,34-36,44-56,59,61-65,74,76-77
+Sources/PasteIt/UI/Components/ClipCardFrameRegistry.swift
+  s_bc5c35b0d8d247::t_e3cd365030e1f3 5,7,45-46,48,79,81,89
+  s_bc5c35b0d8d247::t_402aae3326eb1c 47,80
+  s_bc5c35b0d8d247::t_09e737c930ef59 1-4,6,8-44,49-78,82-88,90-91
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_59f16c8fb0ff94::t_afbe784cd07c7e 127-128,130
+  s_bc5c35b0d8d247::t_e8169c9eabafb9 255
+  s_7c9e0770c4443c::t_1e399d70849a09 46
+  s_bc5c35b0d8d247::t_3f9d6d9baebf2c 231-240,248-254,256-259
+  s_7c9e0770c4443c::t_67d7791a98aaaa 278-279
+  s_59f16c8fb0ff94::t_a95aea261ac2ed 47-50
+  s_59f16c8fb0ff94::t_edfd0352efa6e5 56-61,260
+  s_bc5c35b0d8d247::t_b37fb9a3289e37 129
+  s_7c9e0770c4443c::t_6aef880b238dc8 281,286
+  s_7c9e0770c4443c::t_34149cf7f11e7d 261
+Sources/PasteIt/App/AppRuntime.swift
+  s_19052209a1d002::t_d9916776c33339 101
+  s_59f16c8fb0ff94::t_3dec8df2101644 83
+  s_19052209a1d002::t_069af934a5ce51 122-123
+  s_19052209a1d002::t_7ba10414bf1421 137-149,151-160,165-173,175-182
+  s_19052209a1d002::t_c53c41d1bef9c4 24-25
+Sources/PasteIt/App/AppState.swift
+  s_7c9e0770c4443c::t_64ecc4cff3c99c 133
+  s_bc5c35b0d8d247::t_674b39c5a5f1d1 149
+  s_7c9e0770c4443c::t_543c2426af1297 162-175
+  s_bc5c35b0d8d247::t_48dfe2c7d3dd69 181-207,358
+  s_bc5c35b0d8d247::t_022a2005fa1bd6 293
+  s_7c9e0770c4443c::t_d97088cacfb62c 336,347-357
+Sources/PasteIt/UI/MenuBar/CmdCVKeyFlashMonitor.swift
+  s_19052209a1d002::t_a5cabc8eaad055 23-25
+  s_19052209a1d002::t_8d270062ff3cce 1-22,26-62
+Sources/PasteItCore/ClipPreviewText.swift
+  s_bc5c35b0d8d247::t_222f81b71d1126 1-50
+Sources/PasteIt/UI/Components/BubbleShape.swift
+  s_59f16c8fb0ff94::t_d557d8f92f4c00 1-2,5-6,9-10
+  s_7c9e0770c4443c::t_8c7afe0144bdae 3-4
+  s_59f16c8fb0ff94::t_80dd150a4725f8 7-8
+AGENTS.md
+  s_bc5c35b0d8d247::t_323b1f658fc43e 5-7,10,19
+  s_bc5c35b0d8d247::t_1af0325f69eda9 20
+Sources/PasteIt/Models/ClipItem.swift
+  s_bc5c35b0d8d247::t_bfe21c12db7d7c 3
+  s_bc5c35b0d8d247::t_6ad9e745e0b0dd 114-125
+Sources/PasteIt/Models/ClipType.swift
+  s_59f16c8fb0ff94::t_6aaedc5e324dc1 97-112
+Sources/PasteIt/UI/Components/LinkWebPreview.swift
+  s_59f16c8fb0ff94::t_0a44a895ea3b12 1-50
+Sources/PasteIt/UI/Timeline/ClipCardView.swift
+  s_bc5c35b0d8d247::t_1c999097356c50 101-114
+  s_bc5c35b0d8d247::t_283c5ad073f3ce 216
+  s_bc5c35b0d8d247::t_e5f9ac31e2a5ef 3
+Sources/PasteItCore/RichPlainText.swift
+  s_bc5c35b0d8d247::t_b22d85b50a90ce 1-50
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_59f16c8fb0ff94::t_96a52172afb27a 233-236,238-246,254,256
+  s_59f16c8fb0ff94::t_c786cba8f23998 255,257-263
+  s_59f16c8fb0ff94::t_a3d4c377072696 264-265
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "3872f58e10a5c7f5684be62fb879b59b88896f2b",
+  "prompts": {},
+  "sessions": {
+    "s_19052209a1d002": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5dfc758e-0088-4f96-b708-79ee027b6654",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_322fc85ace28ab": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b7fd76ce-8f6a-42c5-8a41-5109da2ddcd8",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_59f16c8fb0ff94": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "70f19c5e-0bdf-4b8a-b15a-3700a7fdc7d0",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_7c9e0770c4443c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "572c2eeb-3549-4722-b7e7-575894762762",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_bc5c35b0d8d247": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "309688d7-b4f9-4b18-bb36-bbf9b79e9c36",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
