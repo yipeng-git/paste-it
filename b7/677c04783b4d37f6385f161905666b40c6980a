@@ -1,0 +1,51 @@
+Sources/PasteIt/App/AppRuntime.swift
+  s_7c9e0770c4443c::t_acd9f114923920 74
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_7c9e0770c4443c::t_81a48c9e4445cf 20
+  s_7c9e0770c4443c::t_b2c00a6fc1b555 127
+  s_7c9e0770c4443c::t_88416448675219 277
+  s_7c9e0770c4443c::t_e92b38d33ebcd3 293
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_7c9e0770c4443c::t_e3e42d942d13b7 385-389,409
+  s_7c9e0770c4443c::t_664d36b2353442 358,363-384,395-401,403-406,408,410
+  s_7c9e0770c4443c::t_38794710dfc96c 612-626,629-659,661-679,683-689
+  s_7c9e0770c4443c::t_4d1d449c804396 627-628,660,680-682
+  s_7c9e0770c4443c::t_97e78ad4bee4fe 390-394
+Sources/PasteIt/Models/ClipItem.swift
+  s_7c9e0770c4443c::t_966443f53e7373 97,102-103
+  s_7c9e0770c4443c::t_9dbe8b00f418f5 95-96,98-101
+Sources/PasteIt/UI/Timeline/ClipQuickPreview.swift
+  s_7c9e0770c4443c::t_93c99e31490348 40,46
+  s_7c9e0770c4443c::t_7d2437fb7028d4 9-10
+  s_7c9e0770c4443c::t_8352c5ccedbbe6 115-117
+Sources/PasteIt/Search/SearchService.swift
+  s_7c9e0770c4443c::t_3dd93dae4a2248 14,28-61,63-69,72-106
+Sources/PasteIt/UI/Components/TimelineFilterButton.swift
+  s_7c9e0770c4443c::t_1b487581c2db66 9-11,67-75,97,100,126-143
+Sources/PasteIt/App/AppState.swift
+  s_7c9e0770c4443c::t_6ccdde7d6b668d 281-293,297
+  s_7c9e0770c4443c::t_aff1ee7430f05c 77-78
+  s_7c9e0770c4443c::t_9a994266738299 162-164,172
+Sources/PasteIt/UI/ClipDetachedWindowController.swift
+  s_7c9e0770c4443c::t_f41d7b4983cabc 5,25,29,33,36-37,44,63-72,75,148-150,186,262-264
+Sources/PasteIt/UI/Components/CardHoverActionBar.swift
+  s_7c9e0770c4443c::t_d186965302f38b 52
+  s_7c9e0770c4443c::t_2e99936e891cc6 6-7,10,18-21,23,39-44,53
+  s_7c9e0770c4443c::t_7b7770d76d8aad 3-5,8-9,11-12,15-17,24-26,28-38,45-49,51,54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "b7677c04783b4d37f6385f161905666b40c6980a",
+  "prompts": {},
+  "sessions": {
+    "s_7c9e0770c4443c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "572c2eeb-3549-4722-b7e7-575894762762",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
