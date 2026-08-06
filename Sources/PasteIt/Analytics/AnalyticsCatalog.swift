@@ -27,7 +27,7 @@ enum AnalyticsCatalog {
     ]
 
     static let productEvents: [Event] = [
-        Event(name: "onboarding_started", summary: "Tutorial opened (first launch or Settings)"),
+        Event(name: "onboarding_started", summary: "Tutorial / What's New opened (first_launch, update, or settings)"),
         Event(name: "onboarding_step_viewed", summary: "Tutorial page shown (step id only)"),
         Event(name: "onboarding_completed", summary: "Tutorial finished, skipped, or dismissed"),
         Event(name: "panel_opened", summary: "Timeline panel shown (hotkey / menu / status item)"),

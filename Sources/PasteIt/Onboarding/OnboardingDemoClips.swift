@@ -266,39 +266,51 @@ struct OnboardingTimelineChrome<Content: View>: View {
         HStack(spacing: 8) {
             HStack(spacing: 2) {
                 ForEach(TimelineTab.fixedTabs) { tab in
-                    Label(tab.title, systemImage: tab.systemImage)
-                        .labelStyle(.titleAndIcon)
-                        .font(.system(size: 12, weight: .semibold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background {
-                            if selectedTab == tab {
-                                Capsule().fill(Color.primary.opacity(0.12))
-                            }
-                        }
-                        .foregroundStyle(selectedTab == tab ? .primary : .secondary)
+                    demoTab(title: tab.title, systemImage: tab.systemImage, selected: selectedTab == tab)
                 }
             }
             .padding(3)
-            .pasteItCapsuleGlass()
+            .background(Color.primary.opacity(0.06), in: Capsule())
+            .fixedSize(horizontal: true, vertical: false)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 6)
 
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
+                    .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Text("Search (⌘F)")
+                    .font(.system(size: 11))
                     .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .frame(width: 160, height: 30)
-            .pasteItControlGlass()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .frame(minWidth: 100, maxWidth: 140, alignment: .leading)
+            .background(Color.primary.opacity(0.06), in: Capsule())
         }
-        .padding(.horizontal, 14)
-        .padding(.top, 12)
+        .padding(.horizontal, 12)
+        .padding(.top, 10)
         .padding(.bottom, 4)
+    }
+
+    private func demoTab(title: String, systemImage: String, selected: Bool) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: systemImage)
+                .font(.system(size: 10, weight: .semibold))
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background {
+            if selected {
+                Capsule().fill(Color.primary.opacity(0.12))
+            }
+        }
+        .foregroundStyle(selected ? .primary : .secondary)
     }
 }
 

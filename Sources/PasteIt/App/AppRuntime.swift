@@ -105,7 +105,21 @@ final class AppRuntime: NSObject {
         if !settings.hasCompletedOnboarding {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [settings] in
                 guard !settings.hasCompletedOnboarding else { return }
-                OnboardingWindowController.shared.show(settings: settings, source: "first_launch")
+                OnboardingWindowController.shared.show(
+                    settings: settings,
+                    flow: .install,
+                    source: "first_launch"
+                )
+            }
+        } else if settings.seenWhatsNewContentVersion < AppSettings.currentWhatsNewContentVersion {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [settings] in
+                guard settings.hasCompletedOnboarding else { return }
+                guard settings.seenWhatsNewContentVersion < AppSettings.currentWhatsNewContentVersion else { return }
+                OnboardingWindowController.shared.show(
+                    settings: settings,
+                    flow: .update,
+                    source: "update"
+                )
             }
         }
 

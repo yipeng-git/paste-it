@@ -7,399 +7,329 @@ struct OnboardingHeroView: View {
     var body: some View {
         Group {
             switch page {
-            case .welcome: WelcomeHero(isActive: isActive)
             case .capture: CaptureHero(isActive: isActive)
-            case .timeline: TimelineHero(isActive: isActive)
-            case .stage: StageHero(isActive: isActive)
-            case .nextSteps: NextStepsHero(isActive: isActive)
+            case .paste: PasteHero(isActive: isActive)
+            case .browse: BrowseHero(isActive: isActive)
+            case .organize: OrganizeHero(isActive: isActive)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .scaleEffect(isActive ? 1 : 0.96)
-        .opacity(isActive ? 1 : 0.5)
-        .animation(.easeOut(duration: 0.28), value: isActive)
     }
 }
 
-// MARK: - Shared
+// MARK: - Scene wrapper
 
-private struct KeyCapsule: View {
-    let label: String
-    var pulsing: Bool = false
-
-    var body: some View {
-        Text(label)
-            .font(.system(size: 13, weight: .semibold).monospaced())
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(.quaternary, in: Capsule())
-            .scaleEffect(pulsing ? 1.06 : 1)
-            .opacity(pulsing ? 1 : 0.85)
-            .animation(
-                pulsing
-                    ? .easeInOut(duration: 0.9).repeatForever(autoreverses: true)
-                    : .default,
-                value: pulsing
-            )
-    }
-}
-
-private struct ScaledDemoCard: View {
-    let clip: OnboardingDemoClip
-    var isSelected: Bool = false
-    var quickIndex: Int? = nil
-    var scale: CGFloat = OnboardingCardMetrics.heroScale
-
-    var body: some View {
-        OnboardingClipCard(clip: clip, isSelected: isSelected, quickIndex: quickIndex)
-            .frame(width: OnboardingCardMetrics.fullWidth, height: OnboardingCardMetrics.fullHeight)
-            .scaleEffect(scale)
-            .frame(width: OnboardingCardMetrics.fullWidth * scale, height: OnboardingCardMetrics.fullHeight * scale)
-    }
-}
-
-// MARK: - Page 1
-
-private struct WelcomeHero: View {
-    let isActive: Bool
-    @State private var showLock = false
-
-    var body: some View {
-        HStack(spacing: 20) {
-            ZStack {
-                // Mac-ish bezel behind a fan of real cards
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.secondary.opacity(0.35), lineWidth: 2)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.secondary.opacity(0.06))
-                    )
-                    .frame(width: 280, height: 190)
-
-                HStack(spacing: -40) {
-                    ScaledDemoCard(clip: .notes, scale: 0.52)
-                        .rotationEffect(.degrees(-10))
-                    ScaledDemoCard(clip: .link, isSelected: true, scale: 0.52)
-                        .zIndex(1)
-                    ScaledDemoCard(clip: .image, scale: 0.52)
-                        .rotationEffect(.degrees(10))
-                }
-            }
-
-            VStack(spacing: 10) {
-                Image(systemName: "icloud.slash")
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .symbolEffect(.bounce, value: isActive && showLock)
-                HStack(spacing: 6) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("Stays on this Mac")
-                        .font(.system(size: 12, weight: .medium))
-                }
-                .foregroundStyle(.secondary)
-                .opacity(showLock ? 1 : 0)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: isActive) { _, active in
-            if active {
-                showLock = false
-                withAnimation(.easeOut(duration: 0.45).delay(0.2)) {
-                    showLock = true
-                }
-            }
-        }
-        .onAppear {
-            guard isActive else { return }
-            withAnimation(.easeOut(duration: 0.45).delay(0.2)) {
-                showLock = true
-            }
-        }
-    }
-}
-
-// MARK: - Page 2
-
-private struct CaptureHero: View {
-    let isActive: Bool
-    @State private var phase = 0
-    @State private var animationToken = 0
+private struct HeroScene<Content: View>: View {
+    let page: OnboardingPageID
+    let beat: Int
+    @ViewBuilder var content: () -> Content
 
     var body: some View {
         VStack(spacing: 10) {
-            // Menu bar strip with Paste It glyph
-            HStack {
-                Spacer()
-                HStack(spacing: 8) {
-                    Circle().fill(Color.secondary.opacity(0.25)).frame(width: 8, height: 8)
-                    Circle().fill(Color.secondary.opacity(0.25)).frame(width: 8, height: 8)
-                    Image(systemName: "doc.on.clipboard")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                        .padding(6)
-                        .background(
-                            Color.accentColor.opacity(0.12),
-                            in: RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        )
-                }
-                .padding(.horizontal, 12)
-                .frame(height: 28)
-                .frame(maxWidth: .infinity)
-                .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            }
-            .padding(.horizontal, 8)
-
-            HStack(alignment: .center, spacing: 12) {
-                Text("Copied!")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .opacity(phase == 0 ? 1 : 0.4)
-
-                Image(systemName: "arrow.right")
-                    .foregroundStyle(.tertiary)
-
-                ZStack(alignment: .leading) {
-                    ScaledDemoCard(clip: .notes, scale: 0.50)
-                        .offset(x: 0)
-                        .opacity(0.45)
-                    ScaledDemoCard(clip: .link, scale: 0.50)
-                        .offset(x: 36)
-                        .opacity(0.7)
-                    ScaledDemoCard(clip: .code, isSelected: phase >= 1, scale: 0.50)
-                        .offset(x: phase >= 1 ? 72 : 120)
-                        .opacity(phase >= 1 ? 1 : 0)
-                }
-                .frame(width: 220, height: OnboardingCardMetrics.fullHeight * 0.50, alignment: .leading)
-            }
+            DemoStepRail(labels: page.stepLabels, current: min(beat, page.stepLabels.count - 1))
+            content()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: isActive) { _, active in
-            if active {
-                startLoop()
-            } else {
-                animationToken += 1
-                phase = 0
-            }
-        }
-        .onAppear {
-            if isActive { startLoop() }
-        }
     }
+}
 
-    private func startLoop() {
-        animationToken += 1
-        let token = animationToken
-        phase = 0
-        Task { @MainActor in
-            while token == animationToken {
-                try? await Task.sleep(for: .milliseconds(700))
-                guard token == animationToken else { return }
-                withAnimation(.easeInOut(duration: 0.35)) { phase = 1 }
-                try? await Task.sleep(for: .milliseconds(1600))
-                guard token == animationToken else { return }
-                withAnimation(.easeInOut(duration: 0.25)) { phase = 0 }
-                try? await Task.sleep(for: .milliseconds(500))
+// MARK: - Capture — Copy → saved (menu bar flash + new card)
+
+private struct CaptureHero: View {
+    let isActive: Bool
+
+    var body: some View {
+        OnboardingBeatLoop(isActive: isActive, delays: [1.2, 2.2]) { beat in
+            HeroScene(page: .capture, beat: beat) {
+                VStack(spacing: 14) {
+                    DemoMenuBarStrip(cPressed: beat == 0, vPressed: false)
+                        .demoFocus(beat == 0)
+
+                    HStack(alignment: .center, spacing: 14) {
+                        DemoAppWindow(
+                            title: "Notes",
+                            systemImage: "note.text",
+                            emphasized: beat == 0,
+                            bodyText: "Ship the onboarding…",
+                            placeholder: "…"
+                        )
+                        .demoFocus(beat == 0)
+
+                        VStack(spacing: 6) {
+                            KeyCapsule(label: "⌘ C", pulsing: beat == 0, emphasized: beat == 0)
+                            Image(systemName: "arrow.right")
+                                .foregroundStyle(.tertiary)
+                        }
+
+                        ZStack(alignment: .leading) {
+                            ScaledDemoCard(clip: .link, scale: 0.40, opacity: 0.35)
+                            ScaledDemoCard(
+                                clip: .notes,
+                                isSelected: beat >= 1,
+                                scale: 0.40,
+                                opacity: beat >= 1 ? 1 : 0
+                            )
+                            .offset(x: beat >= 1 ? 44 : 90)
+                        }
+                        .frame(width: 180, height: OnboardingCardMetrics.fullHeight * 0.40, alignment: .leading)
+                        .demoFocus(beat >= 1)
+                    }
+                }
             }
         }
     }
 }
 
-// MARK: - Page 3
+// MARK: - Paste — Open timeline → double-click 2nd card → paste with visible result
 
-private struct TimelineHero: View {
+private struct PasteHero: View {
     let isActive: Bool
-    @State private var pulse = false
+    /// Second card in the demo strip (Link).
+    private let targetIndex = 1
+    private let pasteResult = "Paste It Docs\nexample.com/docs"
 
     var body: some View {
-        VStack(spacing: 8) {
-            OnboardingTimelineChrome {
-                HStack(spacing: 10) {
-                    ForEach(Array(OnboardingDemoClip.timelineStrip.enumerated()), id: \.element.id) { index, clip in
-                        ScaledDemoCard(
-                            clip: clip,
-                            isSelected: index == 1,
-                            quickIndex: index < 9 ? index + 1 : nil,
-                            scale: 0.50
-                        )
+        OnboardingBeatLoop(isActive: isActive, delays: [1.1, 1.6, 2.2]) { beat in
+            HeroScene(page: .paste, beat: beat) {
+                VStack(spacing: 10) {
+                    if beat == 0 {
+                        KeyCapsule(label: "⇧ ⌘ V", pulsing: true, emphasized: true)
+                    }
+
+                    HStack(alignment: .center, spacing: 14) {
+                        OnboardingTimelineChrome {
+                            HStack(spacing: 8) {
+                                ForEach(Array(OnboardingDemoClip.timelineStrip.prefix(3).enumerated()), id: \.element.id) { index, clip in
+                                    ZStack(alignment: .bottomTrailing) {
+                                        ScaledDemoCard(
+                                            clip: clip,
+                                            isSelected: beat >= 1 && index == targetIndex,
+                                            scale: 0.38,
+                                            opacity: cardOpacity(beat: beat, index: index)
+                                        )
+
+                                        if beat == 1 && index == targetIndex {
+                                            DemoDoubleClickCue(isActive: true)
+                                                .offset(x: 8, y: 10)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.bottom, 10)
+                            .padding(.top, 4)
+                        }
+                        .frame(width: 340, height: 168)
+                        .offset(y: beat == 0 ? 10 : 0)
+                        .demoFocus(beat <= 1)
+
+                        Image(systemName: "arrow.right")
+                            .foregroundStyle(.tertiary)
+                            .opacity(beat >= 2 ? 1 : 0.25)
+
+                        VStack(spacing: 8) {
+                            DemoAppWindow(
+                                title: "Pages",
+                                emphasized: beat >= 2,
+                                bodyText: beat >= 2 ? pasteResult : nil,
+                                placeholder: "Empty document"
+                            )
+                            KeyCapsule(label: "⌘ V", pulsing: beat >= 2, emphasized: beat >= 2)
+                                .opacity(beat >= 2 ? 1 : 0.3)
+                        }
+                        .demoFocus(beat >= 2)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.bottom, 12)
-                .padding(.top, 6)
             }
-            .frame(width: 580, height: 250)
+        }
+    }
 
-            KeyCapsule(label: "⇧ ⌘ V", pulsing: pulse)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: isActive) { _, active in
-            pulse = active
-        }
-        .onAppear {
-            pulse = isActive
-        }
+    private func cardOpacity(beat: Int, index: Int) -> Double {
+        if beat == 0 { return 0.85 }
+        return index == targetIndex ? 1 : 0.35
     }
 }
 
-// MARK: - Page 4
+// MARK: - Browse — Space → bubble above panel → click text to edit in-place
 
-private struct StageHero: View {
+private struct BrowseHero: View {
     let isActive: Bool
-    @State private var step = 0
-    @State private var animationToken = 0
 
     var body: some View {
-        HStack(spacing: 16) {
-            VStack(spacing: 6) {
-                Text("Step 1")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
-                    ScaledDemoCard(clip: .notes, isSelected: step >= 0, quickIndex: 1, scale: 0.50)
-                    Image(systemName: "arrow.right")
-                        .foregroundStyle(.tertiary)
-                    VStack(spacing: 4) {
-                        Image(systemName: "doc.on.clipboard.fill")
-                            .font(.system(size: 22))
-                            .foregroundStyle(step >= 1 ? Color.accentColor : .secondary)
-                        Text("Clipboard")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.accentColor.opacity(step >= 1 ? 0.12 : 0.04))
-                    )
-                }
-                Text("writes clipboard")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
-            }
-
-            VStack(spacing: 6) {
-                Text("Step 2")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-
+        OnboardingBeatLoop(isActive: isActive, delays: [1.0, 1.5, 2.2]) { beat in
+            HeroScene(page: .browse, beat: beat) {
+                // Keep cue inside the stage (overlay), not as an extra row that
+                // collides with the window footer.
                 VStack(spacing: 8) {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color.secondary.opacity(0.12))
-                        .frame(width: 120, height: 72)
-                        .overlay {
-                            VStack(spacing: 4) {
-                                Image(systemName: "macwindow")
-                                    .font(.system(size: 18))
-                                    .foregroundStyle(.secondary)
-                                Text("Other App")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundStyle(.secondary)
+                    ZStack {
+                        Color.clear.frame(height: 96)
+                        if beat >= 1 {
+                            ProductLikeBubble(isEditing: beat >= 2)
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        }
+                    }
+                    .demoFocus(beat >= 1)
+
+                    ZStack(alignment: .bottom) {
+                        OnboardingTimelineChrome {
+                            HStack(spacing: 8) {
+                                ForEach(Array(OnboardingDemoClip.timelineStrip.prefix(3).enumerated()), id: \.element.id) { index, clip in
+                                    ScaledDemoCard(
+                                        clip: clip,
+                                        isSelected: index == 0,
+                                        scale: 0.32,
+                                        opacity: index == 0 ? 1 : 0.35
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.bottom, 10)
+                            .padding(.top, 4)
+                        }
+                        .frame(width: 460, height: 138)
+                        .demoFocus(beat == 0)
+
+                        if beat == 0 {
+                            KeyCapsule(label: "Space", pulsing: true, emphasized: true)
+                                .padding(.bottom, 10)
+                        } else if beat == 2 {
+                            HStack(spacing: 6) {
+                                Image(systemName: "hand.tap.fill")
+                                    .foregroundStyle(Color.accentColor)
+                                Text("Click text in bubble")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.ultraThinMaterial, in: Capsule())
+                            .padding(.bottom, 10)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Matches real Space bubble: glass panel above timeline; edit = TextEditor in place.
+private struct ProductLikeBubble: View {
+    var isEditing: Bool
+    private let text = "Meeting notes — ship onboarding this week, keep the first-run path short."
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if isEditing {
+                HStack(alignment: .top, spacing: 0) {
+                    Text(text)
+                        .font(.system(size: 12))
+                        .lineLimit(3)
+                    BlinkingCaret()
+                        .padding(.top, 1)
+                    Spacer(minLength: 0)
+                }
+                .padding(8)
+                .frame(maxWidth: .infinity, minHeight: 56, alignment: .topLeading)
+                .background(Color(nsColor: .textBackgroundColor).opacity(0.55), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color.accentColor.opacity(0.45), lineWidth: 1.5)
+                }
+            } else {
+                Text(text)
+                    .font(.system(size: 12))
+                    .lineLimit(3)
+                    .frame(maxWidth: .infinity, minHeight: 56, alignment: .topLeading)
+                    .padding(8)
+            }
+        }
+        .padding(8)
+        .frame(width: 300)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.14), radius: 10, y: 3)
+    }
+}
+
+private struct BlinkingCaret: View {
+    var body: some View {
+        SwiftUI.TimelineView(.animation(minimumInterval: 0.5, paused: false)) { context in
+            Rectangle()
+                .fill(Color.accentColor)
+                .frame(width: 1.5, height: 14)
+                .opacity(Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0 ? 1 : 0)
+        }
+    }
+}
+
+// MARK: - Organize — multi-select → Return pastes in order
+
+private struct OrganizeHero: View {
+    let isActive: Bool
+    private let lines = ["First address", "Second snippet", "Third line"]
+
+    var body: some View {
+        OnboardingBeatLoop(isActive: isActive, delays: [1.4, 1.1, 2.2]) { beat in
+            HeroScene(page: .organize, beat: beat) {
+                HStack(alignment: .center, spacing: 20) {
+                    VStack(spacing: 10) {
+                        HStack(spacing: 8) {
+                            ForEach(Array(OnboardingDemoClip.stackItems.enumerated()), id: \.element.id) { index, clip in
+                                let selected = selectedCount(beat) > index
+                                ScaledDemoCard(
+                                    clip: clip,
+                                    isSelected: selected,
+                                    multiSelectIndex: selected ? index + 1 : nil,
+                                    scale: 0.36,
+                                    opacity: selected || beat == 0 ? 1 : 0.35
+                                )
                             }
                         }
-                    KeyCapsule(label: "⌘ V", pulsing: step >= 2)
-                }
-                Text("you press ⌘V")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
-            }
-            .opacity(step >= 2 ? 1 : 0.45)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: isActive) { _, active in
-            if active {
-                startSequence()
-            } else {
-                animationToken += 1
-                step = 0
-            }
-        }
-        .onAppear {
-            if isActive { startSequence() }
-        }
-    }
-
-    private func startSequence() {
-        animationToken += 1
-        let token = animationToken
-        step = 0
-        Task { @MainActor in
-            while token == animationToken {
-                withAnimation(.easeInOut(duration: 0.25)) { step = 0 }
-                try? await Task.sleep(for: .milliseconds(400))
-                guard token == animationToken else { return }
-                withAnimation(.easeInOut(duration: 0.3)) { step = 1 }
-                try? await Task.sleep(for: .milliseconds(900))
-                guard token == animationToken else { return }
-                withAnimation(.easeInOut(duration: 0.3)) { step = 2 }
-                try? await Task.sleep(for: .milliseconds(1600))
-            }
-        }
-    }
-}
-
-// MARK: - Page 5
-
-private struct NextStepsHero: View {
-    let isActive: Bool
-    @State private var pinned = false
-
-    var body: some View {
-        HStack(spacing: 28) {
-            VStack(spacing: 8) {
-                Text("Pinboard")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                ZStack(alignment: .topTrailing) {
-                    ScaledDemoCard(clip: .favorite, isSelected: pinned, scale: 0.48)
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                        .padding(6)
-                        .background(.ultraThinMaterial, in: Circle())
-                        .offset(x: 4, y: -4)
-                        .opacity(pinned ? 1 : 0)
-                        .scaleEffect(pinned ? 1 : 0.5)
-                }
-            }
-
-            VStack(spacing: 8) {
-                Text("Paste Stack")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(Array(OnboardingDemoClip.stackItems.enumerated()), id: \.element.id) { index, clip in
-                        HStack(spacing: 8) {
-                            Text("\(index + 1).")
-                                .font(.system(size: 11, weight: .bold).monospaced())
+                        if beat <= 1 {
+                            KeyCapsule(
+                                label: "⌘-click",
+                                pulsing: beat == 0,
+                                emphasized: beat <= 1
+                            )
+                        } else {
+                            Text("3 selected — Return to paste")
+                                .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(.secondary)
-                                .frame(width: 18, alignment: .trailing)
-                            ScaledDemoCard(clip: clip, scale: 0.34)
                         }
                     }
-                }
+                    .demoFocus(beat <= 1)
 
-                Text("paste in order")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: isActive) { _, active in
-            if active {
-                pinned = false
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.7).delay(0.15)) {
-                    pinned = true
+                    Image(systemName: "arrow.right")
+                        .foregroundStyle(.tertiary)
+                        .opacity(beat >= 2 ? 1 : 0.3)
+
+                    VStack(spacing: 8) {
+                        DemoAppWindow(
+                            title: "Mail",
+                            emphasized: beat >= 2,
+                            bodyText: beat >= 2 ? lines.joined(separator: "\n") : nil,
+                            placeholder: "Compose…"
+                        )
+                        .frame(width: 168, height: 110)
+
+                        KeyCapsule(label: "Return", pulsing: beat >= 2, emphasized: beat >= 2)
+                            .opacity(beat >= 2 ? 1 : 0.3)
+                    }
+                    .demoFocus(beat >= 2)
                 }
             }
         }
-        .onAppear {
-            guard isActive else { return }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7).delay(0.15)) {
-                pinned = true
-            }
+    }
+
+    private func selectedCount(_ beat: Int) -> Int {
+        switch beat {
+        case 0: return 1
+        case 1: return 3
+        default: return 3
         }
     }
 }

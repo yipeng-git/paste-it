@@ -72,7 +72,18 @@ struct SettingsView: View {
 
             Section {
                 Button("Show Tutorial…") {
-                    OnboardingWindowController.shared.show(settings: settings, source: "settings")
+                    OnboardingWindowController.shared.show(
+                        settings: settings,
+                        flow: .install,
+                        source: "settings"
+                    )
+                }
+                Button("What's New…") {
+                    OnboardingWindowController.shared.show(
+                        settings: settings,
+                        flow: .update,
+                        source: "settings"
+                    )
                 }
             }
 

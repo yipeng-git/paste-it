@@ -4,7 +4,7 @@ import SwiftUI
 @MainActor
 final class OnboardingAnalyticsHandle {
     let source: String
-    private(set) var lastStep: String = OnboardingPageID.welcome.analyticsName
+    private(set) var lastStep: String = OnboardingPageID.capture.analyticsName
     private(set) var didComplete = false
     private var didStart = false
 
@@ -36,32 +36,43 @@ final class OnboardingAnalyticsHandle {
 
 struct OnboardingView: View {
     @ObservedObject var settings: AppSettings
+    var flow: OnboardingFlow
     var analytics: OnboardingAnalyticsHandle
     var onFinished: () -> Void
 
     @State private var pageIndex = 0
     @State private var navigateForward = true
 
-    private var pages: [OnboardingPageID] { OnboardingPageID.allCases }
+    private var pages: [OnboardingPageID] { OnboardingPageID.pages(for: flow) }
     private var isLastPage: Bool { pageIndex >= pages.count - 1 }
     private var currentPage: OnboardingPageID { pages[pageIndex] }
 
     private let footerHeight: CGFloat = 44
+    private let titleBlockHeight: CGFloat = 52
 
     var body: some View {
         VStack(spacing: 0) {
+            titleBlock
+                .padding(.horizontal, 24)
+                .padding(.top, 14)
+                .frame(height: titleBlockHeight, alignment: .top)
+                .clipped()
+                .layoutPriority(1)
+
             heroSection
                 .padding(.horizontal, 16)
-                .padding(.top, 14)
+                .padding(.top, 6)
+                .padding(.bottom, 4)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .layoutPriority(0)
 
             footer
                 .padding(.horizontal, 20)
-                .frame(height: footerHeight)
-                .padding(.bottom, 14)
                 .padding(.top, 10)
+                .padding(.bottom, 16)
+                .layoutPriority(1)
         }
-        .frame(width: 640, height: 420)
+        .frame(width: 640, height: 500)
         .background(Color(nsColor: .windowBackgroundColor))
         .onAppear {
             analytics.markStarted()
@@ -72,6 +83,21 @@ struct OnboardingView: View {
         }
     }
 
+    private var titleBlock: some View {
+        VStack(spacing: 4) {
+            Text(currentPage.title)
+                .font(.system(size: 17, weight: .semibold))
+                .frame(maxWidth: .infinity)
+            Text(currentPage.caption)
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity)
+        }
+        .id(currentPage)
+    }
+
     private var heroSection: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -80,9 +106,7 @@ struct OnboardingView: View {
             OnboardingHeroView(page: currentPage, isActive: true)
                 .id(currentPage)
                 .transition(pageTransition)
-                .padding(16)
-                // Hero pages vary in intrinsic size; always fill the slot so the
-                // footer never jumps when switching illustrations.
+                .padding(12)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -91,50 +115,60 @@ struct OnboardingView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: 12) {
-            Button("Skip") {
-                finish(outcome: "skipped")
+        // Equal-width leading/trailing columns keep dots centered and stop
+        // Back/Continue from shifting when Skip is narrow or Back is hidden.
+        HStack(spacing: 0) {
+            HStack(spacing: 0) {
+                Button("Skip") {
+                    finish(outcome: "skipped")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             pageIndicators
 
-            Spacer()
-
-            // Reserve Back's width on page 1 so Continue doesn't shift horizontally.
-            Button("Back") {
-                go(to: pageIndex - 1, forward: false)
-            }
-            .keyboardShortcut(.leftArrow, modifiers: [])
-            .opacity(pageIndex > 0 ? 1 : 0)
-            .disabled(pageIndex == 0)
-            .allowsHitTesting(pageIndex > 0)
-
-            Button(isLastPage ? "Get Started" : "Continue") {
-                if isLastPage {
-                    finish(outcome: "completed")
-                } else {
-                    go(to: pageIndex + 1, forward: true)
+            HStack(spacing: 12) {
+                Spacer(minLength: 0)
+                Button("Back") {
+                    go(to: pageIndex - 1, forward: false)
                 }
+                .keyboardShortcut(.leftArrow, modifiers: [])
+                .opacity(pageIndex > 0 ? 1 : 0)
+                .disabled(pageIndex == 0)
+                .allowsHitTesting(pageIndex > 0)
+
+                Button(isLastPage ? finishButtonTitle : "Continue") {
+                    if isLastPage {
+                        finish(outcome: "completed")
+                    } else {
+                        go(to: pageIndex + 1, forward: true)
+                    }
+                }
+                .keyboardShortcut(.defaultAction)
+                .buttonStyle(.borderedProminent)
+                .frame(width: 110)
             }
-            .keyboardShortcut(.defaultAction)
-            .buttonStyle(.borderedProminent)
-            .frame(minWidth: 110)
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
+        .frame(height: footerHeight)
+    }
+
+    private var finishButtonTitle: String {
+        flow == .update ? "Done" : "Get Started"
     }
 
     private var pageIndicators: some View {
         HStack(spacing: 6) {
-            ForEach(pages) { page in
+            ForEach(Array(pages.enumerated()), id: \.element.id) { index, _ in
                 Circle()
-                    .fill(page.rawValue == pageIndex ? Color.accentColor : Color.secondary.opacity(0.3))
+                    .fill(index == pageIndex ? Color.accentColor : Color.secondary.opacity(0.3))
                     .frame(width: 7, height: 7)
                     .contentShape(Rectangle().size(width: 16, height: 16))
                     .onTapGesture {
-                        go(to: page.rawValue, forward: page.rawValue >= pageIndex)
+                        go(to: index, forward: index >= pageIndex)
                     }
             }
         }
@@ -158,19 +192,17 @@ struct OnboardingView: View {
     private func finish(outcome: String) {
         analytics.markStep(currentPage.analyticsName)
         analytics.markFinished(outcome: outcome)
-        settings.hasCompletedOnboarding = true
+        stampCompletion()
         onFinished()
     }
-}
 
-extension OnboardingPageID {
-    var analyticsName: String {
-        switch self {
-        case .welcome: return "welcome"
-        case .capture: return "capture"
-        case .timeline: return "timeline"
-        case .stage: return "stage"
-        case .nextSteps: return "nextSteps"
+    private func stampCompletion() {
+        switch flow {
+        case .install:
+            settings.hasCompletedOnboarding = true
+            settings.seenWhatsNewContentVersion = AppSettings.currentWhatsNewContentVersion
+        case .update:
+            settings.seenWhatsNewContentVersion = AppSettings.currentWhatsNewContentVersion
         }
     }
 }

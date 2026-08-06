@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// First-launch tutorial window. Mirrors `SettingsWindowController` activation policy handling.
+/// Install / What's New tutorial window. Mirrors `SettingsWindowController` activation policy handling.
 @MainActor
 final class OnboardingWindowController: NSObject, NSWindowDelegate {
     static let shared = OnboardingWindowController()
@@ -9,14 +9,20 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private var wasAccessory = true
     private var settings: AppSettings?
+    private var flow: OnboardingFlow = .install
     private var analytics: OnboardingAnalyticsHandle?
 
     var isVisible: Bool {
         window?.isVisible == true
     }
 
-    func show(settings: AppSettings, source: String = "settings") {
+    func show(
+        settings: AppSettings,
+        flow: OnboardingFlow,
+        source: String
+    ) {
         self.settings = settings
+        self.flow = flow
         let session = OnboardingAnalyticsHandle(source: source)
         self.analytics = session
         wasAccessory = NSApp.activationPolicy() == .accessory
@@ -24,16 +30,24 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
             NSApp.setActivationPolicy(.regular)
         }
 
+        let title = "Paste It"
         if let existing = window {
-            // Recreate content so the carousel always starts at page 1.
-            existing.contentViewController = makeHostingController(settings: settings, analytics: session)
+            existing.title = title
+            existing.setContentSize(NSSize(width: 640, height: 500))
+            existing.minSize = NSSize(width: 640, height: 500)
+            existing.maxSize = NSSize(width: 640, height: 500)
+            existing.contentViewController = makeHostingController(
+                settings: settings,
+                flow: flow,
+                analytics: session
+            )
             NSApp.activate(ignoringOtherApps: true)
             existing.makeKeyAndOrderFront(nil)
             existing.center()
             return
         }
 
-        let window = makeWindow(settings: settings, analytics: session)
+        let window = makeWindow(settings: settings, flow: flow, analytics: session)
         self.window = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
@@ -44,10 +58,14 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         window?.close()
     }
 
-    private func makeWindow(settings: AppSettings, analytics: OnboardingAnalyticsHandle) -> NSWindow {
-        let hosting = makeHostingController(settings: settings, analytics: analytics)
+    private func makeWindow(
+        settings: AppSettings,
+        flow: OnboardingFlow,
+        analytics: OnboardingAnalyticsHandle
+    ) -> NSWindow {
+        let hosting = makeHostingController(settings: settings, flow: flow, analytics: analytics)
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 420),
+            contentRect: NSRect(x: 0, y: 0, width: 640, height: 500),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -58,17 +76,22 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         window.delegate = self
         window.isOpaque = true
         window.backgroundColor = .windowBackgroundColor
-        window.setContentSize(NSSize(width: 640, height: 420))
-        window.minSize = NSSize(width: 640, height: 420)
-        window.maxSize = NSSize(width: 640, height: 420)
+        window.setContentSize(NSSize(width: 640, height: 500))
+        window.minSize = NSSize(width: 640, height: 500)
+        window.maxSize = NSSize(width: 640, height: 500)
         return window
     }
 
     private func makeHostingController(
         settings: AppSettings,
+        flow: OnboardingFlow,
         analytics: OnboardingAnalyticsHandle
     ) -> NSHostingController<OnboardingView> {
-        let root = OnboardingView(settings: settings, analytics: analytics) { [weak self] in
+        let root = OnboardingView(
+            settings: settings,
+            flow: flow,
+            analytics: analytics
+        ) { [weak self] in
             self?.close()
         }
         return NSHostingController(rootView: root)
@@ -77,11 +100,18 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         analytics?.markDismissedIfNeeded()
         analytics = nil
-        if let settings, !settings.hasCompletedOnboarding {
-            settings.hasCompletedOnboarding = true
+        if let settings {
+            switch flow {
+            case .install:
+                if !settings.hasCompletedOnboarding {
+                    settings.hasCompletedOnboarding = true
+                }
+                settings.seenWhatsNewContentVersion = AppSettings.currentWhatsNewContentVersion
+            case .update:
+                settings.seenWhatsNewContentVersion = AppSettings.currentWhatsNewContentVersion
+            }
         }
         guard wasAccessory else { return }
-        // Keep regular policy if Settings (or another regular window) is still open.
         if SettingsWindowController.shared.isVisible { return }
         NSApp.setActivationPolicy(.accessory)
     }

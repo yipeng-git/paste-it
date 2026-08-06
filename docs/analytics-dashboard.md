@@ -45,7 +45,7 @@ Focus on these five paths. Everything else is secondary until these are readable
 
 ```
 app_install
-  → onboarding_started (source=first_launch)
+  → onboarding_started (source=first_launch | update | settings)
   → onboarding_step_viewed… / onboarding_completed
   → panel_opened
   → clip_staged   ← activation success
@@ -176,7 +176,8 @@ Optional later: pin/folder/MCP once those events exist.
 | Chart name | Type | Configuration |
 | --- | --- | --- |
 | **Install → Stage (7d)** | Funnel | Step 1 `app_install` → Step 2 `clip_staged`. Conversion window **7 days**. Primary activation KPI |
-| **Onboarding steps (first launch)** | Funnel | Filter `source = first_launch` on start where applicable. Steps: `onboarding_started` → `onboarding_step_viewed` (`step=capture`) → (`timeline`) → (`stage`) → `onboarding_completed` (`outcome=completed`) |
+| **Onboarding steps (first launch)** | Funnel | Filter `source = first_launch` on start where applicable. Steps: `onboarding_started` → `onboarding_step_viewed` (`capture` → `paste` → `browse` → `organize`) → `onboarding_completed` (`outcome=completed`) |
+| **What's New (update)** | Funnel | Filter `source = update`. For content version 1, same steps as install (`capture` → `paste` → `browse` → `organize`) |
 | **Onboarding outcomes** | Trends | `onboarding_completed` → Breakdown `outcome` (`completed` / `skipped` / `dismissed`) |
 | **Bail-out step** | Trends | `onboarding_completed` where `outcome` is `skipped` or `dismissed` → Breakdown `last_step` |
 
