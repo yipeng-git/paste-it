@@ -1,0 +1,19 @@
+.gitignore
+  s_e53497dc931596::t_82a36259e314a7 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "02f8e52c87c58a1b320332d7cdff328f70d27f9c",
+  "prompts": {},
+  "sessions": {
+    "s_e53497dc931596": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c418ff1-fdff-42a6-b750-a83a229b1f66",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
