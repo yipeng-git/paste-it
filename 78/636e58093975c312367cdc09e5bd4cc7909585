@@ -1,0 +1,78 @@
+Sources/PasteIt/Onboarding/OnboardingView.swift
+  s_e53497dc931596::t_0544fd71d58c4b 39,46,51,55-58,61,64,86-90,92-94,96-98,159-160,165,167,171,195,199-205
+  s_e53497dc931596::t_cb354a09fca1b0 75
+  s_e53497dc931596::t_3f627729ffb8f1 7
+  s_e53497dc931596::t_47a1901a97de88 59-60,67,73,95,118-127,129,133-148,150-152,154,156
+  s_e53497dc931596::t_2ac8b1983ef17c 65,72
+  s_e53497dc931596::t_d66c06a2d6ffff 91,109
+  s_e53497dc931596::t_ff82238e7265cc 99-100
+  s_e53497dc931596::t_faf16a91915191 157-158
+Sources/PasteIt/Onboarding/OnboardingHeroes.swift
+  s_e53497dc931596::t_46412d0c2faa5e 269,292-300,319-320
+  s_e53497dc931596::t_dc15e929f34b15 12-13,20,22-25,29-30,32,44-45,48-53,55-57,59-68,70,72,74-75,99,118,142,161,273,276-279,282,285-288,304,306-313,315-318,321-322,326-332
+  s_e53497dc931596::t_bdbf061ea1882c 77,140,156,271,281,283-284,289-290
+  s_e53497dc931596::t_034e97d28bd6a5 256,258-259,261-264
+  s_e53497dc931596::t_24f5f1e029dbcd 162-163,166,174-191,195,204-207,226-227,232-233,241-244,247-248
+  s_e53497dc931596::t_2b65a55cf7ca61 28,31,33
+  s_e53497dc931596::t_c049eb5b3ac7da 260
+  s_e53497dc931596::t_ff31f2eee9248f 154,160,164-165,167-173,192-194,196-203,216-219,222-225,228-230,234-237,240,252,254
+  s_e53497dc931596::t_9c7b09a0efaccc 11,37,39,43,46-47,54,69,71,73,76,86,94-98,100-103,117,119-134,136-139,141,208,249-251,291,314
+  s_e53497dc931596::t_a7415c37c56096 84,88-90,93,104-116,135,148-150
+Sources/PasteIt/Onboarding/OnboardingDemoClips.swift
+  s_e53497dc931596::t_0eaf71c11c2623 269,273-274,276,278,280,283,285,287-290,292-293,296-313
+  s_e53497dc931596::t_856a3a752ecfd2 314
+Sources/PasteIt/App/AppRuntime.swift
+  s_e53497dc931596::t_2e5b185d1035e5 108-122
+Sources/PasteIt/Onboarding/OnboardingBeatLoop.swift
+  s_e53497dc931596::t_bfeba45719bf91 1-37
+Sources/PasteIt/App/AppSettings.swift
+  s_e53497dc931596::t_6de27a543aec13 42-44
+docs/analytics.md
+  s_e53497dc931596::t_02f0f037f44889 45
+  s_e53497dc931596::t_0c146b17d4f93f 44
+Sources/PasteIt/Settings/SettingsView.swift
+  s_e53497dc931596::t_5377bbd842e0a6 75-86
+Sources/PasteIt/Onboarding/OnboardingDemoKit.swift
+  s_e53497dc931596::t_27ddf6de82c718 200-201,205-217,219-220
+  s_e53497dc931596::t_32a9391ebbf7ca 223-337
+  s_e53497dc931596::t_94621d89f88ad4 1-199,202-204,218,221-222
+  s_e53497dc931596::t_e1432f8579ba3e 338-393
+Sources/PasteIt/Onboarding/OnboardingPage.swift
+  s_e53497dc931596::t_c691204e45c048 57-58,60
+  s_e53497dc931596::t_90434d8b40277e 50
+  s_e53497dc931596::t_7dbb581fc88496 3-7,14,16,19-22,24-30,35-39,53-56,59,62-63
+  s_e53497dc931596::t_739e38389fb0a7 52
+  s_e53497dc931596::t_8e64c76645540d 34,44-48,51
+  s_e53497dc931596::t_7cb18c2bb8db39 15
+  s_e53497dc931596::t_7595e5652e25e3 42
+  s_e53497dc931596::t_0d7f8af160c4fe 43
+  s_e53497dc931596::t_37a2afc4dfba8e 9,11-13,23,31-33,40,49,61
+  s_e53497dc931596::t_8beaaa94d158d8 41
+Sources/PasteIt/Analytics/AnalyticsCatalog.swift
+  s_e53497dc931596::t_b6430af21a0f30 30
+Sources/PasteIt/Onboarding/OnboardingWindowController.swift
+  s_e53497dc931596::t_ebe80e6304dcf1 4,12,19-23,25,35,39-43,50,61-66,87,90-94,103-112
+  s_e53497dc931596::t_26e7a6b1b56ce2 36-38
+  s_e53497dc931596::t_4231be9b26a2c1 33
+  s_e53497dc931596::t_df4c3266e26a55 68,79-81
+docs/analytics-dashboard.md
+  s_e53497dc931596::t_0dfe02edd31131 48
+  s_e53497dc931596::t_527b64fe4fe5af 180
+  s_e53497dc931596::t_c33bdc828f404a 179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "78636e58093975c312367cdc09e5bd4cc7909585",
+  "prompts": {},
+  "sessions": {
+    "s_e53497dc931596": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c418ff1-fdff-42a6-b750-a83a229b1f66",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
