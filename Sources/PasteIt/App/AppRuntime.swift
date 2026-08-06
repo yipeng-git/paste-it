@@ -21,7 +21,7 @@ final class AppRuntime: NSObject {
     var state: AppState { appState }
 
     private var statusItem: NSStatusItem?
-    private var keycapsView: MenuBarKeycapsView?
+    private var keycapsIcon: MenuBarKeycapsIcon?
     private var cmdCVFlashMonitor: CmdCVKeyFlashMonitor?
     private var didStart = false
 
@@ -132,7 +132,7 @@ final class AppRuntime: NSObject {
     }
 
     private func configureStatusItem() {
-        let size = MenuBarKeycapsView.preferredSize
+        let size = MenuBarKeycapsIcon.preferredSize
         let item = NSStatusBar.system.statusItem(withLength: size.width)
         guard let button = item.button else {
             statusItem = item
@@ -140,21 +140,23 @@ final class AppRuntime: NSObject {
         }
 
         button.title = ""
-        button.image = nil
+        button.imagePosition = .imageOnly
+        button.imageScaling = .scaleProportionallyDown
         button.toolTip = "Paste It"
         button.target = self
         button.action = #selector(statusItemClicked)
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item.menu = nil
 
-        let keycaps = MenuBarKeycapsView(frame: NSRect(origin: .zero, size: size))
-        keycaps.autoresizingMask = [.width, .height]
-        // Clear any previous keycaps if we reconfigure.
-        button.subviews
-            .filter { $0 is MenuBarKeycapsView }
-            .forEach { $0.removeFromSuperview() }
-        button.addSubview(keycaps)
-        keycapsView = keycaps
+        // Drop any legacy keycaps subview from older builds / reconfigure.
+        button.subviews.forEach { $0.removeFromSuperview() }
+
+        let keycaps = MenuBarKeycapsIcon()
+        keycaps.onImageChange = { [weak button] image in
+            button?.image = image
+        }
+        keycaps.publish()
+        keycapsIcon = keycaps
 
         statusItem = item
         refreshStatusItem()
@@ -162,8 +164,8 @@ final class AppRuntime: NSObject {
 
     private func startCmdCVFlashMonitor() {
         let monitor = CmdCVKeyFlashMonitor(
-            onCommandC: { [weak self] in self?.keycapsView?.flash(.c) },
-            onCommandV: { [weak self] in self?.keycapsView?.flash(.v) }
+            onCommandC: { [weak self] pressed in self?.keycapsIcon?.setPressed(pressed, for: .c) },
+            onCommandV: { [weak self] pressed in self?.keycapsIcon?.setPressed(pressed, for: .v) }
         )
         monitor.start()
         cmdCVFlashMonitor = monitor
@@ -172,7 +174,7 @@ final class AppRuntime: NSObject {
     private func refreshStatusItem() {
         let stack = pasteStackController.statusTitle
         let stackLine = stack == "Paste" ? nil : stack
-        var tip = "Paste It — ⌘C / ⌘V flash the keys"
+        var tip = "Paste It — hold ⌘C / ⌘V to press the keys"
         if let stackLine {
             tip += "\n\(stackLine)"
         }

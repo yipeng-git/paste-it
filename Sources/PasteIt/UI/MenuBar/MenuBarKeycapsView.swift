@@ -1,32 +1,58 @@
 import AppKit
 
-/// Diagonal C / V 3D keycaps for the menu-bar status item.
+/// Diagonal C / V 3D keycaps rendered as a menu-bar template image.
 /// Matches KeyStats' MenuIcon feel: thick bottom/left rim, thin top/right,
-/// recessed key face. Pressed = invert (fill) the key face.
+/// recessed key face. Pressed = invert (fill) the key face with a punched letter.
+///
+/// Uses `isTemplate = true` so the system tints the silhouette like other apps;
+/// hold/release swaps the template image between hollow and solid keycaps.
 @MainActor
-final class MenuBarKeycapsView: NSView {
+final class MenuBarKeycapsIcon {
     enum Key {
         case c
         case v
     }
 
-    private var cPressed = false
-    private var vPressed = false
-    private var pressResetWork: [Key: DispatchWorkItem] = [:]
-
     static let preferredSize = NSSize(width: 32, height: 22)
 
-    override var intrinsicContentSize: NSSize { Self.preferredSize }
-    override var isFlipped: Bool { false }
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    private var cPressed = false
+    private var vPressed = false
 
-    override func viewDidChangeEffectiveAppearance() {
-        super.viewDidChangeEffectiveAppearance()
-        needsDisplay = true
+    /// Called whenever the template image should be reapplied to the status button.
+    var onImageChange: ((NSImage) -> Void)?
+
+    func currentImage() -> NSImage {
+        Self.makeTemplateImage(cPressed: cPressed, vPressed: vPressed)
     }
 
-    override func draw(_ dirtyRect: NSRect) {
-        let bounds = self.bounds
+    func publish() {
+        onImageChange?(currentImage())
+    }
+
+    /// Hold → solid; release → hollow. No timed flash.
+    func setPressed(_ pressed: Bool, for key: Key) {
+        switch key {
+        case .c:
+            guard cPressed != pressed else { return }
+            cPressed = pressed
+        case .v:
+            guard vPressed != pressed else { return }
+            vPressed = pressed
+        }
+        publish()
+    }
+
+    static func makeTemplateImage(cPressed: Bool, vPressed: Bool) -> NSImage {
+        let size = preferredSize
+        let image = NSImage(size: size, flipped: false) { bounds in
+            drawKeycaps(in: bounds, cPressed: cPressed, vPressed: vPressed)
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
+
+    private static func drawKeycaps(in bounds: NSRect, cPressed: Bool, vPressed: Bool) {
         let keySize = NSSize(width: 16, height: 15)
 
         let cRect = NSRect(
@@ -42,13 +68,14 @@ final class MenuBarKeycapsView: NSView {
             height: keySize.height
         )
 
+        // V under C so the diagonal stack reads clearly.
         drawKeycap(in: vRect, label: "V", pressed: vPressed)
         drawKeycap(in: cRect, label: "C", pressed: cPressed)
     }
 
-    private func drawKeycap(in outer: NSRect, label: String, pressed: Bool) {
-        let ink = NSColor.labelColor
-        let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    private static func drawKeycap(in outer: NSRect, label: String, pressed: Bool) {
+        // Template images: only alpha matters; draw opaque black, punch holes for invert.
+        let ink = NSColor.black
 
         // Asymmetric inset → fatter SW rim, thin NE rim (KeyStats depth).
         let insetL: CGFloat = 3.4
@@ -77,9 +104,10 @@ final class MenuBarKeycapsView: NSView {
         )
 
         if pressed {
-            // Invert key top: solid body + contrasting letter.
+            // Solid body; letter punched out so the menu bar shows through (invert).
             ink.setFill()
             outerPath.fill()
+            punchLetter(label, in: face)
         } else {
             // Rim only (even-odd punch of the face).
             let rim = NSBezierPath()
@@ -88,28 +116,31 @@ final class MenuBarKeycapsView: NSView {
             rim.append(facePath)
             ink.setFill()
             rim.fill()
-        }
 
-        // Hairline on the thin NE edge so the silhouette stays complete.
-        ink.withAlphaComponent(isDark ? 0.95 : 0.9).setStroke()
-        outerPath.lineWidth = 1.0
-        outerPath.lineJoinStyle = .round
-        outerPath.stroke()
+            // Hairline on the thin NE edge so the silhouette stays complete.
+            ink.withAlphaComponent(0.95).setStroke()
+            outerPath.lineWidth = 1.0
+            outerPath.lineJoinStyle = .round
+            outerPath.stroke()
 
-        // Letter centered on the face.
-        let fontSize = max(7.0, min(face.width, face.height) * 0.72)
-        let font = NSFont.systemFont(ofSize: fontSize, weight: .bold)
-        let textColor: NSColor
-        if pressed {
-            textColor = isDark ? .black : .controlBackgroundColor
-        } else {
-            textColor = ink
+            drawLetter(label, in: face, color: ink)
         }
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: textColor,
+    }
+
+    private static func letterAttrs(fontSize: CGFloat, color: NSColor) -> [NSAttributedString.Key: Any] {
+        [
+            .font: NSFont.systemFont(ofSize: fontSize, weight: .bold),
+            .foregroundColor: color,
             .kern: -0.6,
         ]
+    }
+
+    private static func letterFontSize(for face: NSRect) -> CGFloat {
+        max(7.0, min(face.width, face.height) * 0.72)
+    }
+
+    private static func drawLetter(_ label: String, in face: NSRect, color: NSColor) {
+        let attrs = letterAttrs(fontSize: letterFontSize(for: face), color: color)
         let text = NSAttributedString(string: label, attributes: attrs)
         let size = text.size()
         text.draw(
@@ -120,21 +151,15 @@ final class MenuBarKeycapsView: NSView {
         )
     }
 
-    func flash(_ key: Key, duration: TimeInterval = 0.16) {
-        pressResetWork[key]?.cancel()
-        setPressed(true, for: key)
-        let work = DispatchWorkItem { [weak self] in
-            self?.setPressed(false, for: key)
+    /// Clears the letter glyph so pressed keys read as inverted silhouettes.
+    private static func punchLetter(_ label: String, in face: NSRect) {
+        guard let context = NSGraphicsContext.current?.cgContext else {
+            drawLetter(label, in: face, color: .white)
+            return
         }
-        pressResetWork[key] = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: work)
-    }
-
-    private func setPressed(_ pressed: Bool, for key: Key) {
-        switch key {
-        case .c: cPressed = pressed
-        case .v: vPressed = pressed
-        }
-        needsDisplay = true
+        context.saveGState()
+        context.setBlendMode(.destinationOut)
+        drawLetter(label, in: face, color: .black)
+        context.restoreGState()
     }
 }
