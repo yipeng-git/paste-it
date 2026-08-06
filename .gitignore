@@ -23,6 +23,7 @@ DerivedData/
 *~
 .idea/
 .vscode/
+.cursor/
 
 # Sparkle release archives (DMGs for generate_appcast); do not commit binaries
 updates/*
