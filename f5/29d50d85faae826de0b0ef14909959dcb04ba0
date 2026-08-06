@@ -1,0 +1,27 @@
+Sources/PasteIt/App/AppRuntime.swift
+  s_d9375ac9149e3d::t_20ea69f3e30589 24
+  s_d9375ac9149e3d::t_0bd0d9d0d916b1 177
+  s_d9375ac9149e3d::t_2d68286fb79e20 135,143-144,151-159
+  s_d9375ac9149e3d::t_731a91d6a3b78b 167-168
+Sources/PasteIt/UI/MenuBar/CmdCVKeyFlashMonitor.swift
+  s_d9375ac9149e3d::t_2d30582939a887 5-6,11-13,16-17,19,26-27,32,47-48,52-64,66-68,72-74,76-78,83-122
+Sources/PasteIt/UI/MenuBar/MenuBarKeycapsView.swift
+  s_d9375ac9149e3d::t_0f977f2df48a8a 8,32-33,35-40
+  s_d9375ac9149e3d::t_8c5486f418a5e3 3,5-7,10,16-17,21-30,34,41-43,45-52,55,71,76-78,107,110,120-124,126,128-133,136-143,154-158,160-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "f529d50d85faae826de0b0ef14909959dcb04ba0",
+  "prompts": {},
+  "sessions": {
+    "s_d9375ac9149e3d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a32b427c-9009-470f-a13f-fa9e28c476e5",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
