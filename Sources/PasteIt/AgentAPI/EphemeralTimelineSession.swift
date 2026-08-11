@@ -1,17 +1,20 @@
 import AppKit
 import Foundation
 import SwiftUI
+import PasteItCore
 
 @MainActor
 final class EphemeralTimelineSession {
     private let historyStore: HistoryStore
+    private let appState: AppState
     private let tempRoot: URL
     private var panel: NSPanel?
     private let panelHeight: CGFloat = 320
     private let bottomInset: CGFloat = 12
 
-    private init(historyStore: HistoryStore, tempRoot: URL) {
+    private init(historyStore: HistoryStore, appState: AppState, tempRoot: URL) {
         self.historyStore = historyStore
+        self.appState = appState
         self.tempRoot = tempRoot
     }
 
@@ -19,7 +22,12 @@ final class EphemeralTimelineSession {
         let tempRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("PasteItEphemeral-\(UUID().uuidString)", isDirectory: true)
         let store = HistoryStore(ephemeralBlobRoot: tempRoot, settings: settings)
-        return EphemeralTimelineSession(historyStore: store, tempRoot: tempRoot)
+        let appState = AppState(
+            settings: settings,
+            historyStore: store,
+            searchService: SearchService()
+        )
+        return EphemeralTimelineSession(historyStore: store, appState: appState, tempRoot: tempRoot)
     }
 
     func seed(cards: [AgentRenderCard], preloadedImages: [Int: Data] = [:]) throws {
@@ -34,12 +42,16 @@ final class EphemeralTimelineSession {
         }
     }
 
-    func show(query: String, selectedType: ClipType?, selectedIndex: Int) {
-        let view = EphemeralTimelineView(
-            historyStore: historyStore,
-            query: query,
-            selectedType: selectedType,
-            selectedIndex: selectedIndex
+    /// Shows the real product `TimelineView` over an ephemeral store (does not touch main history).
+    func show(query: String, selectedType: ClipType?) {
+        if let selectedType,
+           let filter = FilterCategory.from(typeToken: selectedType.rawValue) {
+            appState.setFilter(filter)
+        }
+
+        let view = TimelineView(
+            appState: appState,
+            pasteController: AppRuntime.shared.pasteController
         )
         let hosting = NSHostingController(rootView: view)
         let panel = NSPanel(
@@ -69,6 +81,22 @@ final class EphemeralTimelineSession {
         panel.setFrame(frame, display: true)
         panel.orderFrontRegardless()
         self.panel = panel
+
+        // Apply query after the view is mounted so `searchFocusRequest` activates the field.
+        if !query.isEmpty {
+            appState.query = query
+            appState.searchFocusRequest += 1
+        }
+    }
+
+    /// Call after settle so search debounce has rebuilt `visibleClips`.
+    func finalizeUI(selectedIndex: Int) {
+        let clips = appState.visibleClips
+        if clips.indices.contains(selectedIndex) {
+            appState.selectOnly(clips[selectedIndex].id)
+        } else {
+            appState.selectFirst()
+        }
     }
 
     func awaitLinkPreviewsIfNeeded() async {

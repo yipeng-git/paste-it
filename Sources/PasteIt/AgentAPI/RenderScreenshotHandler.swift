@@ -75,7 +75,7 @@ enum RenderScreenshotHandler {
             await session.awaitLinkPreviewsIfNeeded()
         }
 
-        session.show(query: query, selectedType: selectedType, selectedIndex: selectedIndex)
+        session.show(query: query, selectedType: selectedType)
 
         // Yield + sleep releases MainActor so health / menu stay responsive during wait.
         await Task.yield()
@@ -90,6 +90,10 @@ enum RenderScreenshotHandler {
             settleNs = 350_000_000
         }
         try await Task.sleep(nanoseconds: settleNs)
+
+        // After search debounce / first paint, lock selection then capture.
+        session.finalizeUI(selectedIndex: selectedIndex)
+        await Task.yield()
 
         guard let frame = session.panelFrame else {
             throw HandlerError.captureFailed("Ephemeral panel has no frame")

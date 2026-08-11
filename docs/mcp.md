@@ -36,11 +36,11 @@ Requests must be JSON-RPC over HTTP with:
 | `paste_it_list_clips` | `limit` / `offset` / `type` / `sourceApp` |
 | `paste_it_get_clip` | `id` + optional `includeBlobs` |
 | `paste_it_search` | `q` / `limit` / … (same query language as the app) |
-| `paste_it_render_screenshot` | Ephemeral timeline → screen-region PNG path |
+| `paste_it_render_screenshot` | Ephemeral cards + real `TimelineView` → screen-region PNG path |
 
 ### `paste_it_render_screenshot`
 
-Builds a **throwaway** timeline (does not write main history), shows a temporary glass panel, captures a **screen-region** PNG (so Liquid Glass composites correctly), then destroys the session.
+Builds a **throwaway** history (does not write main history), shows a temporary glass panel using the **same `TimelineView` toolbar and cards as the product**, captures a **screen-region** PNG (so Liquid Glass composites correctly), then destroys the session.
 
 Default output directory:
 
