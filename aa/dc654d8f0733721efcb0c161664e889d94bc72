@@ -1,0 +1,25 @@
+README.ja.md
+  s_1b642df6f66f0d::t_2acbc3c2f756de 5,11,13-17,19,21-24,26,28,30-34,36,38-49,51,53,55,57,59,61,63,65-69,72-73,77
+README.zh-CN.md
+  s_1b642df6f66f0d::t_876d00d8959aff 5,11,13-17,19,21-24,26,28,30-34,36,38-49,51,53,55,57,59,61,63,65-69,72-73,77
+README.md
+  s_1b642df6f66f0d::t_7e5b4b7faa3933 5,11,13-17,19,21-24,26,28,30-34,36,38-49,51,53,55,57,59,61,63,65-69,72-73,77
+README.ko.md
+  s_1b642df6f66f0d::t_58308665482d20 5,11,13-17,19,21-24,26,28,30-34,36,38-49,51,53,55,57,59,61,63,65-69,72-73,77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "aadc654d8f0733721efcb0c161664e889d94bc72",
+  "prompts": {},
+  "sessions": {
+    "s_1b642df6f66f0d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f5916ba1-f40c-4f58-a4da-fb6987124a1b",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
