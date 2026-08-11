@@ -108,6 +108,9 @@ struct SettingsView: View {
         Form {
             Toggle("Pause clipboard capture", isOn: $settings.capturePaused)
             Toggle("Paste as plain text by default", isOn: $settings.pasteAsPlainTextByDefault)
+            Text("⌃⌘V pastes once as plain text, then restores the original clipboard (Accessibility required to auto-paste). In the timeline, ⇧↩ pastes the selection as plain text.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             Toggle("Launch at login", isOn: Binding(
                 get: { launchAtLoginEnabled },
                 set: { enabled in

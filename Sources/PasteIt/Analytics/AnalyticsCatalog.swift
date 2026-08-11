@@ -34,6 +34,7 @@ enum AnalyticsCatalog {
         Event(name: "panel_closed", summary: "Timeline panel hidden (duration bucket, did stage?)"),
         Event(name: "session_summary", summary: "Per panel session counts (stages / searches) plus search zero-result flag"),
         Event(name: "clip_staged", summary: "Item copied to system pasteboard from timeline"),
+        Event(name: "plain_paste", summary: "⌃⌘V paste without formatting (success / fail_reason only)"),
         Event(name: "paste_stack_session", summary: "Paste Stack open→close summary (collect / paste-next / Accessibility)"),
         Event(name: "update_interaction", summary: "Sparkle update check / find / download / install / fail")
     ]

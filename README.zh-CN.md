@@ -22,7 +22,8 @@
 - 浮动时间线（**Shift + Command + V**）— 看卡片和预览。
 - Pinboard：拖放固定，可永久保留。
 - Paste Stack（**Shift + Command + C**）— 收集、排序，再按顺序粘贴。
-- Quick Copy：**Command + 1…9**，可粘贴为纯文本，也支持多条一起复制。
+- **无格式粘贴** — **Control + Command + V** 把当前剪贴板剥成纯文本并粘贴（自动粘贴需要辅助功能权限）。
+- Quick Copy：**Command + 1…9**，也支持多条一起复制。
 - 隐私控制：暂停捕获、忽略指定 App 或 pasteboard 类型、保留期限、清理存储。
 - 可选匿名统计（PostHog）— **不会**上传剪贴板内容；见 [`docs/analytics.md`](docs/analytics.md) 和 [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md)。在「设置 → 隐私」里开关。
 - 用 Sparkle 做应用内更新。

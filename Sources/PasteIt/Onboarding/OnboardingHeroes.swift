@@ -81,7 +81,7 @@ private struct CaptureHero: View {
     }
 }
 
-// MARK: - Paste — Open timeline → double-click 2nd card → paste with visible result
+// MARK: - Paste — Open timeline → double-click → ⌘V → ⌃⌘V plain
 
 private struct PasteHero: View {
     let isActive: Bool
@@ -90,7 +90,7 @@ private struct PasteHero: View {
     private let pasteResult = "Paste It Docs\nexample.com/docs"
 
     var body: some View {
-        OnboardingBeatLoop(isActive: isActive, delays: [1.1, 1.6, 2.2]) { beat in
+        OnboardingBeatLoop(isActive: isActive, delays: [1.1, 1.5, 1.7, 2.2]) { beat in
             HeroScene(page: .paste, beat: beat) {
                 VStack(spacing: 10) {
                     if beat == 0 {
@@ -135,8 +135,15 @@ private struct PasteHero: View {
                                 bodyText: beat >= 2 ? pasteResult : nil,
                                 placeholder: "Empty document"
                             )
-                            KeyCapsule(label: "⌘ V", pulsing: beat >= 2, emphasized: beat >= 2)
-                                .opacity(beat >= 2 ? 1 : 0.3)
+                            if beat >= 3 {
+                                KeyCapsule(label: "⌃ ⌘ V", pulsing: true, emphasized: true)
+                                Text("Paste without formatting")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                KeyCapsule(label: "⌘ V", pulsing: beat == 2, emphasized: beat == 2)
+                                    .opacity(beat >= 2 ? 1 : 0.3)
+                            }
                         }
                         .demoFocus(beat >= 2)
                     }

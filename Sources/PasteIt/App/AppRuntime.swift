@@ -70,6 +70,14 @@ final class AppRuntime: NSObject {
                 pasteStackController.ensureAccessibilityIfNeeded()
                 return pasteStackController.pasteNext(panelController: panelController)
             },
+            pastePlain: { [pasteController, pasteStackController, panelController, appState] in
+                AppRuntime.performPasteWithoutFormatting(
+                    pasteController: pasteController,
+                    pasteStackController: pasteStackController,
+                    panelController: panelController,
+                    appState: appState
+                )
+            },
             editSelected: { [appState, panelController] in
                 guard panelController.isVisible else { return false }
                 return appState.beginEditingSelectedClip()
@@ -218,6 +226,12 @@ final class AppRuntime: NSObject {
                 keyEquivalent: ""
             ))
         }
+        menu.addItem(makeMenuItem(
+            title: "Paste Without Formatting",
+            action: #selector(pasteWithoutFormattingMenu),
+            keyEquivalent: "v",
+            controlCommand: true
+        ))
         menu.addItem(NSMenuItem.separator())
         let pauseTitle = settings.capturePaused ? "Resume Capture" : "Pause Capture"
         menu.addItem(makeMenuItem(title: pauseTitle, action: #selector(togglePause), keyEquivalent: "t", shiftCommand: true))
@@ -265,12 +279,15 @@ final class AppRuntime: NSObject {
         action: Selector?,
         keyEquivalent: String,
         shiftCommand: Bool = false,
+        controlCommand: Bool = false,
         enabled: Bool = true
     ) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: keyEquivalent)
         item.target = action == nil ? nil : self
         item.isEnabled = enabled
-        if shiftCommand, !keyEquivalent.isEmpty {
+        if controlCommand, !keyEquivalent.isEmpty {
+            item.keyEquivalentModifierMask = [.command, .control]
+        } else if shiftCommand, !keyEquivalent.isEmpty {
             item.keyEquivalentModifierMask = [.command, .shift]
         }
         return item
@@ -319,9 +336,81 @@ final class AppRuntime: NSObject {
         _ = pasteStackController.pasteNext(panelController: panelController)
     }
 
+    @objc private func pasteWithoutFormattingMenu() {
+        _ = pasteWithoutFormatting()
+    }
+
     @objc private func clearPasteStack() {
         pasteStackController.close()
         refreshStatusItem()
+    }
+
+    /// ⌃⌘V — strip the current clipboard to plain text and synthesize ⌘V.
+    @discardableResult
+    func pasteWithoutFormatting() -> Bool {
+        Self.performPasteWithoutFormatting(
+            pasteController: pasteController,
+            pasteStackController: pasteStackController,
+            panelController: panelController,
+            appState: appState
+        )
+    }
+
+    @discardableResult
+    private static func performPasteWithoutFormatting(
+        pasteController: PasteController,
+        pasteStackController: PasteStackController,
+        panelController: TimelinePanelController,
+        appState: AppState
+    ) -> Bool {
+        pasteStackController.ensureAccessibilityIfNeeded()
+
+        guard let plain = pasteController.plainTextFromGeneralPasteboard() else {
+            Analytics.plainPaste(success: false, failReason: "empty")
+            appState.setStatus("Nothing to paste as plain text")
+            return false
+        }
+
+        // Keep the original rich clipboard so a later ⌘V is unchanged.
+        let snapshot = pasteController.snapshotGeneralPasteboard()
+        guard pasteController.writePlainTextToGeneralPasteboard(plain, markTransient: true) else {
+            Analytics.plainPaste(success: false, failReason: "empty")
+            appState.setStatus("Nothing to paste as plain text")
+            return false
+        }
+
+        let accessibilityTrusted = SystemPasteSynthesizer.isAccessibilityTrusted
+        pasteStackController.suspendPasteIntercept()
+        Task { @MainActor in
+            defer { pasteStackController.resumePasteIntercept() }
+
+            // Wait until the panel has dismissed so the previous app is key.
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                if panelController.isVisible {
+                    panelController.hide {
+                        continuation.resume()
+                    }
+                } else {
+                    continuation.resume()
+                }
+            }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+
+            if accessibilityTrusted {
+                // 80ms settle → ⌘V → 300ms for the target app to read plain text.
+                await SystemPasteSynthesizer.pasteWrittenItem()
+                if let snapshot {
+                    _ = pasteController.restoreGeneralPasteboard(snapshot)
+                }
+                Analytics.plainPaste(success: true, failReason: nil)
+                appState.setStatus("Pasted as plain text")
+            } else {
+                // Can't auto-paste; leave plain so a manual ⌘V still works.
+                Analytics.plainPaste(success: false, failReason: "accessibility")
+                appState.setStatus("Plain text ready — grant Accessibility to auto-paste, or press ⌘V")
+            }
+        }
+        return true
     }
 
     @objc private func togglePause() {

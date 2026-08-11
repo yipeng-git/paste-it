@@ -40,7 +40,7 @@ final class AppSettings: ObservableObject {
     @AppStorage("pasteAsPlainTextByDefault") var pasteAsPlainTextByDefault: Bool = false
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     /// Bump when shipping a What's New feature pack (not every semver).
-    static let currentWhatsNewContentVersion = 1
+    static let currentWhatsNewContentVersion = 2
     @AppStorage("seenWhatsNewContentVersion") var seenWhatsNewContentVersion: Int = 0
     @AppStorage("agentAPIEnabled") var agentAPIEnabled: Bool = false
     /// Anonymous usage analytics (PostHog). Never includes clipboard contents.

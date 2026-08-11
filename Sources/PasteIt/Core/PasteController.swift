@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import PasteItCore
 
 @MainActor
 final class PasteController {
@@ -63,6 +64,73 @@ final class PasteController {
         return wrote
     }
 
+    /// Deep-copies every pasteboard item/type so we can restore after a temporary rewrite.
+    func snapshotGeneralPasteboard() -> GeneralPasteboardSnapshot? {
+        let pasteboard = NSPasteboard.general
+        guard let pasteboardItems = pasteboard.pasteboardItems, !pasteboardItems.isEmpty else {
+            return nil
+        }
+
+        var items: [GeneralPasteboardSnapshot.Item] = []
+        for pasteboardItem in pasteboardItems {
+            var entries: [GeneralPasteboardSnapshot.Entry] = []
+            for type in pasteboardItem.types {
+                guard let data = pasteboardItem.data(forType: type), !data.isEmpty else { continue }
+                entries.append(.init(type: type, data: data))
+            }
+            if !entries.isEmpty {
+                items.append(.init(entries: entries))
+            }
+        }
+        return items.isEmpty ? nil : GeneralPasteboardSnapshot(items: items)
+    }
+
+    /// Plain string currently on the general pasteboard (derives from HTML/RTF when needed).
+    func plainTextFromGeneralPasteboard() -> String? {
+        let pasteboard = NSPasteboard.general
+        let item = pasteboard.pasteboardItems?.first
+        var plain = item?.string(forType: .string) ?? pasteboard.string(forType: .string) ?? ""
+        if plain.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let html = item?.string(forType: .html) ?? pasteboard.string(forType: .html)
+            let rtf = item?.data(forType: .rtf) ?? pasteboard.data(forType: .rtf)
+            plain = RichPlainText.extract(htmlText: html, rtfData: rtf)
+        }
+        return plain.isEmpty ? nil : plain
+    }
+
+    /// Writes plain text only. Marks transient so other clipboard managers can ignore the blip.
+    @discardableResult
+    func writePlainTextToGeneralPasteboard(_ plain: String, markTransient: Bool = true) -> Bool {
+        guard !plain.isEmpty else { return false }
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        let item = NSPasteboardItem()
+        item.setString(plain, forType: .string)
+        if markTransient {
+            item.setString("", forType: .init("org.nspasteboard.TransientType"))
+        }
+        guard pasteboard.writeObjects([item]) else { return false }
+        onPasteboardMutation?(pasteboard.changeCount)
+        return true
+    }
+
+    /// Restores a prior deep snapshot onto the general pasteboard.
+    @discardableResult
+    func restoreGeneralPasteboard(_ snapshot: GeneralPasteboardSnapshot) -> Bool {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        let objects: [NSPasteboardItem] = snapshot.items.map { item in
+            let pasteboardItem = NSPasteboardItem()
+            for entry in item.entries {
+                pasteboardItem.setData(entry.data, forType: entry.type)
+            }
+            return pasteboardItem
+        }
+        guard pasteboard.writeObjects(objects) else { return false }
+        onPasteboardMutation?(pasteboard.changeCount)
+        return true
+    }
+
     private func write(
         _ item: ClipItem,
         to pasteboard: NSPasteboard,
@@ -108,4 +176,18 @@ final class PasteController {
             return pasteboard.writeObjects([pasteboardItem])
         }
     }
+}
+
+/// Raw pasteboard bytes for temporary rewrite → restore (⌃⌘V).
+struct GeneralPasteboardSnapshot: Sendable {
+    struct Entry: Sendable {
+        let type: NSPasteboard.PasteboardType
+        let data: Data
+    }
+
+    struct Item: Sendable {
+        let entries: [Entry]
+    }
+
+    let items: [Item]
 }

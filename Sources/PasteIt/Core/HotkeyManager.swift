@@ -10,12 +10,14 @@ final class HotkeyManager {
     private let showTimeline: () -> Void
     private let togglePasteStack: () -> Void
     private let pasteStackNext: () -> Bool
+    private let pastePlain: () -> Bool
     private let editSelected: () -> Bool
 
     private var eventHandler: EventHandlerRef?
     private var hotKeyShow: EventHotKeyRef?
     private var hotKeyStack: EventHotKeyRef?
     private var hotKeyPasteNext: EventHotKeyRef?
+    private var hotKeyPastePlain: EventHotKeyRef?
 
     private var localMonitor: Any?
 
@@ -23,17 +25,20 @@ final class HotkeyManager {
         case showTimeline = 1
         case togglePasteStack = 2
         case pasteStackNext = 3
+        case pastePlain = 4
     }
 
     init(
         showTimeline: @escaping () -> Void,
         togglePasteStack: @escaping () -> Void,
         pasteStackNext: @escaping () -> Bool,
+        pastePlain: @escaping () -> Bool,
         editSelected: @escaping () -> Bool
     ) {
         self.showTimeline = showTimeline
         self.togglePasteStack = togglePasteStack
         self.pasteStackNext = pasteStackNext
+        self.pastePlain = pastePlain
         self.editSelected = editSelected
     }
 
@@ -47,9 +52,11 @@ final class HotkeyManager {
         if let hotKeyShow { UnregisterEventHotKey(hotKeyShow) }
         if let hotKeyStack { UnregisterEventHotKey(hotKeyStack) }
         if let hotKeyPasteNext { UnregisterEventHotKey(hotKeyPasteNext) }
+        if let hotKeyPastePlain { UnregisterEventHotKey(hotKeyPastePlain) }
         hotKeyShow = nil
         hotKeyStack = nil
         hotKeyPasteNext = nil
+        hotKeyPastePlain = nil
 
         if let eventHandler {
             RemoveEventHandler(eventHandler)
@@ -107,6 +114,12 @@ final class HotkeyManager {
             keyCode: UInt32(kVK_ANSI_V),
             modifiers: UInt32(cmdKey | optionKey)
         )
+        // ⌃⌘V — paste current clipboard without formatting
+        hotKeyPastePlain = registerHotKey(
+            id: .pastePlain,
+            keyCode: UInt32(kVK_ANSI_V),
+            modifiers: UInt32(cmdKey | controlKey)
+        )
     }
 
     private func registerHotKey(id: HotKeyID, keyCode: UInt32, modifiers: UInt32) -> EventHotKeyRef? {
@@ -150,6 +163,8 @@ final class HotkeyManager {
                 self.togglePasteStack()
             case .pasteStackNext:
                 _ = self.pasteStackNext()
+            case .pastePlain:
+                _ = self.pastePlain()
             case nil:
                 break
             }
@@ -180,6 +195,14 @@ final class HotkeyManager {
             return pasteStackNext()
         }
 
+        // ⌃⌘V — paste without formatting while Paste It is key.
+        if flags.contains(.control),
+           !flags.contains(.shift),
+           !flags.contains(.option),
+           event.keyCode == UInt16(kVK_ANSI_V) {
+            return pastePlain()
+        }
+
         // ⌘E opens the editor for the currently selected clip while the panel is key.
         if !flags.contains(.shift),
            !flags.contains(.option),
@@ -188,7 +211,9 @@ final class HotkeyManager {
             return editSelected()
         }
 
-        guard flags.contains(.shift), !flags.contains(.option) else { return false }
+        guard flags.contains(.shift), !flags.contains(.option), !flags.contains(.control) else {
+            return false
+        }
 
         switch Int(event.keyCode) {
         case kVK_ANSI_V:

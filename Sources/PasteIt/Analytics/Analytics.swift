@@ -201,6 +201,17 @@ enum Analytics {
         pasteStackSession = session
     }
 
+    /// ⌃⌘V paste-without-formatting (system clipboard → plain → synthesized ⌘V).
+    static func plainPaste(success: Bool, failReason: String?) {
+        var props: [String: Any] = [
+            "success": success
+        ]
+        if let failReason {
+            props["fail_reason"] = failReason
+        }
+        capture("plain_paste", properties: props)
+    }
+
     static func endPasteStackSession() {
         guard let session = pasteStackSession, let openedAt = session.openedAt else {
             pasteStackSession = nil

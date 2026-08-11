@@ -8,7 +8,7 @@ enum OnboardingFlow: String {
 enum OnboardingPageID: Int, CaseIterable, Identifiable {
     /// Copy in any app → history + menu-bar flash.
     case capture
-    /// ⇧⌘V open timeline → select → paste into another app (result visible).
+    /// ⇧⌘V open timeline → select → ⌘V paste → ⌃⌘V paste plain.
     case paste
     /// Space preview bubble → click to edit in place.
     case browse
@@ -38,7 +38,7 @@ enum OnboardingPageID: Int, CaseIterable, Identifiable {
     var caption: String {
         switch self {
         case .capture: return "Copy anything — Paste It saves it and flashes ⌘C in the menu bar."
-        case .paste: return "⇧⌘V opens history. Double-click a clip, then ⌘V in any app."
+        case .paste: return "⇧⌘V opens history. Double-click a clip, then ⌘V — or ⌃⌘V to paste without formatting."
         case .browse: return "Press Space to preview above the timeline. Click the text to edit."
         case .organize: return "⌘-click several clips, then press Return to paste them in order."
         }
@@ -47,7 +47,7 @@ enum OnboardingPageID: Int, CaseIterable, Identifiable {
     var stepLabels: [String] {
         switch self {
         case .capture: return ["Copy", "Saved"]
-        case .paste: return ["Open", "Double-click", "Paste"]
+        case .paste: return ["Open", "Double-click", "Paste", "Plain"]
         case .browse: return ["Space", "Preview", "Edit"]
         case .organize: return ["⌘-click", "Order", "Return"]
         }

@@ -22,7 +22,8 @@ Search finds text inside screenshots and images — not only plain clipboard tex
 - Floating timeline with **Shift + Command + V** — browse visual cards and a preview pane.
 - Pinboards with drag-and-drop pinning and permanent retention.
 - Paste Stack (**Shift + Command + C**) — collect, reorder, and prepare sequential pastes.
-- Quick Copy with **Command + 1…9**, paste as plain text, and multi-item text copy.
+- **Paste without formatting** — **Control + Command + V** strips the current clipboard to plain text and pastes (Accessibility required to auto-paste).
+- Quick Copy with **Command + 1…9**, and multi-item text copy.
 - Privacy controls: pause capture, ignore apps or pasteboard types, retention, and storage pruning.
 - Optional anonymous usage analytics (PostHog) — never clipboard contents; see [`docs/analytics.md`](docs/analytics.md) and dashboard guide [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md). Toggle in Settings → Privacy.
 - In-app updates via Sparkle.
