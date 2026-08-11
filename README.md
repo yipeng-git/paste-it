@@ -1,5 +1,7 @@
 # Paste It
 
+**English** | [中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+
 A local-only macOS clipboard manager — native SwiftUI, Liquid Glass, and MCP for agents.
 
 **Website:** [paste-it.app](https://paste-it.app)
