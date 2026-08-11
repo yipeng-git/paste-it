@@ -1,0 +1,28 @@
+README.zh-CN.md
+  s_34f6d34bc9c6bc::t_020fcf0e17a1b2 1-4,6-10,15-17,19-21,29,31-33,35,37,39,43,45-56,58-62,64-66,68-70,72
+  s_34f6d34bc9c6bc::t_1b0ea554fd0791 5,11-14,18,22-28,30,34,36,38,40-42,44,57,63,67,71,73
+README.ko.md
+  s_34f6d34bc9c6bc::t_b2ab81d84bb8db 5,11-14,18,22-24,26-28,30,34,38,41-42,44,57,63,67,71,73
+  s_34f6d34bc9c6bc::t_ad0c771126b6bd 1-4,6-10,15-17,19-21,25,29,31-33,35-37,39-40,43,45-56,58-62,64-66,68-70,72
+README.md
+  s_34f6d34bc9c6bc::t_304c247aae339d 3-4
+README.ja.md
+  s_34f6d34bc9c6bc::t_e15c84b02b8853 1-4,6-10,15-17,19-21,28-29,31-33,35-37,39-40,43,45-56,58-62,64-66,68-70,72
+  s_34f6d34bc9c6bc::t_8a43608f29a6bf 5,11-14,18,22-27,30,34,38,41-42,44,57,63,67,71,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "c915b93bd319450f2acf9d825d0ad2217f70df3c",
+  "prompts": {},
+  "sessions": {
+    "s_34f6d34bc9c6bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c403aecd-ffa3-4535-b63d-51ff5e92b9c5",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
