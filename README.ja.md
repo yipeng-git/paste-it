@@ -2,69 +2,79 @@
 
 [English](README.md) | [中文](README.zh-CN.md) | **日本語** | [한국어](README.ko.md)
 
-ローカル完結の macOS クリップボードマネージャー — ネイティブ SwiftUI、Liquid Glass、エージェント向け MCP。
+macOS 向けのローカル完結クリップボードマネージャー — 視覚的なタイムライン、検索できる履歴（スクリーンショット内の文字も含む）、邪魔にならないネイティブな操作感。
 
 **ウェブサイト：** [paste-it.app](https://paste-it.app)
 
 ![Paste It timeline panel](docs/screenshots/paste-it-history-panel.png)
 
-- **完全ローカル** — アカウント不要、クラウド同期なし。履歴はこの Mac にだけ残ります。
-- **ネイティブ SwiftUI** — AppKit のフローティングパネルと SwiftUI のタイムライン。**macOS 26+ は Liquid Glass**（それ以前はマテリアルにフォールバック）。
-- **AI 向け** — ローカルの **MCP**（任意）で、エージェントが履歴の参照・検索（OCR 含む）、一時的なタイムライン画像の生成ができます。
-- **画像の中身も検索** — Vision OCR がコピーした画像やスクリーンショットをインデックス。テキスト、リッチテキスト、HTML、ファイル、リンクも対象です。
-
-![Search clipboard history including OCR](docs/screenshots/paste-it-ocr-search.png)
-
-スクリーンショットや画像の中の文字も探せます — プレーンテキストだけではありません。
-
 ## 機能
 
-- フローティングタイムライン（**Shift + Command + V**）— カードとプレビューを眺める。
-- Pinboard：ドラッグ＆ドロップでピン留め、永久保存も可。
-- Paste Stack（**Shift + Command + C**）— 集めて並べ替え、順番にペーストする準備。
-- Quick Copy：**Command + 1…9**、プレーンテキストでペースト、複数項目のテキストコピー。
-- プライバシー：キャプチャ一時停止、アプリや pasteboard タイプの除外、保持期間、ストレージ整理。
-- 匿名の利用統計（PostHog・任意）— クリップボード内容は**送りません**。[`docs/analytics.md`](docs/analytics.md) と [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md)。設定 → プライバシーで切り替え。
-- Sparkle によるアプリ内アップデート。
+- コピーした内容を視覚的なタイムラインで眺める
+- テキスト検索 — スクリーンショットや画像の中の文字も対象
+- プレビューして編集してからペースト
+- 重要な項目をピン留め（フォルダにも整理可能）
+- Paste Stack で複数クリップを順番にペースト
 
-クリップを選ぶとシステムペーストボードに載ります（アクセシビリティ不要）。Paste Stack の「Paste Next」は必要なら **Command + V** を自動入力し、そのときはアクセシビリティが必要です。
+## インストール
 
-## プライバシーと分析
+1. [paste-it.app](https://paste-it.app) または [GitHub Releases](https://github.com/yipeng-git/paste-it/releases/latest) から最新版をダウンロード。
+2. `.dmg` を開く（または解凍）し、**Paste It** を **アプリケーション** にドラッグ。
+3. アプリケーションから起動。メニューバーに常駐します。
+4. ほかのアプリへワンキーでペーストしたい場合は、案内に従って **アクセシビリティ** を許可（システム設定 → プライバシーとセキュリティ → アクセシビリティ）。
 
-クリップボード履歴は **この Mac だけ**。公式ビルドでは PostHog がデフォルトでオンで、パネルの開閉、ペースト準備、オンボーディング、アップデートまわりなどの匿名イベントだけ送ります — テキスト、OCR、パス、検索語は**含みません**。イベント一覧：[`docs/analytics.md`](docs/analytics.md)。ダッシュボードの作り方：[`docs/analytics-dashboard.md`](docs/analytics-dashboard.md)。**設定 → プライバシー** でいつでもオフにできます。
+macOS 14 以降。公式ビルドはバックグラウンドで自動更新します。
 
-## エージェント向け MCP
+## 使い方
 
-ローカルの [Model Context Protocol](https://modelcontextprotocol.io) サーバー（任意）— **デフォルトはオフ**。Paste It 起動中にメニューバーの **MCP** から有効化します。
+1. いつもどおりコピー — Paste It がローカルに履歴を残します。
+2. **⇧⌘V**（またはメニューバーアイコン）でタイムラインを開く。
+3. 入力して検索、または種類で絞り込み。**⌘1…9** で素早く選ぶか、カードを選んで **Return** でペースト。
+4. **Space** でタイムライン上にプレビュー。テキストをクリックして編集。画像は OCR、リンクはページプレビュー。
+5. 残したいものはピン留め、またはカスタムフォルダへ（最大 3 つ）。
 
-- URL：`http://127.0.0.1:17321/mcp`（ループバックのみ、Stateless HTTP）
-- 読み取り専用：list、get、search（元アプリ、OCR、アプリと同じクエリ）
-- カード内容から一時的なタイムライン画像を生成（本履歴には書き込まない）
+### その他のショートカット
 
-ツール、curl 例、クライアント設定は [`docs/mcp.md`](docs/mcp.md)（英語）。
+| ショートカット | 動作 |
+|----------------|------|
+| **⇧⌘V** | タイムラインを開く / 閉じる |
+| **⌘1…9** | そのカードを載せてパネルを閉じる |
+| **Return** | 選択をペースト（アクセシビリティが必要） |
+| **⇧Return** | プレーンテキストでペースト |
+| **Space** | プレビュー |
+| **⌘E** | 選択中のクリップを編集 |
+| **⇧⌘C** | Paste Stack を開く |
+| **⌥⌘V** | Stack の次をペースト |
+| **⌃⌘V** | 現在のクリップボードを一度だけプレーンテキストでペースト |
+| **⇧⌘T** | キャプチャの一時停止 / 再開（メニューから） |
 
-## 動作環境
+**Paste Stack：** **⇧⌘C** を押し、いくつかコピーしてキューに入れ、**⌥⌘V**（または Stack 表示中の **⌘V**）で一つずつペースト。順序（古い順 / 新しい順）は設定 → Stack。
 
-- macOS 14+
-- Xcode / Swift 6.2 ツールチェーン
+**複数選択：** **⌘**-クリックで複数選び、**Return** で順番にペースト。
 
-## 実行
+クリップを選ぶとシステムペーストボードに載ります（アクセシビリティ不要）。自動ペースト（**Return**、Stack、**⌃⌘V**）にはアクセシビリティが必要です。
+
+## プライバシー
+
+履歴はこの Mac だけ — アカウント不要、クラウド同期なし。パスワードマネージャーなど保護された pasteboard タイプはデフォルトでスキップ。設定でキャプチャ一時停止、アプリ除外、保持期間の制限が可能です。
+
+任意の匿名統計（公式ビルドではオン）にクリップボード内容、OCR、パス、検索語は**含まれません**。**設定 → プライバシー** でいつでもオフにできます。詳細：[`docs/analytics.md`](docs/analytics.md)。
+
+## エージェント向け（任意）
+
+ローカルの [MCP](https://modelcontextprotocol.io) サーバーで、エージェントが履歴の参照・検索ができます。**デフォルトはオフ** — 起動中にメニューバーの **MCP** を有効化（`http://127.0.0.1:17321/mcp`）。設定とツール：[`docs/mcp.md`](docs/mcp.md)。
+
+## ソースからビルド
+
+コントリビューター向け：
 
 ```sh
 swift run PasteIt
-```
-
-最小構成の `.app` を作る（更新チェック用に Sparkle を埋め込み）：
-
-```sh
+# または
 ./scripts/run-app.sh
 ```
 
-このフォルダを Xcode で開けば、Swift Package として実行・デバッグできます。
-
-## アップデート
-
-自動更新は Sparkle。フィードは [`Info.plist`](Info.plist) の `SUFeedURL`（GitHub Pages）。詳しくは [`docs/mac-updates.md`](docs/mac-updates.md)。署名付きリリースは [`scripts/package-release.sh`](scripts/package-release.sh) — 手順は [`docs/mac-packaging.md`](docs/mac-packaging.md)。
+Xcode / Swift 6.2 が必要。パッケージと署名：[`docs/mac-packaging.md`](docs/mac-packaging.md)。アップデート仕組み：[`docs/mac-updates.md`](docs/mac-updates.md)。
 
 ## ライセンス
 

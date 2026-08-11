@@ -2,70 +2,79 @@
 
 **English** | [中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-A local-only macOS clipboard manager — native SwiftUI, Liquid Glass, and MCP for agents.
+A local clipboard manager for macOS — visual timeline, searchable history (including text inside screenshots), and a native feel that stays out of your way.
 
 **Website:** [paste-it.app](https://paste-it.app)
 
 ![Paste It timeline panel](docs/screenshots/paste-it-history-panel.png)
 
-- **Local only** — No account, no cloud sync. Clipboard history stays on this Mac.
-- **Native SwiftUI** — AppKit floating panel with a SwiftUI timeline. **Liquid Glass on macOS 26+** (material fallback on earlier versions).
-- **AI-native** — Optional local **MCP** so agents can read history, search (including OCR text), and render ephemeral timeline screenshots.
-- **Searchable clipboard** — Vision OCR indexes copied images and screenshots, alongside text, rich text, HTML, files, and links.
-
-![Search clipboard history including OCR](docs/screenshots/paste-it-ocr-search.png)
-
-Search finds text inside screenshots and images — not only plain clipboard text.
-
 ## Features
 
-- Floating timeline with **Shift + Command + V** — browse visual cards and a preview pane.
-- Pinboards with drag-and-drop pinning and permanent retention.
-- Paste Stack (**Shift + Command + C**) — collect, reorder, and prepare sequential pastes.
-- **Paste without formatting** — **Control + Command + V** strips the current clipboard to plain text and pastes (Accessibility required to auto-paste).
-- Quick Copy with **Command + 1…9**, and multi-item text copy.
-- Privacy controls: pause capture, ignore apps or pasteboard types, retention, and storage pruning.
-- Optional anonymous usage analytics (PostHog) — never clipboard contents; see [`docs/analytics.md`](docs/analytics.md) and dashboard guide [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md). Toggle in Settings → Privacy.
-- In-app updates via Sparkle.
+- Visual timeline of everything you copy
+- Search text — including words inside screenshots and images
+- Preview a clip, edit it, then paste
+- Pin important items (and keep them in folders)
+- Paste Stack for pasting several clips in order
 
-Selecting a clip stages it on the system pasteboard (no Accessibility needed). Paste Stack’s “Paste Next” optionally synthesizes **Command + V** and requires Accessibility.
+## Install
 
-## Privacy & analytics
+1. Download the latest build from [paste-it.app](https://paste-it.app) or [GitHub Releases](https://github.com/yipeng-git/paste-it/releases/latest).
+2. Open the `.dmg` (or unzip) and drag **Paste It** into **Applications**.
+3. Launch it from Applications. It lives in the menu bar.
+4. For one-key paste into other apps, allow **Accessibility** when prompted (System Settings → Privacy & Security → Accessibility).
 
-Clipboard history is **local-only**. Optional PostHog analytics (on by default in official builds) reports anonymous product events such as panel open/close, staging, onboarding, and update funnel — **never** clipboard text, OCR, paths, or search queries. Full event list: [`docs/analytics.md`](docs/analytics.md). How to build the product dashboard: [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md). Disable anytime in **Settings → Privacy**.
+macOS 14 or later. Official builds update themselves in the background.
 
-## MCP for agents
+## Usage
 
-Optional local [Model Context Protocol](https://modelcontextprotocol.io) server — **off by default**. Enable from the menu bar **MCP** item while Paste It is running.
+1. Copy as usual — Paste It keeps a local history.
+2. Press **⇧⌘V** (or click the menu bar icon) to open the timeline.
+3. Type to search, or filter by type. Use **⌘1…9** for a quick pick, or select a card and press **Return** to paste.
+4. Press **Space** to preview above the timeline. Click the text to edit; for images you can review OCR, for links you get a page preview.
+5. Pin clips you want to keep, or put them in a custom folder (up to three folders).
 
-- URL: `http://127.0.0.1:17321/mcp` (loopback only, Stateless HTTP)
-- Read-only history: list, get, search (source app, OCR, and the same query language as the app)
-- Ephemeral timeline screenshots from card payloads (does not write main history)
+### More shortcuts
 
-Full tools, curl examples, and client setup: [`docs/mcp.md`](docs/mcp.md).
+| Shortcut | Action |
+|----------|--------|
+| **⇧⌘V** | Open / close timeline |
+| **⌘1…9** | Stage that card and close |
+| **Return** | Paste selection (needs Accessibility) |
+| **⇧Return** | Paste as plain text |
+| **Space** | Preview |
+| **⌘E** | Edit selected clip |
+| **⇧⌘C** | Open Paste Stack |
+| **⌥⌘V** | Paste next from Stack |
+| **⌃⌘V** | Paste current clipboard as plain text once |
+| **⇧⌘T** | Pause / resume capture (from the menu) |
 
-## Requirements
+**Paste Stack:** press **⇧⌘C**, copy several things into the queue, then **⌥⌘V** (or **⌘V** while the stack is open) to paste them one by one. Direction (oldest / newest first) is in Settings → Stack.
 
-- macOS 14+
-- Xcode / Swift 6.2 toolchain
+**Multi-select:** **⌘**-click several cards, then **Return** to paste in order.
 
-## Run
+Selecting a clip puts it on the system clipboard without Accessibility. Auto-paste (**Return**, Stack, **⌃⌘V**) needs Accessibility.
+
+## Privacy
+
+History stays on this Mac — no account, no cloud sync. Password managers and other protected pasteboard types are skipped by default. You can pause capture, ignore apps, and limit how long history is kept in Settings.
+
+Optional anonymous analytics (on in official builds) never includes clipboard contents, OCR, paths, or search queries. Turn it off anytime in **Settings → Privacy**. Details: [`docs/analytics.md`](docs/analytics.md).
+
+## For agents (optional)
+
+Paste It can expose a local [MCP](https://modelcontextprotocol.io) server so agents can read and search history. **Off by default** — enable **MCP** from the menu bar while the app is running (`http://127.0.0.1:17321/mcp`). Setup and tools: [`docs/mcp.md`](docs/mcp.md).
+
+## Build from source
+
+For contributors:
 
 ```sh
 swift run PasteIt
-```
-
-To package a minimal `.app` (embeds Sparkle for update checks):
-
-```sh
+# or
 ./scripts/run-app.sh
 ```
 
-Open this folder in Xcode to run and debug it as a Swift Package.
-
-## Updates
-
-Auto-updates use Sparkle. The feed URL is `SUFeedURL` in [`Info.plist`](Info.plist) (GitHub Pages). See [`docs/mac-updates.md`](docs/mac-updates.md). Signed release builds use [`scripts/package-release.sh`](scripts/package-release.sh) — setup in [`docs/mac-packaging.md`](docs/mac-packaging.md).
+Requires Xcode / Swift 6.2. Packaging and signing: [`docs/mac-packaging.md`](docs/mac-packaging.md). Updates plumbing: [`docs/mac-updates.md`](docs/mac-updates.md).
 
 ## License
 

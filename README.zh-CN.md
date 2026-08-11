@@ -2,70 +2,79 @@
 
 [English](README.md) | **中文** | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-只在本机运行的 macOS 剪贴板管理器 — 原生 SwiftUI、Liquid Glass，以及给 Agent 用的 MCP。
+面向 macOS 的本地剪贴板管理器 — 视觉时间线、可搜索的历史（含截图里的字），原生体验，不打扰你。
 
 **网站：** [paste-it.app](https://paste-it.app)
 
 ![Paste It timeline panel](docs/screenshots/paste-it-history-panel.png)
 
-- **纯本地** — 不用账号，不同步云端。历史只存在这台 Mac。
-- **原生 SwiftUI** — AppKit 浮动面板 + SwiftUI 时间线。**macOS 26+ 用 Liquid Glass**（更早系统用材质效果兜底）。
-- **给 AI 用** — 可选本地 **MCP**，Agent 能读历史、搜索（含 OCR），还能生成临时时间线截图。
-- **能搜到图里的字** — Vision OCR 会索引复制的图片和截图；文本、富文本、HTML、文件、链接一样能搜。
-
-![Search clipboard history including OCR](docs/screenshots/paste-it-ocr-search.png)
-
-截图和图片里的文字也能搜到 — 不只是纯文本。
-
 ## 功能
 
-- 浮动时间线（**Shift + Command + V**）— 看卡片和预览。
-- Pinboard：拖放固定，可永久保留。
-- Paste Stack（**Shift + Command + C**）— 收集、排序，再按顺序粘贴。
-- **无格式粘贴** — **Control + Command + V** 把当前剪贴板剥成纯文本并粘贴（自动粘贴需要辅助功能权限）。
-- Quick Copy：**Command + 1…9**，也支持多条一起复制。
-- 隐私控制：暂停捕获、忽略指定 App 或 pasteboard 类型、保留期限、清理存储。
-- 可选匿名统计（PostHog）— **不会**上传剪贴板内容；见 [`docs/analytics.md`](docs/analytics.md) 和 [`docs/analytics-dashboard.md`](docs/analytics-dashboard.md)。在「设置 → 隐私」里开关。
-- 用 Sparkle 做应用内更新。
+- 可视化时间线，浏览你复制过的内容
+- 能搜文本，也能搜截图和图片里的字
+- 预览一条，改完再粘贴
+- 钉住重要条目（还可放进文件夹）
+- Paste Stack：按顺序粘贴多段内容
 
-点选一条会先放到系统剪贴板（不需要辅助功能）。Paste Stack 的「Paste Next」可以自动按 **Command + V**，这时需要辅助功能权限。
+## 安装
 
-## 隐私与分析
+1. 从 [paste-it.app](https://paste-it.app) 或 [GitHub Releases](https://github.com/yipeng-git/paste-it/releases/latest) 下载最新版。
+2. 打开 `.dmg`（或解压），把 **Paste It** 拖进 **应用程序**。
+3. 从应用程序启动。它会待在菜单栏。
+4. 若希望一键粘贴到其他 App，按提示开启 **辅助功能**（系统设置 → 隐私与安全性 → 辅助功能）。
 
-剪贴板历史 **只在本机**。官方构建默认开启 PostHog，只上报面板开关、粘贴准备、新手引导、更新流程这类匿名事件 — **不含**剪贴板文本、OCR、路径或搜索词。事件列表：[`docs/analytics.md`](docs/analytics.md)。看板怎么搭：[`docs/analytics-dashboard.md`](docs/analytics-dashboard.md)。随时可在 **设置 → 隐私** 关掉。
+需要 macOS 14 或更高版本。官方构建会在后台自动更新。
 
-## 给 Agent 用的 MCP
+## 使用
 
-可选的本地 [Model Context Protocol](https://modelcontextprotocol.io) 服务 — **默认关闭**。Paste It 运行时，在菜单栏点 **MCP** 打开。
+1. 照常复制 — Paste It 在本机记录历史。
+2. 按 **⇧⌘V**（或点菜单栏图标）打开时间线。
+3. 输入搜索，或按类型筛选。用 **⌘1…9** 快速选中，或选中卡片后按 **Return** 粘贴。
+4. 按 **Space** 在时间线上方预览。点文字可编辑；图片可看 OCR，链接有网页预览。
+5. 需要保留的条目可以钉住，或放进自定义文件夹（最多三个）。
 
-- URL：`http://127.0.0.1:17321/mcp`（仅本机，Stateless HTTP）
-- 只读历史：list、get、search（来源 App、OCR，查询语法和 App 里一样）
-- 按卡片内容生成临时时间线截图（不写入主历史）
+### 更多快捷键
 
-工具说明、curl 示例、客户端配置见 [`docs/mcp.md`](docs/mcp.md)（英文）。
+| 快捷键 | 作用 |
+|--------|------|
+| **⇧⌘V** | 打开 / 关闭时间线 |
+| **⌘1…9** | 选中该卡片并关闭面板 |
+| **Return** | 粘贴选中项（需辅助功能） |
+| **⇧Return** | 按纯文本粘贴 |
+| **Space** | 预览 |
+| **⌘E** | 编辑选中项 |
+| **⇧⌘C** | 打开 Paste Stack |
+| **⌥⌘V** | 粘贴 Stack 下一项 |
+| **⌃⌘V** | 当前剪贴板按纯文本粘贴一次 |
+| **⇧⌘T** | 暂停 / 继续捕获（菜单里） |
 
-## 系统要求
+**Paste Stack：** 按 **⇧⌘C**，连续复制几段进队列，再用 **⌥⌘V**（或 Stack 打开时按 **⌘V**）一项项粘贴。顺序（先旧 / 先新）在「设置 → Stack」。
 
-- macOS 14+
-- Xcode / Swift 6.2 工具链
+**多选：** **⌘**-点击多张卡片，再按 **Return** 按顺序粘贴。
 
-## 运行
+点选一条会先放到系统剪贴板（不需要辅助功能）。自动粘贴（**Return**、Stack、**⌃⌘V**）需要辅助功能。
+
+## 隐私
+
+历史只留在这台 Mac — 不用账号，不同步云端。密码管理器等受保护的 pasteboard 类型默认会跳过。可在设置里暂停捕获、忽略 App、限制保留时间。
+
+可选匿名统计（官方构建默认开启）**不会**包含剪贴板内容、OCR、路径或搜索词。随时可在 **设置 → 隐私** 关闭。说明：[`docs/analytics.md`](docs/analytics.md)。
+
+## 给 Agent 用（可选）
+
+Paste It 可开启本地 [MCP](https://modelcontextprotocol.io)，让 Agent 读取和搜索历史。**默认关闭** — 应用运行时在菜单栏打开 **MCP**（`http://127.0.0.1:17321/mcp`）。配置与工具：[`docs/mcp.md`](docs/mcp.md)。
+
+## 从源码构建
+
+给贡献者：
 
 ```sh
 swift run PasteIt
-```
-
-打一个最小 `.app`（内嵌 Sparkle，用来检查更新）：
-
-```sh
+# 或
 ./scripts/run-app.sh
 ```
 
-也可以用 Xcode 打开这个目录，当 Swift Package 跑和调试。
-
-## 更新
-
-自动更新走 Sparkle。订阅地址是 [`Info.plist`](Info.plist) 里的 `SUFeedURL`（GitHub Pages）。见 [`docs/mac-updates.md`](docs/mac-updates.md)。签名发布用 [`scripts/package-release.sh`](scripts/package-release.sh)，配置见 [`docs/mac-packaging.md`](docs/mac-packaging.md)。
+需要 Xcode / Swift 6.2。打包与签名见 [`docs/mac-packaging.md`](docs/mac-packaging.md)。更新机制见 [`docs/mac-updates.md`](docs/mac-updates.md)。
 
 ## 许可证
 
