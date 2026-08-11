@@ -1,0 +1,24 @@
+docs/mcp.md
+  s_def69a886d8aef::t_d25da474971789 39,43
+Sources/PasteIt/AgentAPI/RenderScreenshotHandler.swift
+  s_def69a886d8aef::t_92281681b77bec 78,94-96
+  s_def69a886d8aef::t_cdb18867ee8066 97
+Sources/PasteIt/AgentAPI/EphemeralTimelineSession.swift
+  s_def69a886d8aef::t_e388e6467c618e 4,9,15,17,25-30,45-54,84-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "7cfab4ac1006f057e9677b3bd5c4d51d37583e5d",
+  "prompts": {},
+  "sessions": {
+    "s_def69a886d8aef": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "92ca98bd-bf64-4a95-9574-bbdad71d0e7c",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
