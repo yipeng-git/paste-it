@@ -1,0 +1,56 @@
+Sources/PasteIt/App/AppRuntime.swift
+  s_85f0f0a91cc74b::t_dfcaccabc65c0e 367-376,400,402-404,408
+  s_85f0f0a91cc74b::t_2ed6660f099897 386-396,398
+  s_85f0f0a91cc74b::t_b7668f92751dfb 73-79
+  s_85f0f0a91cc74b::t_afc076dc9b936a 80
+  s_85f0f0a91cc74b::t_df25c0fe157fb9 339-342,348-350,366,377-383,385,397,399,401,405-407,409-413
+  s_85f0f0a91cc74b::t_a1d51a2e6d8729 282,288-290
+  s_85f0f0a91cc74b::t_5185463081abc8 351-365,384,414
+  s_85f0f0a91cc74b::t_c9622df84635f1 229-234
+  s_85f0f0a91cc74b::t_1b2e61a68d5411 415
+docs/analytics.md
+  s_85f0f0a91cc74b::t_3d9a926fbe1994 51
+Sources/PasteIt/Onboarding/OnboardingHeroes.swift
+  s_85f0f0a91cc74b::t_66351057f53904 84,93,138-146
+Sources/PasteIt/Analytics/Analytics.swift
+  s_85f0f0a91cc74b::t_89d949969d6a23 204-214
+Sources/PasteIt/Settings/SettingsView.swift
+  s_85f0f0a91cc74b::t_f17f2ce209af9d 111
+  s_85f0f0a91cc74b::t_65b0512b5e1800 112-113
+Sources/PasteIt/Analytics/AnalyticsCatalog.swift
+  s_85f0f0a91cc74b::t_0b47c81be3059b 37
+Sources/PasteIt/Onboarding/OnboardingPage.swift
+  s_85f0f0a91cc74b::t_76394e84e1fa1a 11,41,50
+Sources/PasteIt/Core/HotkeyManager.swift
+  s_85f0f0a91cc74b::t_2430987fa33a86 13,20,28,35,41,55,59
+  s_85f0f0a91cc74b::t_d3222bf724b37d 117-122
+  s_85f0f0a91cc74b::t_2d1571c596e17a 198-205,214-216
+  s_85f0f0a91cc74b::t_f3e62df5364e35 166-167
+README.md
+  s_85f0f0a91cc74b::t_d48b9ca0f18b24 25-26
+Sources/PasteIt/Core/PasteController.swift
+  s_85f0f0a91cc74b::t_7fbcf75606393a 67-89,97-110,112-115,117-120,122-129,131
+  s_85f0f0a91cc74b::t_820bf4270767a7 180-193
+  s_85f0f0a91cc74b::t_bc95364c66c492 3
+  s_85f0f0a91cc74b::t_5f89b43491214b 90-96,111,116,121,130,132-133
+README.zh-CN.md
+  s_85f0f0a91cc74b::t_048741da01cd9d 25-26
+Sources/PasteIt/App/AppSettings.swift
+  s_85f0f0a91cc74b::t_63bca6b5628266 43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "e9b506f91da944635b3a5aaf455a6a116f3ded42",
+  "prompts": {},
+  "sessions": {
+    "s_85f0f0a91cc74b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "21db63e5-a14c-47ed-8707-2ef180912359",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
