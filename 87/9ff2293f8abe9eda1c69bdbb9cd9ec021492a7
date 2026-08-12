@@ -1,0 +1,19 @@
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_85f0f0a91cc74b::t_9aaa609acfdfb8 459,470-476,484-497,532-547
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "879ff2293f8abe9eda1c69bdbb9cd9ec021492a7",
+  "prompts": {},
+  "sessions": {
+    "s_85f0f0a91cc74b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "21db63e5-a14c-47ed-8707-2ef180912359",
+        "model": "grok-4.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
