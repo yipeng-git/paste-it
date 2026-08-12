@@ -456,7 +456,7 @@ struct TimelineView: View {
         }
     }
 
-    /// Return with multi-select: paste each item natively in order into the frontmost app.
+    /// Return / Shift+Return: paste selection into the frontmost app (synthesized ⌘V).
     private func pasteSelectionSequentially(
         mode: PasteController.PasteMode = .normal,
         trigger: String
@@ -464,15 +464,16 @@ struct TimelineView: View {
         let ordered = appState.orderedSelectedClips
         guard !ordered.isEmpty else { return }
 
-        if ordered.count == 1, let only = ordered.first {
-            stage(only, mode: mode, trigger: trigger, dismissPanel: true)
-            return
-        }
-
         var didPromptForAccessibility = false
         SystemPasteSynthesizer.ensureAccessibilityIfNeeded(didPrompt: &didPromptForAccessibility)
         guard SystemPasteSynthesizer.isAccessibilityTrusted else {
-            appState.setStatus("Grant Accessibility to paste multiple items")
+            // Fall back to staging so the user can still ⌘V manually.
+            if ordered.count == 1, let only = ordered.first {
+                stage(only, mode: mode, trigger: trigger, dismissPanel: true)
+                appState.setStatus("Copied — grant Accessibility to auto-paste, or press ⌘V")
+            } else {
+                appState.setStatus("Grant Accessibility to paste multiple items")
+            }
             return
         }
 
@@ -480,7 +481,20 @@ struct TimelineView: View {
             settings.pasteAsPlainTextByDefault && mode == .normal ? .plainText : mode
         // Capture items before clearing selection and hiding the panel.
         let items = ordered
-        appState.clearMultiSelectKeepingAnchor()
+        if items.count == 1, let only = items.first {
+            // Promote / analytics before dismiss (same as former stage path).
+            appState.selectOnly(only.id)
+            Analytics.clipStaged(
+                mode: resolvedMode == .plainText ? "plain" : "normal",
+                trigger: trigger,
+                clipType: only.primaryType.rawValue,
+                tab: analyticsTabKind(appState.selectedTab),
+                ageBucket: Analytics.Buckets.age(since: only.createdAt)
+            )
+            appState.promoteAccessedClip(only, scroll: false)
+        } else {
+            appState.clearMultiSelectKeepingAnchor()
+        }
         let pasteStack = appState.pasteStackController
 
         Task { @MainActor in
@@ -515,14 +529,22 @@ struct TimelineView: View {
                 await SystemPasteSynthesizer.pasteWrittenItem()
                 pasted += 1
             }
-            Analytics.clipStaged(
-                mode: resolvedMode == .plainText ? "plain" : "normal",
-                trigger: trigger,
-                clipType: "multi",
-                tab: analyticsTabKind(appState.selectedTab),
-                ageBucket: "multi"
-            )
-            appState.setStatus("Pasted \(pasted) items")
+            if items.count > 1 {
+                Analytics.clipStaged(
+                    mode: resolvedMode == .plainText ? "plain" : "normal",
+                    trigger: trigger,
+                    clipType: "multi",
+                    tab: analyticsTabKind(appState.selectedTab),
+                    ageBucket: "multi"
+                )
+            }
+            if pasted == 0 {
+                appState.setStatus("Nothing to paste")
+            } else if pasted == 1 {
+                appState.setStatus(resolvedMode == .plainText ? "Pasted as plain text" : "Pasted")
+            } else {
+                appState.setStatus("Pasted \(pasted) items")
+            }
         }
     }
 
