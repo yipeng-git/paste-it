@@ -8,6 +8,12 @@ enum TimelinePanelOpenSource: String {
     case menu
 }
 
+private enum PanelAnimation {
+    case none
+    case showing
+    case hiding
+}
+
 @MainActor
 final class TimelinePanelController: NSObject, NSWindowDelegate {
     private let appState: AppState
@@ -15,8 +21,17 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
     private var globalOutsideClickMonitor: Any?
     private var localOutsideClickMonitor: Any?
-    private var isAnimating = false
+    /// Slide-in / slide-out are distinct so hide can interrupt an in-flight show
+    /// instead of no-oping and firing callers' completions immediately.
+    private var panelAnimation: PanelAnimation = .none
+    /// Bumped whenever a new show/hide animation starts; stale completions no-op.
+    private var animationGeneration = 0
+    private var pendingHideCompletions: [@Sendable () -> Void] = []
+    /// True while we await clipboard ingest before the slide-in.
+    private var isPreparingShow = false
     var onShow: (() -> Void)?
+    /// Ingest any pending clipboard change so ⇧⌘V right after copy shows the new card.
+    var ingestBeforeShow: (() async -> Void)?
     /// Set by AppRuntime so outside-click dismiss can ignore detached preview / stack windows.
     weak var detachedWindowController: ClipDetachedWindowController?
     weak var pasteStackPanelController: PasteStackPanelController?
@@ -32,7 +47,8 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
     }
 
     func toggle(source: TimelinePanelOpenSource) {
-        if panel?.isVisible == true {
+        if isPreparingShow || panel?.isVisible == true {
+            isPreparingShow = false
             hide()
         } else {
             show(source: source)
@@ -41,6 +57,22 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
 
     var isVisible: Bool {
         panel?.isVisible == true
+    }
+
+    /// Build the hosting view and force one off-screen layout so the first ⇧⌘V isn't a cold mount.
+    func prewarm() {
+        guard panel == nil else { return }
+        let panel = makePanel()
+        self.panel = panel
+        let finalFrame = targetFrame(for: panel)
+        var parked = finalFrame
+        parked.origin.y -= finalFrame.height + 80
+        panel.alphaValue = 0
+        panel.setFrame(parked, display: false)
+        panel.orderFrontRegardless()
+        panel.displayIfNeeded()
+        panel.orderOut(nil)
+        panel.alphaValue = 1
     }
 
     /// Screen frame of the floating timeline panel (bubble anchors above this).
@@ -61,11 +93,29 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
 
     func show(source: TimelinePanelOpenSource = .menu) {
         onShow?()
-        guard !isAnimating else { return }
+        // Ignore re-entrant show; hide-in-flight keeps sliding out (toggle will
+        // see isVisible and call hide again, which just waits for that animation).
+        guard panelAnimation == .none else { return }
+        if isPreparingShow { return }
+        isPreparingShow = true
+        Task { @MainActor in
+            await ingestBeforeShow?()
+            guard self.isPreparingShow else { return }
+            self.isPreparingShow = false
+            // Store add() publishes on the next main turn. Pull the new clip in
+            // now so the slide-in doesn't paint the old first card, then shuffle.
+            self.appState.absorbNewestClipBeforePanelShow()
+            self.performShow(source: source)
+        }
+    }
+
+    private func performShow(source: TimelinePanelOpenSource) {
         let wasVisible = panel?.isVisible == true
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        appState.resetFiltersForPanelShow()
+        if !appState.isReadyForInstantShow() {
+            appState.resetFiltersForPanelShow()
+        }
 
         let finalFrame = targetFrame(for: panel)
         let startFrame: NSRect
@@ -95,18 +145,21 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
             )
         }
 
-        isAnimating = true
+        animationGeneration += 1
+        let generation = animationGeneration
+        panelAnimation = .showing
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = animationDuration
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             panel.animator().setFrame(finalFrame, display: true)
         }, completionHandler: { [weak self] in
             Task { @MainActor in
-                guard let self else { return }
-                self.isAnimating = false
+                guard let self, generation == self.animationGeneration else { return }
+                self.panelAnimation = .none
                 // Defer out of the display-cycle flush — mutating @Published
                 // mid-layout was crashing under exclusivity checking.
                 DispatchQueue.main.async {
+                    guard generation == self.animationGeneration else { return }
                     self.panel?.makeFirstResponder(nil)
                     self.appState.searchBlurRequest += 1
                     NSLog("PasteIt: timeline panel shown")
@@ -116,11 +169,31 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
     }
 
     func hide(completion: (@Sendable () -> Void)? = nil) {
-        guard let panel, panel.isVisible, !isAnimating else {
-            if panel?.isVisible != true {
+        isPreparingShow = false
+        if let completion {
+            pendingHideCompletions.append(completion)
+        }
+
+        switch panelAnimation {
+        case .hiding:
+            // Already sliding out — wait for that animation, don't fake-complete.
+            return
+        case .showing:
+            beginHide()
+        case .none:
+            guard let panel, panel.isVisible else {
                 stopOutsideClickMonitoring()
+                flushHideCompletions()
+                return
             }
-            completion?()
+            beginHide()
+        }
+    }
+
+    private func beginHide() {
+        guard let panel else {
+            panelAnimation = .none
+            flushHideCompletions()
             return
         }
 
@@ -128,8 +201,11 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         if appState.previewClip != nil {
             appState.dismissPreview()
         }
-        isAnimating = true
         stopOutsideClickMonitoring()
+
+        animationGeneration += 1
+        let generation = animationGeneration
+        panelAnimation = .hiding
 
         let endFrame: NSRect
         if let screen = panel.screen ?? screenForCurrentFocus() {
@@ -143,24 +219,36 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.22
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            // From the current frame, so an interrupted slide-in reverses in place.
             panel.animator().setFrame(endFrame, display: true)
             // Fade alongside the slide: when a display below forces the slide to
             // clamp at the screen edge, the fade carries the dismissal.
             panel.animator().alphaValue = 0
         }, completionHandler: { [weak self] in
             Task { @MainActor in
+                guard let self, generation == self.animationGeneration else { return }
                 panel.orderOut(nil)
                 panel.alphaValue = 1
-                self?.isAnimating = false
+                self.panelAnimation = .none
                 Analytics.endPanelSession()
-                completion?()
+                self.appState.prepareForNextPanelShow()
+                self.flushHideCompletions()
             }
         })
+    }
+
+    private func flushHideCompletions() {
+        let completions = pendingHideCompletions
+        pendingHideCompletions.removeAll()
+        for completion in completions {
+            completion()
+        }
     }
 
     private func makePanel() -> NSPanel {
         let contentView = TimelineView(appState: appState, pasteController: pasteController)
         let hostingController = NSHostingController(rootView: contentView)
+        hostingController.sizingOptions = []
 
         let panel = FloatingTimelinePanel(
             contentRect: NSRect(x: 0, y: 0, width: 1120, height: panelHeight),

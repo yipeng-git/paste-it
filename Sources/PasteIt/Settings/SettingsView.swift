@@ -216,7 +216,7 @@ struct SettingsView: View {
                 }
             }
 
-            Text("⇧⌘C opens or closes Paste Stack. ⌥⌘V pastes the next item (Accessibility permission required). Runtime controls live in the Stack panel and the ⋯ menu.")
+            Text("⇧⌘C opens or closes Paste Stack. While the stack has items, ⌘V in any app pastes the next one (Accessibility required). Runtime controls live in the Stack panel and the ⋯ menu.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

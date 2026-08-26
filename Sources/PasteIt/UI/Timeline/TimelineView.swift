@@ -220,44 +220,12 @@ struct TimelineView: View {
     }
 
     private var searchField: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-            if isSearchActive {
-                TextField("Search history", text: $appState.query)
-                    .textFieldStyle(.plain)
-                    .focused($isSearchFocused)
-                    .onSubmit {
-                        // Keep focus after submit; Esc still resigns.
-                    }
-                if !appState.query.isEmpty {
-                    Button {
-                        appState.query = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            } else {
-                Text("Search (⌘F)")
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        activateSearch()
-                    }
-            }
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .frame(width: 260, height: 30)
-        .pasteItControlGlass()
-        .onTapGesture {
-            if !isSearchActive {
-                activateSearch()
-            }
-        }
+        TimelineSearchField(
+            appState: appState,
+            isSearchFocused: $isSearchFocused,
+            isSearchActive: $isSearchActive,
+            onActivate: { activateSearch() }
+        )
     }
 
     private var menuButton: some View {
@@ -315,11 +283,11 @@ struct TimelineView: View {
             // skip Pin/Unpin here
         } else if historyStore.isPinned(item) {
             Button("Unpin") {
-                historyStore.unpinFromPinnedBoard(item)
+                appState.togglePinned(item)
             }
         } else {
             Button("Pin") {
-                historyStore.pinToPinnedBoard(item)
+                appState.togglePinned(item)
             }
         }
 
@@ -338,7 +306,7 @@ struct TimelineView: View {
             Menu("Add to Folder") {
                 ForEach(available) { folder in
                     Button(folder.name) {
-                        historyStore.pin(item, to: folder)
+                        appState.pin(item, to: folder)
                     }
                 }
             }
@@ -347,7 +315,7 @@ struct TimelineView: View {
             Menu("Remove from Folder") {
                 ForEach(memberships) { folder in
                     Button(folder.name) {
-                        historyStore.unpin(item, from: folder)
+                        appState.unpin(item, from: folder)
                     }
                 }
             }
@@ -360,7 +328,7 @@ struct TimelineView: View {
             historyStore: historyStore,
             isSelected: isSelected,
             quickIndex: quickIndex,
-            query: appState.query,
+            query: appState.searchHighlight,
             isPinned: historyStore.isPinned(item),
             deleteHelp: deleteTitle,
             onSingleClick: {
@@ -395,16 +363,14 @@ struct TimelineView: View {
             onPin: {
                 resignSearch()
                 appState.dismissPreview()
-                if historyStore.isPinned(item) {
-                    historyStore.unpinFromPinnedBoard(item)
-                } else {
-                    historyStore.pinToPinnedBoard(item)
-                }
+                appState.togglePinned(item)
             },
             onDelete: {
                 resignSearch()
                 appState.dismissPreview()
-                historyStore.removeFromTab(item, tab: appState.selectedTab)
+                withAnimation(.easeOut(duration: 0.15)) {
+                    appState.removeClipFromCurrentTab(item)
+                }
             },
             pinMenu: { pinMenu(for: item) }
         )
@@ -431,16 +397,31 @@ struct TimelineView: View {
         let resolvedMode: PasteController.PasteMode =
             settings.pasteAsPlainTextByDefault && mode == .normal ? .plainText : mode
 
+        if dismissPanel {
+            if item.primaryType == .image, resolvedMode == .normal {
+                Task { @MainActor in
+                    guard await pasteController.copyToPasteboardAsync(item, mode: resolvedMode) else { return }
+                    logClipStaged(item, mode: resolvedMode, trigger: trigger)
+                    dismissThenPromote(item, status: "Copied \(item.title)")
+                }
+                return
+            }
+            guard pasteController.copyToPasteboard(item, mode: resolvedMode) else { return }
+            logClipStaged(item, mode: resolvedMode, trigger: trigger)
+            dismissThenPromote(item, status: "Copied \(item.title)")
+            return
+        }
+
         if item.primaryType == .image, resolvedMode == .normal {
             Task { @MainActor in
                 guard await pasteController.copyToPasteboardAsync(item, mode: resolvedMode) else { return }
-                promoteAfterStage(item, mode: resolvedMode, trigger: trigger, dismissPanel: dismissPanel)
+                promoteAfterStage(item, mode: resolvedMode, trigger: trigger)
             }
             return
         }
 
         guard pasteController.copyToPasteboard(item, mode: resolvedMode) else { return }
-        promoteAfterStage(item, mode: resolvedMode, trigger: trigger, dismissPanel: dismissPanel)
+        promoteAfterStage(item, mode: resolvedMode, trigger: trigger)
     }
 
     /// ⌘C with multi-select: copy first selected item only, then collapse selection.
@@ -479,11 +460,11 @@ struct TimelineView: View {
 
         let resolvedMode: PasteController.PasteMode =
             settings.pasteAsPlainTextByDefault && mode == .normal ? .plainText : mode
-        // Capture items before clearing selection and hiding the panel.
+        // Capture items and hide immediately — don't collapse multi-select first
+        // or the timeline changes face while the panel is still on screen.
         let items = ordered
+        let itemToPromote: ClipItem? = items.count == 1 ? items.first : nil
         if items.count == 1, let only = items.first {
-            // Promote / analytics before dismiss (same as former stage path).
-            appState.selectOnly(only.id)
             Analytics.clipStaged(
                 mode: resolvedMode == .plainText ? "plain" : "normal",
                 trigger: trigger,
@@ -491,9 +472,6 @@ struct TimelineView: View {
                 tab: analyticsTabKind(appState.selectedTab),
                 ageBucket: Analytics.Buckets.age(since: only.createdAt)
             )
-            appState.promoteAccessedClip(only, scroll: false)
-        } else {
-            appState.clearMultiSelectKeepingAnchor()
         }
         let pasteStack = appState.pasteStackController
 
@@ -504,15 +482,7 @@ struct TimelineView: View {
 
             // Wait until the panel has fully dismissed and the previous app is key;
             // otherwise the first synthesized ⌘V is swallowed / lost.
-            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                if let panelController = appState.panelController {
-                    panelController.hide {
-                        continuation.resume()
-                    }
-                } else {
-                    continuation.resume()
-                }
-            }
+            await dismissTimelinePanel()
             try? await Task.sleep(nanoseconds: 100_000_000)
 
             var pasted = 0
@@ -545,14 +515,51 @@ struct TimelineView: View {
             } else {
                 appState.setStatus("Pasted \(pasted) items")
             }
+            // Reorder after paste so SwiftData save / list rebuild never delay ⌘V.
+            if let itemToPromote {
+                appState.promoteAccessedClip(itemToPromote, scroll: false)
+            }
+        }
+    }
+
+    /// Close now; persist order after the panel is gone (no visible card shuffle).
+    private func dismissThenPromote(_ item: ClipItem, status: String) {
+        let clipID = item.id
+        let appState = self.appState
+        if let panelController = appState.panelController {
+            panelController.hide {
+                Task { @MainActor in
+                    appState.setStatus(status)
+                    guard let clip = appState.historyStore.clips.first(where: { $0.id == clipID }) else {
+                        return
+                    }
+                    appState.promoteAccessedClip(clip, scroll: false)
+                }
+            }
+        } else {
+            appState.setStatus(status)
+            appState.promoteAccessedClip(item, scroll: false)
         }
     }
 
     private func promoteAfterStage(
         _ item: ClipItem,
         mode: PasteController.PasteMode,
-        trigger: String,
-        dismissPanel: Bool
+        trigger: String
+    ) {
+        logClipStaged(item, mode: mode, trigger: trigger)
+        if appState.panelController?.isVisible == true {
+            appState.notePromoteAfterHide(item)
+        } else {
+            appState.promoteAccessedClip(item, scroll: true)
+        }
+        appState.setStatus("Copied \(item.title)")
+    }
+
+    private func logClipStaged(
+        _ item: ClipItem,
+        mode: PasteController.PasteMode,
+        trigger: String
     ) {
         Analytics.clipStaged(
             mode: mode == .plainText ? "plain" : "normal",
@@ -561,10 +568,18 @@ struct TimelineView: View {
             tab: analyticsTabKind(appState.selectedTab),
             ageBucket: Analytics.Buckets.age(since: item.createdAt)
         )
-        appState.promoteAccessedClip(item, scroll: !dismissPanel)
-        appState.setStatus("Copied \(item.title)")
-        if dismissPanel {
-            appState.panelController?.hide()
+    }
+
+    /// Starts the panel slide-out immediately and returns after it has orderOut.
+    private func dismissTimelinePanel() async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            if let panelController = appState.panelController {
+                panelController.hide {
+                    continuation.resume()
+                }
+            } else {
+                continuation.resume()
+            }
         }
     }
 
@@ -628,6 +643,64 @@ struct TimelineView: View {
         }
         .frame(width: 0, height: 0)
         .opacity(0)
+    }
+}
+
+/// Owns the live search draft so typing does not `@Published`-refresh the card strip.
+private struct TimelineSearchField: View {
+    @ObservedObject var appState: AppState
+    var isSearchFocused: FocusState<Bool>.Binding
+    @Binding var isSearchActive: Bool
+    var onActivate: () -> Void
+    @State private var draft = ""
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            if isSearchActive {
+                TextField("Search history", text: $draft)
+                    .textFieldStyle(.plain)
+                    .focused(isSearchFocused)
+                    .onSubmit {
+                        // Keep focus after submit; Esc still resigns.
+                    }
+                if !draft.isEmpty {
+                    Button {
+                        draft = ""
+                        appState.clearSearch()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            } else {
+                Text("Search (⌘F)")
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        onActivate()
+                    }
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .frame(width: 260, height: 30)
+        .pasteItControlGlass()
+        .onTapGesture {
+            if !isSearchActive {
+                onActivate()
+            }
+        }
+        .onAppear { draft = appState.query }
+        .onChange(of: draft) { _, newValue in
+            appState.applySearchTyping(newValue)
+        }
+        .onChange(of: appState.searchFieldSeed) { _, _ in
+            draft = appState.query
+        }
     }
 }
 

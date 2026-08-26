@@ -44,11 +44,10 @@ macOS 14 or later. Official builds update themselves in the background.
 | **Space** | Preview |
 | **⌘E** | Edit selected clip |
 | **⇧⌘C** | Open Paste Stack |
-| **⌥⌘V** | Paste next from Stack |
 | **⌃⌘V** | Paste current clipboard as plain text once |
 | **⇧⌘T** | Pause / resume capture (from the menu) |
 
-**Paste Stack:** press **⇧⌘C**, copy several things into the queue, then **⌥⌘V** (or **⌘V** while the stack is open) to paste them one by one. Direction (oldest / newest first) is in Settings → Stack.
+**Paste Stack:** press **⇧⌘C**, copy several things into the queue, then **⌘V** in the target app to paste them one by one. Direction (oldest / newest first) is in Settings → Stack.
 
 **Multi-select:** **⌘**-click several cards, then **Return** to paste in order.
 

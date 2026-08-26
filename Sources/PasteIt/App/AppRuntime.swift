@@ -65,11 +65,6 @@ final class AppRuntime: NSObject {
                     appState.setStatus("Paste Stack closed")
                 }
             },
-            pasteStackNext: { [pasteStackController, panelController] in
-                guard !pasteStackController.items.isEmpty else { return false }
-                pasteStackController.ensureAccessibilityIfNeeded()
-                return pasteStackController.pasteNext(panelController: panelController)
-            },
             pastePlain: { [pasteController, pasteStackController, panelController, appState] in
                 AppRuntime.performPasteWithoutFormatting(
                     pasteController: pasteController,
@@ -88,6 +83,15 @@ final class AppRuntime: NSObject {
         panelController.detachedWindowController = detachedWindowController
         detachedWindowController.timelinePanelController = panelController
         panelController.pasteStackPanelController = pasteStackPanelController
+        let stackPanel = pasteStackPanelController
+        panelController.onShow = { [weak stackPanel] in
+            DispatchQueue.main.async {
+                stackPanel?.attentionPulse()
+            }
+        }
+        panelController.ingestBeforeShow = { [pasteboardMonitor] in
+            await pasteboardMonitor.flushPendingCapture()
+        }
         super.init()
 
         pasteStackController.onChange = { [weak self] in
@@ -109,6 +113,9 @@ final class AppRuntime: NSObject {
         // Retain Sparkle updater for automatic background checks.
         _ = UpdateChecker.shared
         Analytics.start(enabled: settings.analyticsEnabled)
+        DispatchQueue.main.async { [panelController] in
+            panelController.prewarm()
+        }
 
         if !settings.hasCompletedOnboarding {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [settings] in
@@ -216,11 +223,6 @@ final class AppRuntime: NSObject {
         ))
         if !pasteStackController.items.isEmpty {
             menu.addItem(makeMenuItem(
-                title: "Paste Next from Stack",
-                action: #selector(pasteNextFromStack),
-                keyEquivalent: ""
-            ))
-            menu.addItem(makeMenuItem(
                 title: "Clear Paste Stack",
                 action: #selector(clearPasteStack),
                 keyEquivalent: ""
@@ -266,7 +268,6 @@ final class AppRuntime: NSObject {
     func togglePauseCaptureAction() { togglePause() }
     func openSettingsAction() { openSettings() }
     func quitAction() { quit() }
-    func pasteNextFromStackAction() { pasteNextFromStack() }
     func clearPasteStackAction() { clearPasteStack() }
 
     var isCapturePaused: Bool { settings.capturePaused }
@@ -329,11 +330,6 @@ final class AppRuntime: NSObject {
         } else {
             appState.setStatus("Paste Stack closed")
         }
-    }
-
-    @objc private func pasteNextFromStack() {
-        pasteStackController.ensureAccessibilityIfNeeded()
-        _ = pasteStackController.pasteNext(panelController: panelController)
     }
 
     @objc private func pasteWithoutFormattingMenu() {

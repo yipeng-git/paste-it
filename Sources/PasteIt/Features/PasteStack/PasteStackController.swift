@@ -20,8 +20,15 @@ final class PasteStackController: ObservableObject {
 
         var systemImage: String {
             switch self {
-            case .oldestFirst: return "arrow.down"
-            case .newestFirst: return "arrow.up"
+            case .oldestFirst: return "arrow.up"
+            case .newestFirst: return "arrow.down"
+            }
+        }
+
+        var toggleHelp: String {
+            switch self {
+            case .oldestFirst: return "Copy order. Click to reverse."
+            case .newestFirst: return "Newest first. Click for copy order."
             }
         }
     }
@@ -44,10 +51,14 @@ final class PasteStackController: ObservableObject {
 
     nonisolated(unsafe) private var eventTap: CFMachPort?
     nonisolated(unsafe) private var runLoopSource: CFRunLoopSource?
+    /// Let the synthetic ⌘V we post reach the target app instead of re-entering the tap.
+    nonisolated(unsafe) private var isPassingSyntheticCommandV = false
     private var didPromptForAccessibility = false
     /// Nested suspends so multi-select sequential paste can post ⌘V without
     /// the Stack intercept swallowing / re-staging mid-sequence.
     private var pasteInterceptSuspendCount = 0
+    private var pendingDeliveries = 0
+    private var isDrainingDeliveries = false
 
     init(pasteController: PasteController, settings: AppSettings) {
         self.pasteController = pasteController
@@ -90,6 +101,7 @@ final class PasteStackController: ObservableObject {
         Analytics.endPasteStackSession()
         isCollecting = false
         items = []
+        pendingDeliveries = 0
         tearDownEventTap()
         notifyChange()
         onPanelSync?(false)
@@ -107,8 +119,9 @@ final class PasteStackController: ObservableObject {
     func append(_ capturedClip: CapturedClip) {
         guard isCollecting else { return }
         let item = capturedClip.makeModel()
+        // Only skip a consecutive double-copy. The same value can appear twice
+        // in a stack (two form fields, repeated snippets).
         if items.last?.duplicateContentKey == item.duplicateContentKey { return }
-        if items.contains(where: { $0.contentHash == item.contentHash }) { return }
         items.append(item)
         refreshPasteIntercept()
         notifyChange()
@@ -145,7 +158,7 @@ final class PasteStackController: ObservableObject {
         onPanelSync?(isCollecting)
     }
 
-    /// Stage next item onto the pasteboard only (used by Paste Next / pre-stage).
+    /// Stage next item onto the pasteboard only (⌘V intercept re-posts after this).
     @discardableResult
     func stageNext() -> Bool {
         guard !items.isEmpty else { return false }
@@ -179,32 +192,6 @@ final class PasteStackController: ObservableObject {
             onPanelSync?(false)
         }
         NSLog("PasteIt: Paste Stack staged — \(itemTitle) (\(items.count) left)")
-    }
-
-    /// Stage next item and synthesize ⌘V (⌥⌘V / Paste Next button).
-    @discardableResult
-    func pasteNext(panelController: TimelinePanelController? = nil) -> Bool {
-        guard !items.isEmpty else {
-            Analytics.notePasteStackPasteNext(success: false, failReason: "empty")
-            return false
-        }
-        let accessibilityTrusted = SystemPasteSynthesizer.isAccessibilityTrusted
-        panelController?.hide()
-        ensureAccessibilityIfNeeded()
-        Task { @MainActor in
-            guard await self.stageNextAsync() else {
-                Analytics.notePasteStackPasteNext(success: false, failReason: "stage_failed")
-                return
-            }
-            if accessibilityTrusted {
-                Analytics.notePasteStackPasteNext(success: true, failReason: nil)
-            } else {
-                Analytics.notePasteStackPasteNext(success: false, failReason: "accessibility")
-            }
-            try? await Task.sleep(nanoseconds: 50_000_000)
-            Self.postCommandV()
-        }
-        return true
     }
 
     @discardableResult
@@ -268,7 +255,9 @@ final class PasteStackController: ObservableObject {
             return
         }
 
-        let mask = CGEventMask(1 << CGEventType.keyDown.rawValue)
+        let mask = CGEventMask(
+            (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
+        )
         let refcon = Unmanaged.passUnretained(self).toOpaque()
         guard let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
@@ -316,7 +305,7 @@ final class PasteStackController: ObservableObject {
             }
             return Unmanaged.passUnretained(event)
         }
-        guard type == .keyDown else { return Unmanaged.passUnretained(event) }
+        guard type == .keyDown || type == .keyUp else { return Unmanaged.passUnretained(event) }
 
         let flags = event.flags
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
@@ -328,20 +317,51 @@ final class PasteStackController: ObservableObject {
             return Unmanaged.passUnretained(event)
         }
 
-        // Swallow ⌘V, stage the next item asynchronously, then re-post ⌘V.
-        // Never block the event-tap thread with main.sync — that stalls the
-        // system keyboard path whenever the main actor is busy.
+        // Synthetic ⌘V we posted must reach the frontmost app.
+        if isPassingSyntheticCommandV {
+            return Unmanaged.passUnretained(event)
+        }
+
+        // Swallow the user's keyUp so it doesn't paste the *previous* clipboard
+        // after we already ate the keyDown.
+        if type == .keyUp {
+            return nil
+        }
+
+        // Swallow ⌘V, enqueue a serialized stage → settle → paste.
+        // Never block the event-tap thread with main.sync.
+        // Rapid ⌘V is queued so we don't skip / double-paste under race.
         Task { @MainActor in
-            guard await self.stageNextAsync() else {
-                Analytics.notePasteStackPasteNext(success: false, failReason: "stage_failed")
-                return
-            }
-            Analytics.notePasteStackPasteNext(success: true, failReason: nil)
-            // Brief yield so the pasteboard write is visible to the target app.
-            try? await Task.sleep(nanoseconds: 20_000_000)
-            Self.postCommandV()
+            await self.enqueueDelivery()
         }
         return nil
+    }
+
+    @MainActor
+    private func enqueueDelivery() async {
+        pendingDeliveries += 1
+        guard !isDrainingDeliveries else { return }
+        isDrainingDeliveries = true
+        defer { isDrainingDeliveries = false }
+
+        while pendingDeliveries > 0 {
+            pendingDeliveries -= 1
+            guard !items.isEmpty else {
+                pendingDeliveries = 0
+                break
+            }
+            guard await stageNextAsync() else {
+                Analytics.notePasteStackPasteNext(success: false, failReason: "stage_failed")
+                continue
+            }
+            Analytics.notePasteStackPasteNext(success: true, failReason: nil)
+            try? await Task.sleep(nanoseconds: SystemPasteSynthesizer.writeSettleNanoseconds)
+            // Only the synthetic keystrokes we post should pass the tap.
+            isPassingSyntheticCommandV = true
+            await SystemPasteSynthesizer.postCommandVAsync()
+            isPassingSyntheticCommandV = false
+            try? await Task.sleep(nanoseconds: SystemPasteSynthesizer.targetPasteNanoseconds)
+        }
     }
 
     private func removeNext() -> ClipItem {
@@ -358,9 +378,5 @@ final class PasteStackController: ObservableObject {
         case .oldestFirst: return "fifo"
         case .newestFirst: return "lifo"
         }
-    }
-
-    private static func postCommandV() {
-        SystemPasteSynthesizer.postCommandV()
     }
 }

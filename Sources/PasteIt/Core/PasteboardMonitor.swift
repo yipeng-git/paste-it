@@ -34,8 +34,8 @@ final class PasteboardMonitor: NSObject {
         // Block timer avoids @objc → @MainActor isolation checks that were crashing
         // (EXC_BAD_ACCESS in swift_task_isCurrentExecutor / objc_opt_class).
         let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.checkForChanges()
+            Task { @MainActor in
+                await self?.captureIfNeeded()
             }
         }
         t.tolerance = 0.1
@@ -53,7 +53,16 @@ final class PasteboardMonitor: NSObject {
         lastChangeCount = changeCount
     }
 
-    private func checkForChanges() {
+    /// Await any in-flight capture, then ingest a newer pasteboard change if present.
+    /// Called before ⇧⌘V so a copy-then-open doesn't wait for the poll timer.
+    func flushPendingCapture() async {
+        while isCapturing {
+            try? await Task.sleep(nanoseconds: 8_000_000)
+        }
+        await captureIfNeeded()
+    }
+
+    private func captureIfNeeded() async {
         let current = pasteboard.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
@@ -68,21 +77,17 @@ final class PasteboardMonitor: NSObject {
         guard let snapshot = snapshotPasteboard() else { return }
 
         isCapturing = true
-        Task {
-            let captured = await Self.normalize(
-                snapshot: snapshot,
-                blobStore: blobStore
-            )
-            await MainActor.run {
-                if let captured {
-                    historyStore.add(captured)
-                    if pasteStackController.isCollecting {
-                        pasteStackController.append(captured)
-                    }
-                }
-                self.isCapturing = false
+        let captured = await Self.normalize(
+            snapshot: snapshot,
+            blobStore: blobStore
+        )
+        if let captured {
+            historyStore.add(captured)
+            if pasteStackController.isCollecting {
+                pasteStackController.append(captured)
             }
         }
+        isCapturing = false
     }
 
     /// Lightweight pasteboard read — stays on the main actor.

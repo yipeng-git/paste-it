@@ -2,14 +2,18 @@ import AppKit
 import ApplicationServices
 import SwiftUI
 
-/// Full Paste-style Stack surface: glass chrome, horizontal cards, direction control.
+/// Right-rail Stack: compact queue rows, visually distinct from the bottom timeline.
 struct PasteStackView: View {
     @ObservedObject var stack: PasteStackController
     let historyStore: HistoryStore
 
+    private static let gripHeight = PasteStackPanelLayout.gripHeight
+
     var body: some View {
         VStack(spacing: 0) {
             toolbar
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
             ZStack {
                 if stack.items.isEmpty {
                     emptyState
@@ -18,120 +22,136 @@ struct PasteStackView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .layoutPriority(1)
+            resizeGrip
+                .frame(height: Self.gripHeight)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .pasteItPanelGlass()
     }
 
     private var toolbar: some View {
-        HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Image(systemName: "square.stack.3d.up.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                Text("Paste Stack")
-                    .font(.system(size: 14, weight: .bold))
-                if stack.isCollecting {
-                    Text("Collecting")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.green)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.green.opacity(0.14), in: Capsule())
+                HStack(spacing: 8) {
+                    Image(systemName: "square.stack.3d.up.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    Text("Stack")
+                        .font(.system(size: 13, weight: .bold))
+                    if stack.isCollecting {
+                        Text("Collecting")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(.green)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.green.opacity(0.14), in: Capsule())
+                    }
                 }
+                .allowsHitTesting(false)
+
+                Spacer(minLength: 4)
+                Button {
+                    stack.close()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 24, height: 24)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .pasteItControlGlass()
+                .help("Close Paste Stack (⇧⌘C)")
             }
 
-            Spacer(minLength: 8)
+            HStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    Text(stack.items.isEmpty ? "Empty" : "\(stack.items.count)")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                    Text("⌘V pastes next")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+                .allowsHitTesting(false)
 
-            Text(stack.items.isEmpty ? "Empty" : "\(stack.items.count) items")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
-
-            Button {
-                stack.flipDirection()
-            } label: {
-                Label(
-                    stack.direction == .oldestFirst ? "First in, first out" : "Last in, first out",
-                    systemImage: "arrow.up.arrow.down"
-                )
-                .labelStyle(.titleAndIcon)
-                .font(.system(size: 12, weight: .semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .contentShape(Capsule())
+                Spacer(minLength: 4)
+                Button {
+                    stack.flipDirection()
+                } label: {
+                    Image(systemName: stack.direction.systemImage)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 24, height: 24)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .pasteItControlGlass()
+                .help(stack.direction.toggleHelp)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
-            .pasteItCapsuleGlass()
-            .help("Change paste order")
-
-            Button {
-                stack.ensureAccessibilityIfNeeded()
-                _ = stack.pasteNext()
-            } label: {
-                Text("Paste Next")
-                    .font(.system(size: 12, weight: .semibold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-            }
-            .buttonStyle(.plain)
-            .disabled(stack.items.isEmpty)
-            .opacity(stack.items.isEmpty ? 0.45 : 1)
-            .pasteItCapsuleGlass()
-            .help("⌥⌘V")
-
-            Button {
-                stack.close()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, height: 28)
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .pasteItControlGlass()
-            .help("Close Paste Stack (⇧⌘C)")
         }
-        .padding(.horizontal, 18)
-        .padding(.top, 14)
+        .padding(.horizontal, 12)
+        .padding(.top, 10)
         .padding(.bottom, 6)
+        .background {
+            PasteStackWindowDragArea()
+        }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "doc.on.clipboard")
-                .font(.system(size: 28, weight: .medium))
-                .foregroundStyle(.secondary)
-            Text("Copy items to build your stack")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-            Text("Then press ⌘V in any app to paste them in order")
-                .font(.system(size: 12))
-                .foregroundStyle(.tertiary)
-            if !AXIsProcessTrusted() {
-                Text("Grant Accessibility so ⌘V can advance the stack")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.orange)
-                    .padding(.top, 4)
+        ZStack {
+            PasteStackWindowDragArea()
+            VStack(spacing: 8) {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(.secondary)
+                Text("Copy to fill the stack")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Text("Then ⌘V in any app")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                if !AXIsProcessTrusted() {
+                    Text("Grant Accessibility so ⌘V can advance the stack")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.orange)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 4)
+                }
             }
+            .allowsHitTesting(false)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
         }
-        .padding(.bottom, 12)
     }
 
     private var cardStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 14) {
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVStack(spacing: PasteStackPanelLayout.rowSpacing) {
                 ForEach(displayItems) { item in
-                    stackCard(item)
+                    stackRow(item)
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 18)
-            .padding(.top, 8)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 4)
+            .padding(.top, 2)
         }
     }
 
-    /// Visual order matches paste order: next-to-paste is leftmost.
+    private var resizeGrip: some View {
+        Capsule()
+            .fill(Color.primary.opacity(0.28))
+            .frame(width: 36, height: 4)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .allowsHitTesting(false)
+            .help("Drag to resize height")
+    }
+
+    /// Visual order matches paste order: next-to-paste is at the top.
     private var displayItems: [ClipItem] {
         switch stack.direction {
         case .oldestFirst:
@@ -141,32 +161,16 @@ struct PasteStackView: View {
         }
     }
 
-    private func stackCard(_ item: ClipItem) -> some View {
+    private func stackRow(_ item: ClipItem) -> some View {
         let isNext = displayItems.first?.id == item.id
-        return ClipCardView(
+        return PasteStackClipRow(
             item: item,
             historyStore: historyStore,
-            isSelected: isNext,
-            quickIndex: nil,
-            query: ""
+            isNext: isNext
         )
-        .frame(width: 200, height: 190)
-        .overlay(alignment: .topLeading) {
-            if isNext {
-                Text("NEXT")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(Color.accentColor, in: Capsule())
-                    .padding(10)
-            }
-        }
         .contextMenu {
-            Button("Paste Now") {
+            Button("Move to Next") {
                 stack.promoteToNext(item)
-                stack.ensureAccessibilityIfNeeded()
-                _ = stack.pasteNext()
             }
             Button("Delete", role: .destructive) {
                 withAnimation(.easeOut(duration: 0.15)) {
@@ -184,5 +188,22 @@ struct PasteStackView: View {
                     }
                 }
         )
+    }
+}
+
+/// Transparent hit target so the header / empty state can drag the panel.
+struct PasteStackWindowDragArea: NSViewRepresentable {
+    func makeNSView(context: Context) -> PasteStackWindowDragView {
+        PasteStackWindowDragView()
+    }
+
+    func updateNSView(_ nsView: PasteStackWindowDragView, context: Context) {}
+}
+
+final class PasteStackWindowDragView: NSView {
+    override var mouseDownCanMoveWindow: Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
     }
 }

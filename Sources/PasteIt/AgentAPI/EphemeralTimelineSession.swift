@@ -84,7 +84,7 @@ final class EphemeralTimelineSession {
 
         // Apply query after the view is mounted so `searchFocusRequest` activates the field.
         if !query.isEmpty {
-            appState.query = query
+            appState.setQueryFromExternal(query)
             appState.searchFocusRequest += 1
         }
     }

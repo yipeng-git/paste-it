@@ -9,14 +9,12 @@ import Foundation
 final class HotkeyManager {
     private let showTimeline: () -> Void
     private let togglePasteStack: () -> Void
-    private let pasteStackNext: () -> Bool
     private let pastePlain: () -> Bool
     private let editSelected: () -> Bool
 
     private var eventHandler: EventHandlerRef?
     private var hotKeyShow: EventHotKeyRef?
     private var hotKeyStack: EventHotKeyRef?
-    private var hotKeyPasteNext: EventHotKeyRef?
     private var hotKeyPastePlain: EventHotKeyRef?
 
     private var localMonitor: Any?
@@ -24,20 +22,17 @@ final class HotkeyManager {
     private enum HotKeyID: UInt32 {
         case showTimeline = 1
         case togglePasteStack = 2
-        case pasteStackNext = 3
-        case pastePlain = 4
+        case pastePlain = 3
     }
 
     init(
         showTimeline: @escaping () -> Void,
         togglePasteStack: @escaping () -> Void,
-        pasteStackNext: @escaping () -> Bool,
         pastePlain: @escaping () -> Bool,
         editSelected: @escaping () -> Bool
     ) {
         self.showTimeline = showTimeline
         self.togglePasteStack = togglePasteStack
-        self.pasteStackNext = pasteStackNext
         self.pastePlain = pastePlain
         self.editSelected = editSelected
     }
@@ -51,11 +46,9 @@ final class HotkeyManager {
     func stop() {
         if let hotKeyShow { UnregisterEventHotKey(hotKeyShow) }
         if let hotKeyStack { UnregisterEventHotKey(hotKeyStack) }
-        if let hotKeyPasteNext { UnregisterEventHotKey(hotKeyPasteNext) }
         if let hotKeyPastePlain { UnregisterEventHotKey(hotKeyPastePlain) }
         hotKeyShow = nil
         hotKeyStack = nil
-        hotKeyPasteNext = nil
         hotKeyPastePlain = nil
 
         if let eventHandler {
@@ -108,12 +101,6 @@ final class HotkeyManager {
             keyCode: UInt32(kVK_ANSI_C),
             modifiers: UInt32(cmdKey | shiftKey)
         )
-        // ⌥⌘V — paste next from Stack (works without intercepting plain ⌘V)
-        hotKeyPasteNext = registerHotKey(
-            id: .pasteStackNext,
-            keyCode: UInt32(kVK_ANSI_V),
-            modifiers: UInt32(cmdKey | optionKey)
-        )
         // ⌃⌘V — paste current clipboard without formatting
         hotKeyPastePlain = registerHotKey(
             id: .pastePlain,
@@ -161,8 +148,6 @@ final class HotkeyManager {
                 self.showTimeline()
             case .togglePasteStack:
                 self.togglePasteStack()
-            case .pasteStackNext:
-                _ = self.pasteStackNext()
             case .pastePlain:
                 _ = self.pastePlain()
             case nil:
@@ -186,14 +171,6 @@ final class HotkeyManager {
     private func handleLocal(_ event: NSEvent) -> Bool {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard flags.contains(.command) else { return false }
-
-        // ⌥⌘V — paste next from stack while Paste It is key.
-        if flags.contains(.option),
-           !flags.contains(.shift),
-           !flags.contains(.control),
-           event.keyCode == UInt16(kVK_ANSI_V) {
-            return pasteStackNext()
-        }
 
         // ⌃⌘V — paste without formatting while Paste It is key.
         if flags.contains(.control),
