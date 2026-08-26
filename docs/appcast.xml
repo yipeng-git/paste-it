@@ -3,69 +3,69 @@
     <channel>
         <title>Paste It</title>
         <item>
-            <title>0.2.4</title>
-            <pubDate>Wed, 12 Aug 2026 10:04:45 +0800</pubDate>
-            <sparkle:version>6</sparkle:version>
-            <sparkle:shortVersionString>0.2.4</sparkle:shortVersionString>
+            <title>0.2.5</title>
+            <pubDate>Wed, 26 Aug 2026 14:00:29 +0800</pubDate>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>0.2.5</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/PasteIt-0.2.4-universal.dmg" length="9522629" type="application/octet-stream" sparkle:edSignature="S6kEMbgW1wwcrFZscqUUu4JIVw+Of36U5d4dt6qAtKgLEmjNSNoa78riofi1Yv9/SYSdxJl2cZ7I8c/OFv60BQ=="/>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/PasteIt-0.2.5-universal.dmg" length="9622757" type="application/octet-stream" sparkle:edSignature="GjfwRwOstNf+DiDO7gUd4r+zCUkGKGg839Oz5KdxVLq3MHJ69VWCrlV8mPNcGZQHc9Cv3r9cNJMR/YAZL1kFBQ=="/>
             <sparkle:deltas>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-5.delta" sparkle:deltaFrom="5" length="637746" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="LrmkwYwScTLHfwmnUTZfen7bpeHryM32rEst6nLprzbQT+5FPBNcVYWKflYlGNitzLpEFbbm4dCd8vjE/ThlCA=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-4.delta" sparkle:deltaFrom="4" length="2142034" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="GbSVRAxQpxFtqtwcTX2FZk7HMPOl7oMoJL954yJmuTy5/qN5oy+P0wNC42ECB8qnfqiNGFFYf5A/87DocqhWBA=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-3.delta" sparkle:deltaFrom="3" length="2936266" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="h0QkzXebsYEcqzqgYxbVGP3aMWlWZPRgHlrQTtiJ7tcg76Dk8X9ZwIXU6fUiBLV9AGhqfcVMscSTlJVoH9YDAg=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-2.delta" sparkle:deltaFrom="2" length="2950774" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="zz4iqQIdwULT0UFMsPRHjbbKHMyeEBEX5Wt94lRscMfScCN4zDax7kHtyvkEsVmoWEIjUJttYntA6/iCNvo1AA=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-1.delta" sparkle:deltaFrom="1" length="4960390" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="0iWYpq+hvRdrwT5duMq6FetR4MoCdN2+lg99SyoNPTmzRTbIYKbtlwKLn4tJzgCt8V5re3oCf4cs677dRx+LCw=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-6.delta" sparkle:deltaFrom="6" length="919670" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="4obsp7Ne8Il+ZlyraFM9brm5xOIJGYJFLOcgF84+q4XEJT7+U38UOEGXVJrFbe1CqW2T+OEMU+54U9FJXQyxBw=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-5.delta" sparkle:deltaFrom="5" length="928566" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="fOKXt7X2VifZfNQt5WCIQaMEIIH+P/BQsdU9A5sR3vCMX+V3WEiOiw+DfG4sv2SgYKzEQmNoENp+GpnIp9vWCQ=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-4.delta" sparkle:deltaFrom="4" length="2295982" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="WY7IwdsfvqgoeSd8aZ3cXsOgWEUlc6samEcaOVSlFYmOlRzFBDl0Qegv0+1hJEIfvITPC6weYLGAYWFmgirfDw=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-3.delta" sparkle:deltaFrom="3" length="3043774" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="3wnCukwFPtyTl/f34HZDxdKmqnuE8N00hhGV75HYFhbg5nDUlbDlERZhALdyneO1kZ7WYRr2YRIx0Y1qcJc4BA=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-2.delta" sparkle:deltaFrom="2" length="3060870" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="+qVjP6GN9vBsY93yIrsJhg7eO7FLkBYYF6dkn+Yybc+OoobSSrhZZ5RRwL5oMp4KRiR37eAW9sAlFTbT7YRwDA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
+            <title>0.2.5</title>
+            <pubDate>Wed, 26 Aug 2026 14:00:29 +0800</pubDate>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>0.2.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/PasteIt-0.2.5-arm64.dmg" length="6935809" type="application/octet-stream" sparkle:edSignature="+8l6orr8W87s04wYXNw1u/DoQD98Ti1Dpfb9/abusF1wAM5DUugCl2uDs/mM/lVHqwMcYcQIwuXHC6ik9GLrAA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-6.delta" sparkle:deltaFrom="6" length="446962" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="x/1etz5hgAZ84DG9Z8GUaDrkC27JIYMKTPp9TuEUbTTI8TsU8FPgclAXSSgDJwNPJ4uL5M6toUFrr6yBaA9tBg=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-5.delta" sparkle:deltaFrom="5" length="453878" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="VG5EXYyGxO5KWoVFTE1MD7qR0E7543qJl7lGD8muihDC73Mdo/6jaozoMvpJQVy22BTQH5HMg4EnVW1KjycZAg=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-4.delta" sparkle:deltaFrom="4" length="1638710" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="SvsT+vWffX/cVGN6VLW40+DhIqAOVgBNgJzhjzTx9eWPGYUYQdRnWl+AtwrLrPA8Q4QB/8coJP5YU+tF8EF/DQ=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-3.delta" sparkle:deltaFrom="3" length="2012474" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="KqIkK4VAPV4kOUEcRaoTd5fxjIIijuyhVjE2oHfhrPo0BK1S6FgO76pq7bocSv1b8EeyWusM6yDhsNGv97ZYCQ=="/>
+                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.5/Paste.It7-2.delta" sparkle:deltaFrom="2" length="2020614" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="Bh1uQosJaalsA+fyZexZUhbomjMHV3DXG22mjfv43KHmJQVR+DRazpZun60ER6oQElGYJRw1Ly/o/Clt3O1zDQ=="/>
             </sparkle:deltas>
         </item>
         <item>
             <title>0.2.4</title>
-            <pubDate>Wed, 12 Aug 2026 10:04:45 +0800</pubDate>
+            <pubDate>Wed, 26 Aug 2026 14:00:29 +0800</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>0.2.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/PasteIt-0.2.4-universal.dmg" length="9522629" type="application/octet-stream" sparkle:edSignature="S6kEMbgW1wwcrFZscqUUu4JIVw+Of36U5d4dt6qAtKgLEmjNSNoa78riofi1Yv9/SYSdxJl2cZ7I8c/OFv60BQ=="/>
+        </item>
+        <item>
+            <title>0.2.4</title>
+            <pubDate>Wed, 26 Aug 2026 14:00:29 +0800</pubDate>
             <sparkle:version>6</sparkle:version>
             <sparkle:shortVersionString>0.2.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/PasteIt-0.2.4-arm64.dmg" length="6884093" type="application/octet-stream" sparkle:edSignature="5fGmzK6oWDr34iiADUMJt6/IVob0CE41j5KEwZuvhLh5lc4T2oMyd8Z1aWZ7RaqKE6i5Fr/3ptK8ILz6OXrTAg=="/>
-            <sparkle:deltas>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-5.delta" sparkle:deltaFrom="5" length="296006" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="AiIEsbfnaV3TydYgsJ+bZPnkFAraPj+ir6cNOEIR70+JKjJutQ/eIatV0eDP6j4DFWJnPwZxg0j3+cN0Waf7Bw=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-4.delta" sparkle:deltaFrom="4" length="1557458" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="h1Fr1YlXvQOj+kcnu9OQ6UPuOtkLgkkZfnPPcQtw++63fWy0qty2u+WSsJ8DEEMN3IQrho+JsWSeUdt7llLJBg=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-3.delta" sparkle:deltaFrom="3" length="1954778" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="fnJRPA+FIw0q0LjiTajTSngbSCK5o7NB1sR/R0EDJ6T28Fh5GOIPGPYGteBlvGzBh3mBqK0lKAEUb0wALtyEDw=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-2.delta" sparkle:deltaFrom="2" length="1963950" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="DmbAZvA/74y6+sPLihlXXxKSekmoZp4GBBzZS909mvZbIn6ICa1NDmwbpuMAZXmeccuFNMistP/cq9QZj0CqBA=="/>
-                <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.4/Paste.It6-1.delta" sparkle:deltaFrom="1" length="2957298" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="P8r+zl4373BxLyhJGiqxm21pTwUGCZccYmJIcwaLLfFBW2MJkGIP49JjAalGmKuOlV9MyjGVW96JS4SSJMAgAg=="/>
-            </sparkle:deltas>
         </item>
         <item>
             <title>0.2.3</title>
-            <pubDate>Wed, 12 Aug 2026 10:04:45 +0800</pubDate>
+            <pubDate>Wed, 26 Aug 2026 14:00:29 +0800</pubDate>
             <sparkle:version>5</sparkle:version>
             <sparkle:shortVersionString>0.2.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.3/PasteIt-0.2.3-universal.dmg" length="9532489" type="application/octet-stream" sparkle:edSignature="cJYjl0IHmtHEXl/ZNjc4I89y9GApZ9a0/Po/jZjDWCJ4XGFO4T7XvtRplnUiX9wVPrsZMKfnIDgFI1VzM0CCDw=="/>
         </item>
-        <item>
+    <item>
             <title>0.2.3</title>
-            <pubDate>Wed, 12 Aug 2026 10:04:45 +0800</pubDate>
+            <pubDate>Wed, 26 Aug 2026 14:00:29 +0800</pubDate>
             <sparkle:version>5</sparkle:version>
             <sparkle:shortVersionString>0.2.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.3/PasteIt-0.2.3-arm64.dmg" length="6889528" type="application/octet-stream" sparkle:edSignature="z4X40NmfaArxwCS6pSfwnb9Y6juHjAu+7lM6DNJRDwvHSxL3sQ5T9is3m/YDocVyY7w0P8T6+wbhYIt0iedmDw=="/>
-        </item>
-        <item>
-            <title>0.2.2</title>
-            <pubDate>Wed, 12 Aug 2026 10:04:45 +0800</pubDate>
-            <sparkle:version>4</sparkle:version>
-            <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.2/PasteIt-0.2.2-universal.dmg" length="6182484" type="application/octet-stream" sparkle:edSignature="RhoGz281/OR74HM/vZ/kA+A/ww3r22KH2ONphwSTjCd7HOLt+nHm4R8FBNY1qHl8NlY1b2Yd/30LeOvBZJsEAg=="/>
-        </item>
-    <item>
-            <title>0.2.2</title>
-            <pubDate>Wed, 12 Aug 2026 10:04:45 +0800</pubDate>
-            <sparkle:version>4</sparkle:version>
-            <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.2/PasteIt-0.2.2-arm64.dmg" length="3620024" type="application/octet-stream" sparkle:edSignature="66GMKnh3eTbCSQV8o+lyn/Iv0noHWVsNHqJLzHU0zQ1XTdnr2f8KFzF9gSAalFoCwrMLkJJTq2VlncXrA2M8BA=="/>
         </item>
     </channel>
 </rss>
