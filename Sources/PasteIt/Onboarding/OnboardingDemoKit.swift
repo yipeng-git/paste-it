@@ -336,6 +336,93 @@ extension View {
     }
 }
 
+/// Compact vertical queue matching the live Paste Stack rail (not timeline cards).
+struct DemoStackRail: View {
+    let items: [OnboardingDemoClip]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "square.stack.3d.up.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("Stack")
+                    .font(.system(size: 12, weight: .semibold))
+                Spacer(minLength: 4)
+                Text("⇧⌘C")
+                    .font(.system(size: 10, weight: .medium).monospaced())
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+
+            Divider().opacity(0.35)
+
+            if items.isEmpty {
+                Text("Copy to collect")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                VStack(spacing: 6) {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, clip in
+                        DemoStackRow(clip: clip, isNext: index == 0)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(8)
+            }
+        }
+        .frame(width: 196, height: 196)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
+    }
+}
+
+private struct DemoStackRow: View {
+    let clip: OnboardingDemoClip
+    var isNext: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ZStack {
+                clip.type.bannerFallbackColor
+                Image(systemName: clip.type.systemImage)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 28, height: 28)
+            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+
+            Text(clip.previewText)
+                .font(.system(size: 11, weight: .medium))
+                .lineLimit(1)
+            Spacer(minLength: 0)
+            if isNext {
+                Text("NEXT")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Color.accentColor, in: Capsule())
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            Color(nsColor: .windowBackgroundColor).opacity(isNext ? 1 : 0.7),
+            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(isNext ? Color.accentColor.opacity(0.85) : Color.black.opacity(0.06), lineWidth: isNext ? 1.5 : 1)
+        }
+    }
+}
+
 /// Two quick press pulses to read as a double-click on a card.
 struct DemoDoubleClickCue: View {
     var isActive: Bool

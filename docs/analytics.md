@@ -42,7 +42,7 @@ The PostHog SDK may also attach its own library/device fields.
 | Event | When | Properties (metadata only) |
 | --- | --- | --- |
 | `onboarding_started` | Tutorial opens | `source`: `first_launch` \| `update` \| `settings` |
-| `onboarding_step_viewed` | Tutorial page shown | `step`: `capture` \| `paste` \| `browse` \| `organize` |
+| `onboarding_step_viewed` | Tutorial page shown | `step`: `capture` \| `paste` \| `browse` \| `organize` \| `stack` |
 | `onboarding_completed` | Finish / skip / window close | `outcome`: `completed` \| `skipped` \| `dismissed`; `last_step` |
 | `panel_opened` | Timeline panel shown | `source`: `hotkey` \| `status_item` \| `menu`; `history_count_bucket`; `session_id` |
 | `panel_closed` | Timeline panel hidden | `duration_ms_bucket`; `did_stage`; `session_id` |

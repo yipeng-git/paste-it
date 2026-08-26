@@ -11,6 +11,7 @@ struct OnboardingHeroView: View {
             case .paste: PasteHero(isActive: isActive)
             case .browse: BrowseHero(isActive: isActive)
             case .organize: OrganizeHero(isActive: isActive)
+            case .stack: StackHero(isActive: isActive)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -337,6 +338,60 @@ private struct OrganizeHero: View {
         case 0: return 1
         case 1: return 3
         default: return 3
+        }
+    }
+}
+
+// MARK: - Stack — ⇧⌘C open rail → copy into queue → ⌘V in the target app
+
+private struct StackHero: View {
+    let isActive: Bool
+    private let items = OnboardingDemoClip.stackItems
+
+    var body: some View {
+        OnboardingBeatLoop(isActive: isActive, delays: [1.4, 1.8, 2.2]) { beat in
+            HeroScene(page: .stack, beat: beat) {
+                HStack(alignment: .center, spacing: 18) {
+                    VStack(spacing: 10) {
+                        DemoAppWindow(
+                            title: beat >= 2 ? "Mail" : "Safari",
+                            systemImage: beat >= 2 ? "envelope" : "safari",
+                            emphasized: beat >= 1,
+                            bodyText: windowBody(beat),
+                            placeholder: beat >= 2 ? "Compose…" : "Select text…"
+                        )
+                        .frame(width: 168, height: 110)
+
+                        if beat == 0 {
+                            KeyCapsule(label: "⇧ ⌘ C", pulsing: true, emphasized: true)
+                        } else if beat == 1 {
+                            KeyCapsule(label: "⌘ C", pulsing: true, emphasized: true)
+                        } else {
+                            KeyCapsule(label: "⌘ V", pulsing: true, emphasized: true)
+                        }
+                    }
+                    .demoFocus(true)
+
+                    DemoStackRail(items: queuedItems(beat))
+                        .demoFocus(true)
+                }
+            }
+        }
+    }
+
+    private func queuedItems(_ beat: Int) -> [OnboardingDemoClip] {
+        switch beat {
+        case 0: return []
+        case 1: return items
+        default: return Array(items.dropFirst())
+        }
+    }
+
+    private func windowBody(_ beat: Int) -> String? {
+        switch beat {
+        case 1: return items.first?.previewText
+        case 2: return items.first?.previewText
+        default: return nil
         }
     }
 }

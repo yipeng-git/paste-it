@@ -176,8 +176,8 @@ Optional later: pin/folder/MCP once those events exist.
 | Chart name | Type | Configuration |
 | --- | --- | --- |
 | **Install → Stage (7d)** | Funnel | Step 1 `app_install` → Step 2 `clip_staged`. Conversion window **7 days**. Primary activation KPI |
-| **Onboarding steps (first launch)** | Funnel | Filter `source = first_launch` on start where applicable. Steps: `onboarding_started` → `onboarding_step_viewed` (`capture` → `paste` → `browse` → `organize`) → `onboarding_completed` (`outcome=completed`) |
-| **What's New (update)** | Funnel | Filter `source = update`. For content version 1, same steps as install (`capture` → `paste` → `browse` → `organize`) |
+| **Onboarding steps (first launch)** | Funnel | Filter `source = first_launch` on start where applicable. Steps: `onboarding_started` → `onboarding_step_viewed` (`capture` → `paste` → `browse` → `organize` → `stack`) → `onboarding_completed` (`outcome=completed`) |
+| **What's New (update)** | Funnel | Filter `source = update`. Content version 3 is Stack-only (`stack`). Older packs used the full install sequence. |
 | **Onboarding outcomes** | Trends | `onboarding_completed` → Breakdown `outcome` (`completed` / `skipped` / `dismissed`) |
 | **Bail-out step** | Trends | `onboarding_completed` where `outcome` is `skipped` or `dismissed` → Breakdown `last_step` |
 
