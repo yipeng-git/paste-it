@@ -1,0 +1,36 @@
+Sources/PasteIt/App/AppSettings.swift
+  s_6ccfc38bceb071::t_3efe0813bcaf9d 43
+Sources/PasteIt/Onboarding/OnboardingHeroes.swift
+  s_6ccfc38bceb071::t_c575e0ed7660f9 344-397
+  s_6ccfc38bceb071::t_b5b9aec2a40f7f 14
+docs/analytics.md
+  s_6ccfc38bceb071::t_3293e2e4706a41 45
+docs/analytics-dashboard.md
+  s_6ccfc38bceb071::t_d16c42716c2c7a 179-180
+Sources/PasteIt/Onboarding/OnboardingDemoKit.swift
+  s_6ccfc38bceb071::t_2eea4250398132 339-425
+Sources/PasteIt/Onboarding/OnboardingPage.swift
+  s_6ccfc38bceb071::t_e410e4f9d21944 65-68
+  s_6ccfc38bceb071::t_40f9cce01ad644 48
+  s_6ccfc38bceb071::t_f1987725283977 63
+  s_6ccfc38bceb071::t_432ece74603078 38
+  s_6ccfc38bceb071::t_e1ed25c6eb6216 28
+  s_6ccfc38bceb071::t_aef62a32a5bdef 17-18
+  s_6ccfc38bceb071::t_18e732995fe6e1 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "b045d0a082d86165f51892f01b95e58f0ef52e46",
+  "prompts": {},
+  "sessions": {
+    "s_6ccfc38bceb071": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "942dc22e-bfdb-48a0-ae8a-0cfee586ff0d",
+        "model": "grok-4.6"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
