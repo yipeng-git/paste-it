@@ -1,0 +1,133 @@
+Sources/PasteIt/Core/HotkeyManager.swift
+  s_6ccfc38bceb071::t_84088630ab326c 25
+README.md
+  s_6ccfc38bceb071::t_3ca97a8a55f49c 50
+README.zh-CN.md
+  s_6ccfc38bceb071::t_bc736d6d9bca10 50
+README.ja.md
+  s_6ccfc38bceb071::t_1c80a62297135b 50
+Sources/PasteIt/Features/PasteStack/PasteStackPanelController.swift
+  s_6ccfc38bceb071::t_f631ac47a3edb1 17,139-140,151-154,173-176,180-191,218-219,221-235,242,402
+  s_6ccfc38bceb071::t_c94044af8188e8 78-81
+  s_6ccfc38bceb071::t_c09b4e58784f3c 177,324,329-334,340-370,377-401
+  s_6ccfc38bceb071::t_bf6e21ec793ff2 167-171,178-179,195-206
+  s_6ccfc38bceb071::t_044297c0a9ef45 109-116,120-129
+  s_6ccfc38bceb071::t_84d17b284e2858 136
+  s_6ccfc38bceb071::t_22f72e61748d46 13,16
+  s_6ccfc38bceb071::t_3ff4ebe89a9291 85
+  s_6ccfc38bceb071::t_38374e3f916b16 192
+  s_6ccfc38bceb071::t_6045dd798e5be0 220
+  s_6ccfc38bceb071::t_4142681e377f2a 243-314,403
+  s_6ccfc38bceb071::t_df5521e7e683ec 315-323,325-328,335-339,371-372,374-376
+  s_6ccfc38bceb071::t_07d1867db63ad7 55,62-63,71
+  s_6ccfc38bceb071::t_49c90a28947e09 373
+  s_6ccfc38bceb071::t_944d183da3b109 5,14-15,58,88,105-108,117-119,130-131,158,193-194
+  s_6ccfc38bceb071::t_9ce98f2c99f6ec 137,155,157
+Sources/PasteIt/App/AppState.swift
+  s_6ccfc38bceb071::t_e18009c671a401 168-172,186-203,206-235
+  s_6ccfc38bceb071::t_d2d0c70b66422d 446
+  s_6ccfc38bceb071::t_1cf242a312b480 94-97
+  s_6ccfc38bceb071::t_0bb6b7b84497e1 113,116-117,121
+  s_6ccfc38bceb071::t_702dc9da101d17 375-378
+  s_6ccfc38bceb071::t_3d6e5f237422d7 118-120
+  s_6ccfc38bceb071::t_3923f157f72ebb 454-506
+  s_6ccfc38bceb071::t_b0b756c6e95757 173-185
+  s_6ccfc38bceb071::t_c97ad76e972955 515-522,524,533-536
+  s_6ccfc38bceb071::t_210e67d9176c85 148-167
+  s_6ccfc38bceb071::t_17111f51946ec1 537-543
+  s_6ccfc38bceb071::t_d255102554a809 267
+  s_6ccfc38bceb071::t_baf3481e742033 236-242
+  s_6ccfc38bceb071::t_f93995c6c77eb2 114-115
+  s_6ccfc38bceb071::t_8771a6c3935162 204-205
+  s_6ccfc38bceb071::t_3b33a79fd402ee 87-91
+  s_6ccfc38bceb071::t_a312b059ec7dd9 248,252
+  s_6ccfc38bceb071::t_ce93f5a4569ca5 40-43
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_6ccfc38bceb071::t_7cb65c032a2f3f 309
+  s_6ccfc38bceb071::t_d64233a0946412 403-405
+  s_6ccfc38bceb071::t_2988d9ded754e4 331
+  s_6ccfc38bceb071::t_9827305ec5884a 318
+  s_6ccfc38bceb071::t_5a2bec36ade0f6 401-402,406-410
+  s_6ccfc38bceb071::t_5f3714e9e29c0d 463-464,466
+  s_6ccfc38bceb071::t_fda7076c7574d1 485,518-520,571-582
+  s_6ccfc38bceb071::t_12811d04c66dd1 286,290
+  s_6ccfc38bceb071::t_24eb4c52c68812 411
+  s_6ccfc38bceb071::t_d139ab54f2d6fa 521-523,649-706
+  s_6ccfc38bceb071::t_ec1252ea06ae0d 400,412-414,418,424
+  s_6ccfc38bceb071::t_e743b34437fffd 223-228
+  s_6ccfc38bceb071::t_edea477b7731d1 366,371-373
+  s_6ccfc38bceb071::t_16ff52aed2b3ab 548-550,556-562
+  s_6ccfc38bceb071::t_559eabae47c9e7 551-555
+  s_6ccfc38bceb071::t_5c4ad3ba27b448 525-541
+  s_6ccfc38bceb071::t_c9dbd3fd8d4e3d 524
+Sources/PasteIt/Settings/SettingsView.swift
+  s_6ccfc38bceb071::t_c55ccccb907fda 219
+Sources/PasteIt/Core/PasteboardMonitor.swift
+  s_6ccfc38bceb071::t_92f22fe5d97dc9 37-38
+  s_6ccfc38bceb071::t_64d4279a43a6f6 56-65,80-87,90
+Sources/PasteIt/Features/PasteStack/PasteStackClipRow.swift
+  s_6ccfc38bceb071::t_7d1de6f5c36e7e 1-46,48-112
+  s_6ccfc38bceb071::t_286220d5bfd0e2 47
+Sources/PasteIt/Features/PasteStack/PasteStackController.swift
+  s_6ccfc38bceb071::t_b55836632b12e9 23-31
+  s_6ccfc38bceb071::t_edd59849655e5d 54-55,60-61
+  s_6ccfc38bceb071::t_cfd439682e1123 358-359,361,363
+  s_6ccfc38bceb071::t_e884b6adfe3114 122-123
+  s_6ccfc38bceb071::t_1f7689defc23f8 258,260
+  s_6ccfc38bceb071::t_ec7fe3ceb19e2f 161
+  s_6ccfc38bceb071::t_d6c8a6066462c8 308,320-333,335-353,355,360,362
+  s_6ccfc38bceb071::t_c0e69abd03759f 104
+  s_6ccfc38bceb071::t_b1c1f522aeb3bf 259
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_6ccfc38bceb071::t_ae85fddb136d16 24-29
+  s_6ccfc38bceb071::t_b0b65a72ea38a3 30-31
+  s_6ccfc38bceb071::t_be07862b8f5127 116-118
+  s_6ccfc38bceb071::t_e08e3ac18dd48a 234
+  s_6ccfc38bceb071::t_9fe31b2cf72e23 251
+  s_6ccfc38bceb071::t_db8fee5d9b03c0 11-16
+  s_6ccfc38bceb071::t_3cc57ae9206efe 50-51
+  s_6ccfc38bceb071::t_341152b8ca4af3 33-34
+  s_6ccfc38bceb071::t_324680f18e3606 105-107
+  s_6ccfc38bceb071::t_d0c1333819df1a 172
+  s_6ccfc38bceb071::t_9137ae24cdf08e 99-104,108-112
+  s_6ccfc38bceb071::t_5d1924f1817b84 62-77
+  s_6ccfc38bceb071::t_3cb627287671f7 96-98,148-150,157-158,162,173-184,186-187,189-196,206-209,222,229,232,235,240-246
+  s_6ccfc38bceb071::t_d96ff0275304f5 247
+Sources/PasteIt/App/AppRuntime.swift
+  s_6ccfc38bceb071::t_46158ebb514b6c 88,90-91
+  s_6ccfc38bceb071::t_c7255d97febf51 92-94
+  s_6ccfc38bceb071::t_d6e243669b68d2 116-118
+  s_6ccfc38bceb071::t_e86544a278eb69 86-87,89
+Sources/PasteIt/Features/PasteStack/PasteStackView.swift
+  s_6ccfc38bceb071::t_176282d4779747 114,133,154,172
+  s_6ccfc38bceb071::t_2eecbdcff357df 11,16,25,27,67,99-100
+  s_6ccfc38bceb071::t_97d37bc0ba05b3 15,34,36-49,51,53-65,68-84,86-92,96-97
+  s_6ccfc38bceb071::t_16e6723ba99253 29
+  s_6ccfc38bceb071::t_5073d6a8e8e531 134
+  s_6ccfc38bceb071::t_e7a6c800865b74 10
+  s_6ccfc38bceb071::t_779bbf0f919acf 5,26,105-113,115-124,126-128,136,139-141,145,152,164,166,169,193-209
+  s_6ccfc38bceb071::t_d9a184487e2902 85,93
+  s_6ccfc38bceb071::t_469926bf942908 146-151
+  s_6ccfc38bceb071::t_a4980267d8472b 101
+  s_6ccfc38bceb071::t_6a576bd467c480 153
+README.ko.md
+  s_6ccfc38bceb071::t_18f87f739759f2 50
+Sources/PasteIt/AgentAPI/EphemeralTimelineSession.swift
+  s_6ccfc38bceb071::t_98b018ddc893f1 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "8dab1584aec2bc24870abba4be05fd6b47c59a16",
+  "prompts": {},
+  "sessions": {
+    "s_6ccfc38bceb071": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "942dc22e-bfdb-48a0-ae8a-0cfee586ff0d",
+        "model": "grok-4.6"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
