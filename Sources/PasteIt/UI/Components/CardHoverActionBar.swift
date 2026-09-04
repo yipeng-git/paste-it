@@ -42,15 +42,48 @@ struct CardHoverActionBar: View {
         enabled: Bool = true,
         action: @escaping () -> Void
     ) -> some View {
+        ActionBarButton(
+            systemName: systemName,
+            help: help,
+            enabled: enabled,
+            action: action
+        )
+    }
+}
+
+private struct ActionBarButton: View {
+    let systemName: String
+    let help: String
+    var enabled: Bool
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 12, weight: isHovered && enabled ? .bold : .semibold))
                 .frame(width: 28, height: 28)
-                .contentShape(Rectangle())
+                .background {
+                    if isHovered {
+                        Circle()
+                            .fill(Color.primary.opacity(enabled ? 0.14 : 0.08))
+                    }
+                }
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(enabled ? Color.primary : Color.secondary.opacity(0.45))
+        .foregroundStyle(
+            enabled
+                ? Color.primary.opacity(isHovered ? 1 : 0.88)
+                : Color.secondary.opacity(0.45)
+        )
         .disabled(!enabled)
         .help(help)
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.1)) {
+                isHovered = hovering
+            }
+        }
     }
 }

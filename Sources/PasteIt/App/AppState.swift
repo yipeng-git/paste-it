@@ -48,7 +48,7 @@ final class AppState: ObservableObject {
     @Published var selectedTab: TimelineTab = .timeline {
         didSet {
             guard selectedTab != oldValue, !isBatchUpdatingFilters else { return }
-            rebuildVisibleClips()
+            beginTabSwitch()
         }
     }
     @Published var selectedFilter: FilterCategory = .all {
@@ -95,6 +95,12 @@ final class AppState: ObservableObject {
     private var skipNextHistoryRebuild = false
     /// Hover Copy / ⌘C while browsing: persist recency after the panel closes.
     private var pendingPromoteAfterHide: UUID?
+    /// Per-tab source lists (timeline / pinned / folders) — rebuilt once per history change.
+    private var tabSourceCache: [String: [ClipItem]] = [:]
+    /// Per-tab filtered results under the current query / filter / source-app key.
+    private var tabVisibleCache: [String: [ClipItem]] = [:]
+    private var tabVisibleCacheFilterKey: String = ""
+    private var visibleClipsRebuildTask: Task<Void, Never>?
 
     init(
         settings: AppSettings,
@@ -111,6 +117,7 @@ final class AppState: ObservableObject {
                 // Defer so we read the updated `clips` array after the mutation lands.
                 DispatchQueue.main.async {
                     guard let self else { return }
+                    self.invalidateTabCaches()
                     if self.skipNextHistoryRebuild {
                         self.skipNextHistoryRebuild = false
                         return
@@ -170,6 +177,15 @@ final class AppState: ObservableObject {
         query.isEmpty && debouncedQuery.isEmpty && selectedTab == .timeline && selectedSourceApp == nil
     }
 
+    /// Prebuild Pinned / folder lists while Default is showing so the first tab switch is instant.
+    func warmTabCaches() {
+        Task { @MainActor in
+            await Task.yield()
+            guard panelController?.isVisible == true else { return }
+            warmTabCachesNow()
+        }
+    }
+
     /// `historyStore.add` lands before Combine updates `visibleClips`. Call after a
     /// clipboard flush so the panel never opens with the old first card still selected.
     func absorbNewestClipBeforePanelShow() {
@@ -177,6 +193,7 @@ final class AppState: ObservableObject {
            let newest = historyStore.clips.first,
            visibleClips.first?.id != newest.id,
            belongsInCurrentVisibleList(newest) {
+            invalidateTabCaches()
             visibleClips.removeAll { $0.id == newest.id }
             visibleClips.insert(newest, at: 0)
         }
@@ -208,12 +225,14 @@ final class AppState: ObservableObject {
         if historyStore.isPinned(item) {
             historyStore.unpinFromPinnedBoard(item)
             if selectedTab == .pinned {
+                invalidateTabCaches()
                 visibleClips.removeAll { $0.id == item.id }
                 pruneSelectionToVisibleClips()
             }
         } else {
             historyStore.pinToPinnedBoard(item)
             if selectedTab == .pinned, !visibleClips.contains(where: { $0.id == item.id }) {
+                invalidateTabCaches()
                 visibleClips.insert(item, at: 0)
             }
         }
@@ -228,6 +247,7 @@ final class AppState: ObservableObject {
         skipNextHistoryRebuild = true
         historyStore.unpin(item, from: folder)
         if case .folder(let id) = selectedTab, id == folder.id {
+            invalidateTabCaches()
             visibleClips.removeAll { $0.id == item.id }
             pruneSelectionToVisibleClips()
         }
@@ -236,6 +256,7 @@ final class AppState: ObservableObject {
     func removeClipFromCurrentTab(_ item: ClipItem) {
         skipNextHistoryRebuild = true
         historyStore.removeFromTab(item, tab: selectedTab)
+        invalidateTabCaches()
         visibleClips.removeAll { $0.id == item.id }
         pruneSelectionToVisibleClips()
     }
@@ -478,6 +499,7 @@ final class AppState: ObservableObject {
         }
 
         if belongsInCurrentVisibleList(newest) {
+            invalidateTabCaches()
             visibleClips.insert(newest, at: 0)
         }
         return true
@@ -504,12 +526,33 @@ final class AppState: ObservableObject {
         ).contains { $0.id == item.id }
     }
 
-    private func rebuildVisibleClips() {
+    private func rebuildVisibleClips(tabChanged: Bool = false) {
         if case .folder(let id) = selectedTab,
            !historyStore.customFolders.contains(where: { $0.id == id }) {
             isBatchUpdatingFilters = true
             selectedTab = .timeline
             isBatchUpdatingFilters = false
+        }
+
+        let previousTab = lastAppliedTab
+        let didChangeTab = tabChanged || selectedTab != previousTab
+        let filterKey = visibleCacheFilterKey
+
+        if filterKey == tabVisibleCacheFilterKey,
+           let cached = tabVisibleCache[selectedTab.id] {
+            lastAppliedQuery = debouncedQuery
+            lastAppliedTab = selectedTab
+            lastAppliedFilter = selectedFilter
+            lastAppliedSourceApp = selectedSourceApp
+            if !applyVisibleClipsNow(cached, progressive: didChangeTab) {
+                finishVisibleClipsRebuild(tabChanged: didChangeTab)
+            }
+            return
+        }
+
+        if filterKey != tabVisibleCacheFilterKey {
+            tabVisibleCache.removeAll(keepingCapacity: true)
+            tabVisibleCacheFilterKey = filterKey
         }
 
         let canNarrow = !debouncedQuery.isEmpty
@@ -520,7 +563,7 @@ final class AppState: ObservableObject {
             && selectedSourceApp == lastAppliedSourceApp
             && !visibleClips.isEmpty
         let source = canNarrow ? visibleClips : sourceClipsForCurrentTab()
-        visibleClips = searchService.search(
+        let filtered = searchService.search(
             clips: source,
             query: debouncedQuery,
             selectedFilter: selectedFilter,
@@ -530,12 +573,104 @@ final class AppState: ObservableObject {
                 historyStore.foldedSearchText(for: item)
             }
         )
+        tabVisibleCache[selectedTab.id] = filtered
         lastAppliedQuery = debouncedQuery
         lastAppliedTab = selectedTab
         lastAppliedFilter = selectedFilter
         lastAppliedSourceApp = selectedSourceApp
+        if !applyVisibleClipsNow(filtered, progressive: didChangeTab) {
+            finishVisibleClipsRebuild(tabChanged: didChangeTab)
+        }
+    }
+
+    private func beginTabSwitch() {
+        visibleClipsRebuildTask?.cancel()
+        visibleClips = []
+        selectedClipID = nil
+        selectedClipIDs = []
         if panelController?.isVisible == true {
-            selectFirstIfNeeded()
+            scrollToStartRequest += 1
+        }
+
+        let tab = selectedTab
+        visibleClipsRebuildTask = Task { @MainActor in
+            await Task.yield()
+            guard !Task.isCancelled, selectedTab == tab else { return }
+            rebuildVisibleClips(tabChanged: true)
+        }
+    }
+
+    private func applyVisibleClipsNow(_ clips: [ClipItem], progressive: Bool) -> Bool {
+        if !progressive || clips.count <= 6 {
+            visibleClips = clips
+            return false
+        }
+
+        visibleClipsRebuildTask?.cancel()
+        visibleClips = []
+        let tab = selectedTab
+        visibleClipsRebuildTask = Task { @MainActor in
+            await applyVisibleClips(clips, progressive: true)
+            guard !Task.isCancelled, selectedTab == tab else { return }
+            finishVisibleClipsRebuild(tabChanged: true)
+        }
+        return true
+    }
+
+    /// Fills `visibleClips` in small batches so card views mount across frames.
+    private func applyVisibleClips(_ clips: [ClipItem], progressive: Bool) async {
+        let batchSize = 6
+        if !progressive || clips.count <= batchSize {
+            visibleClips = clips
+            return
+        }
+
+        visibleClips = []
+        var index = 0
+        while index < clips.count {
+            let end = min(index + batchSize, clips.count)
+            visibleClips.append(contentsOf: clips[index..<end])
+            index = end
+            if index < clips.count {
+                await Task.yield()
+                guard !Task.isCancelled else { return }
+            }
+        }
+    }
+
+    private func warmTabCachesNow() {
+        ensureTabSourceCache()
+        let filterKey = visibleCacheFilterKey
+        if filterKey != tabVisibleCacheFilterKey {
+            tabVisibleCache.removeAll(keepingCapacity: true)
+            tabVisibleCacheFilterKey = filterKey
+        }
+
+        var tabsToWarm: [TimelineTab] = [.pinned]
+        tabsToWarm.append(contentsOf: historyStore.customFolders.map { .folder($0.id) })
+        for tab in tabsToWarm {
+            guard tabVisibleCache[tab.id] == nil else { continue }
+            let source = tabSourceCache[tab.id] ?? []
+            tabVisibleCache[tab.id] = searchService.search(
+                clips: source,
+                query: debouncedQuery,
+                selectedFilter: selectedFilter,
+                sourceApp: selectedSourceApp,
+                pinboardID: nil,
+                foldedHaystack: { [historyStore] item in
+                    historyStore.foldedSearchText(for: item)
+                }
+            )
+        }
+    }
+
+    private func finishVisibleClipsRebuild(tabChanged: Bool) {
+        if panelController?.isVisible == true {
+            if tabChanged {
+                selectFirst(scroll: false)
+            } else {
+                selectFirstIfNeeded()
+            }
         } else {
             // Hidden ingest prepends a card; keep selection on the new first
             // so the next ⇧⌘V doesn't highlight the previous first (now second).
@@ -543,15 +678,34 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func sourceClipsForCurrentTab() -> [ClipItem] {
-        switch selectedTab {
-        case .timeline:
-            return historyStore.clips.filter { !$0.isHiddenFromTimeline }
-        case .pinned:
-            let pinnedID = historyStore.pinnedPinboard.id
-            return historyStore.clips.filter { $0.pinboardIDs.contains(pinnedID) }
-        case .folder(let id):
-            return historyStore.clips.filter { $0.pinboardIDs.contains(id) }
+    private var visibleCacheFilterKey: String {
+        "\(selectedFilter.rawValue)|\(debouncedQuery)|\(selectedSourceApp ?? "")"
+    }
+
+    private func invalidateTabCaches() {
+        tabSourceCache.removeAll(keepingCapacity: true)
+        tabVisibleCache.removeAll(keepingCapacity: true)
+        tabVisibleCacheFilterKey = ""
+    }
+
+    private func ensureTabSourceCache() {
+        guard tabSourceCache.isEmpty else { return }
+        let pinnedID = historyStore.pinnedPinboard.id
+        for item in historyStore.clips {
+            if !item.isHiddenFromTimeline {
+                tabSourceCache[TimelineTab.timeline.id, default: []].append(item)
+            }
+            for boardID in item.pinboardIDs {
+                if boardID == pinnedID {
+                    tabSourceCache[TimelineTab.pinned.id, default: []].append(item)
+                }
+                tabSourceCache[TimelineTab.folder(boardID).id, default: []].append(item)
+            }
         }
+    }
+
+    private func sourceClipsForCurrentTab() -> [ClipItem] {
+        ensureTabSourceCache()
+        return tabSourceCache[selectedTab.id] ?? []
     }
 }

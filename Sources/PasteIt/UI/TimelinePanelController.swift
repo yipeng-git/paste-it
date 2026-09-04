@@ -162,6 +162,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
                     guard generation == self.animationGeneration else { return }
                     self.panel?.makeFirstResponder(nil)
                     self.appState.searchBlurRequest += 1
+                    self.appState.warmTabCaches()
                     NSLog("PasteIt: timeline panel shown")
                 }
             }

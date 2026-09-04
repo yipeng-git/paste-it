@@ -28,9 +28,9 @@ struct TimelineView: View {
             .pasteItPanelGlass()
             .onChange(of: historyStore.clips.count) { _, _ in appState.selectFirstIfNeeded() }
             .onChange(of: appState.selectedTab) { _, _ in
-                // Tab switch leaves the peeked clip's context — dismiss, then reselect.
+                // Tab switch leaves the peeked clip's context — dismiss only.
+                // Card rebuild + selection run asynchronously in AppState.beginTabSwitch().
                 appState.dismissPreview()
-                appState.selectFirstIfNeeded()
             }
             .onChange(of: appState.searchFocusRequest) { _, _ in
                 appState.dismissPreview()
