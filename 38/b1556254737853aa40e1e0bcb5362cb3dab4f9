@@ -1,0 +1,143 @@
+Sources/PasteIt/Settings/PrivacySettingsView.swift
+  s_f4aadf3ae60236::t_0b669710beea70 4,18,28,30,35,43,57,66,68-74,79,114,127,133,135,139,144,146,208,264,267,271,276,305
+Sources/PasteItCore/ClipPreviewText.swift
+  s_f4aadf3ae60236::t_9528181a4ce230 45,48-51
+Sources/PasteIt/Onboarding/OnboardingView.swift
+  s_f4aadf3ae60236::t_6197d6d2aa5ff0 84
+Info.plist
+  s_f4aadf3ae60236::t_ba1fdb715f9c45 7-12
+Sources/PasteIt/App/AppRuntime.swift
+  s_f4aadf3ae60236::t_00a51484cb1e21 216-217,221
+  s_f4aadf3ae60236::t_06544394d914a4 237
+  s_f4aadf3ae60236::t_b2e2d8e612daab 243,249-251,253
+  s_f4aadf3ae60236::t_5f730b612d2cd2 27
+  s_f4aadf3ae60236::t_78a5dcaf0e8a43 228
+  s_f4aadf3ae60236::t_0fd12d7e327115 257,259,261
+  s_f4aadf3ae60236::t_7e729010299f83 144-146,150
+  s_f4aadf3ae60236::t_3fdc1d879f2568 266
+  s_f4aadf3ae60236::t_1b79b1b33ff81c 2
+  s_f4aadf3ae60236::t_98718409f2e957 160-162
+  s_f4aadf3ae60236::t_2ef5c41dea6c85 163-164
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_4917baf8c48a71::t_511dd3b6accf6f 223
+  s_f4aadf3ae60236::t_877bee22a54714 387-389
+  s_f4aadf3ae60236::t_dc9100d58639f6 804,808
+  s_4917baf8c48a71::t_79836b8eb26bd1 218
+  s_4917baf8c48a71::t_c16fe1071a3772 194-196,199-201,210-213
+  s_f4aadf3ae60236::t_a19bd791620036 779-781
+  s_f4aadf3ae60236::t_ae6881ae541acd 144
+  s_f4aadf3ae60236::t_96521fed0069e4 685
+  s_4917baf8c48a71::t_bc63a44a007547 17
+  s_f4aadf3ae60236::t_7e75176af58231 321
+  s_f4aadf3ae60236::t_a94fa22324ccf5 295
+  s_4917baf8c48a71::t_7520ba71e3d2a6 163
+  s_4917baf8c48a71::t_24d263ccd5758f 169,179-188
+  s_f4aadf3ae60236::t_a4570db722d3f9 262,268,270,272,277,279,281
+  s_4917baf8c48a71::t_74cac553fabda1 791,796-797,803,805-807,809-813,817-819,821,824,829-834
+  s_f4aadf3ae60236::t_046d6bc4bce9c3 28
+  s_f4aadf3ae60236::t_79a800683a8d98 291
+  s_f4aadf3ae60236::t_4868ddba7df02a 820,823
+  s_4917baf8c48a71::t_74ff4c6b2c8ebd 15
+  s_f4aadf3ae60236::t_87430c4960fbfb 91
+  s_f4aadf3ae60236::t_7571e7d665366b 668
+  s_f4aadf3ae60236::t_b60a7d27d82ad0 178
+  s_f4aadf3ae60236::t_6b234c5329f759 312
+  s_4917baf8c48a71::t_e6b8802aaffa13 835-836
+Sources/PasteIt/Settings/SettingsView.swift
+  s_f4aadf3ae60236::t_a89b0734a3010c 49
+  s_f4aadf3ae60236::t_bba7ff5cb7ae54 2,23,27,31,35,39,43,64,70,72,76,83,93,95,111-113,116,136,145,170,190,209,221,231-238,242,246
+Sources/PasteIt/App/AppDelegate.swift
+  s_f4aadf3ae60236::t_67196ae67bb8ad 2
+  s_f4aadf3ae60236::t_1571296394088d 9
+Sources/PasteIt/Settings/FoldersSettingsView.swift
+  s_f4aadf3ae60236::t_804a32d7e2a63c 2,17,23,25,30,45,48,69,82,95,101,103-109,116,118,133,135,186,193
+scripts/generate-localizations.py
+  s_f4aadf3ae60236::t_d77540a1f3be99 36
+  s_f4aadf3ae60236::t_95b04f04e7c733 1-10,12-35,40-61,63-107,109-320,337-361,364-367
+  s_f4aadf3ae60236::t_9a54c03eb7e863 321-325,335-336
+  s_f4aadf3ae60236::t_0a3231038ff85e 326-329
+  s_f4aadf3ae60236::t_2551c651f65ba9 62
+  s_f4aadf3ae60236::t_9ce491af821be1 11
+  s_f4aadf3ae60236::t_1ead9046895cd3 108
+  s_f4aadf3ae60236::t_b0de1f6b5cbf14 362-363
+  s_f4aadf3ae60236::t_964b81295db819 330-334
+  s_f4aadf3ae60236::t_edb7c8fb375dc0 37-39
+Package.swift
+  s_f4aadf3ae60236::t_8f56c835b19762 7
+Sources/PasteIt/UI/Components/TimelineFilterButton.swift
+  s_4917baf8c48a71::t_de661f90a93943 95-96,99-100
+  s_f4aadf3ae60236::t_80c3bda0b7a977 52
+  s_f4aadf3ae60236::t_c453fa0b59e6f1 60
+  s_f4aadf3ae60236::t_d86898e48c4d24 80
+  s_4917baf8c48a71::t_8e09159e79d97a 30
+  s_4917baf8c48a71::t_72cd34605ce8af 88,106,108,121
+Sources/PasteIt/Onboarding/OnboardingPage.swift
+  s_f4aadf3ae60236::t_b97cf1e845b849 2,35-39,45-49,55-75
+Sources/PasteIt/UI/Components/AppMenuButton.swift
+  s_f4aadf3ae60236::t_a86f99d390aabc 2,11-12,14,17-18,24,31
+Resources/Localization/Localizable.xcstrings
+  s_f4aadf3ae60236::t_3f178b81917d9e 1-3680
+Sources/PasteIt/App/AppState.swift
+  s_f4aadf3ae60236::t_154c85cff50ff8 77-78
+  s_f4aadf3ae60236::t_e6d71282bc3607 459-461
+  s_f4aadf3ae60236::t_4f52ecf3be9528 23-25
+  s_f4aadf3ae60236::t_166d85562deffd 462-463
+Sources/PasteIt/App/LocalizationObserver.swift
+  s_f4aadf3ae60236::t_d9053ab15d9bca 49,63-66
+  s_f4aadf3ae60236::t_0acfb6b55eda6b 13
+  s_f4aadf3ae60236::t_38e7cccefcf628 1-12,14-48,50-62,67-76
+Sources/PasteIt/Features/PasteStack/PasteStackController.swift
+  s_f4aadf3ae60236::t_57e92da9b92763 31-32
+  s_f4aadf3ae60236::t_801cf7dcc2bcd6 210-213,215,220,222
+  s_f4aadf3ae60236::t_953a27d796303e 5
+  s_f4aadf3ae60236::t_508a30cb3c3e8d 17-18
+Sources/PasteIt/Features/PasteStack/PasteStackView.swift
+  s_f4aadf3ae60236::t_529cf5324e6a67 32
+  s_4917baf8c48a71::t_6d85738a275dbf 50-52
+  s_f4aadf3ae60236::t_3083fd421c299a 3,42,45,69,74,78,115,119,123,155,176,179
+Sources/PasteItCore/L10n.swift
+  s_f4aadf3ae60236::t_30215f30f759b1 5
+  s_f4aadf3ae60236::t_5e8d602824b251 1-4,6-15
+Sources/PasteIt/App/AppSettings.swift
+  s_f4aadf3ae60236::t_fa2859b9a52bfa 2
+  s_f4aadf3ae60236::t_49717872114583 17-20
+Sources/PasteIt/UI/Components/LocalizedRefresh.swift
+  s_f4aadf3ae60236::t_b017649ee4cd9f 1-3,11,13,17-19,21-22,24-28,30,35-36
+  s_f4aadf3ae60236::t_ff05a284f76f86 4-10,12,14-16,20,23,29,31-34
+Sources/PasteItCore/FilterCategory.swift
+  s_f4aadf3ae60236::t_cc67243ceeb4fb 16-21
+Sources/PasteIt/Models/ClipType.swift
+  s_f4aadf3ae60236::t_3fdb365cda1c86 56-59
+  s_f4aadf3ae60236::t_2c49b359f8773d 18-24
+  s_f4aadf3ae60236::t_051568079585d2 76-78,80-82
+Resources/en.lproj/Localizable.strings
+  s_f4aadf3ae60236::t_9f7f09e5fd1d84 1-167
+Resources/ja.lproj/Localizable.strings
+  s_f4aadf3ae60236::t_179b07fc21016a 1-167
+Resources/zh-Hans.lproj/Localizable.strings
+  s_f4aadf3ae60236::t_87903ed40c5959 1-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "38b1556254737853aa40e1e0bcb5362cb3dab4f9",
+  "prompts": {},
+  "sessions": {
+    "s_4917baf8c48a71": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3382cb51-2c32-4e5c-a58c-7aed3c9a166d",
+        "model": "composer-2.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_f4aadf3ae60236": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "aaf9239b-0bc1-478c-9af3-5ac7586a7e9a",
+        "model": "composer-2.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
