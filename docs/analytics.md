@@ -26,8 +26,10 @@ Registered via PostHog `register`:
 | `os` / `$os` | `"macOS"` |
 | `os_version` / `$os_version` | OS version |
 | `first_open_utc` | First analytics-enabled open (ISO8601) |
+| `preferred_language` | macOS preferred language list (first entry), e.g. `zh-Hans-CN`, `en-US` |
+| `system_locale` | macOS current locale identifier, e.g. `zh_CN`, `en_US` |
 
-The PostHog SDK may also attach its own library/device fields.
+The PostHog SDK may also attach its own library/device fields (including `$locale`, which is only a 2-letter language code such as `en` — prefer `preferred_language` for analytics).
 
 ## Lifecycle events
 

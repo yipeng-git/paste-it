@@ -382,6 +382,8 @@ enum Analytics {
             "os": "macOS",
             "os_version": osVersion,
             "first_open_utc": firstOpenUTC(),
+            "preferred_language": Locale.preferredLanguages.first ?? Locale.current.identifier,
+            "system_locale": Locale.current.identifier,
             "$app_name": "Paste It",
             "$app_version": shortVersion,
             "$os": "macOS",
