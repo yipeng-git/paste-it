@@ -1,0 +1,42 @@
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_4917baf8c48a71::t_e0d6dba75a1419 31-32
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_4917baf8c48a71::t_d54811aa7ff429 165
+Sources/PasteIt/App/AppState.swift
+  s_4917baf8c48a71::t_0bbde843bc104f 670
+  s_4917baf8c48a71::t_ddb57f398c9edd 581-583
+  s_4917baf8c48a71::t_7cea849359a07d 543-546,600-602,604-605,607-615,620
+  s_4917baf8c48a71::t_ce6799efe28e85 103
+  s_4917baf8c48a71::t_4e34f4a2f04208 187,529,537-539,550-551,553-556,584-590,592-599,616,618-619,621-665,673,683,689,697,701,703,708,710
+  s_4917baf8c48a71::t_f1a428b57c7d34 672
+  s_4917baf8c48a71::t_9f9b3ed9641395 603
+  s_4917baf8c48a71::t_b3e346d12f4dad 547-549
+  s_4917baf8c48a71::t_48b5560b0ebe0e 606,617
+  s_4917baf8c48a71::t_5299821168fa3b 180-186
+  s_4917baf8c48a71::t_a8006a85f41d35 51
+  s_f4aadf3ae60236::t_55e9bf64965e40 98-102,120,188,196,228,235,250,259,502,540-542,552,557,566,576,666-669,671,681-682,684-688,690-696,698-700,702,706-707,709
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "3b8a0f14ff5b695445304be4ec23db9510077eb5",
+  "prompts": {},
+  "sessions": {
+    "s_4917baf8c48a71": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3382cb51-2c32-4e5c-a58c-7aed3c9a166d",
+        "model": "composer-2.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_f4aadf3ae60236": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "aaf9239b-0bc1-478c-9af3-5ac7586a7e9a",
+        "model": "composer-2.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
