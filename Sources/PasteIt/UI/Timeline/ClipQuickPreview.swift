@@ -157,7 +157,6 @@ struct ClipQuickPreview: View {
                 isEditingText = false
                 onEditingChanged(false)
             }
-            .localizedRefreshTrigger()
     }
 
     private func publishEditingFocus() {

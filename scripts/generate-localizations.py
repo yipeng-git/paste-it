@@ -4,13 +4,21 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from localization_batch2 import BATCH2_LANGS, merge_batch2
+from localization_batch_cjk import merge_batch_cjk
+
 OUT = ROOT / "Resources" / "Localization" / "Localizable.xcstrings"
 LPROJ_ROOT = ROOT / "Resources"
 
-# key -> { en, zh-Hans, ja }
+SUPPORTED_LANGS = ("en", "zh-Hans", "zh-Hant", "ja", "ko", *BATCH2_LANGS)
+
+# key -> { en, zh-Hans, ja, ... }
 STRINGS: dict[str, dict[str, str]] = {
     # Filter categories
     "filter.all": {"en": "All types", "zh-Hans": "全部类型", "ja": "すべての種類"},
@@ -56,26 +64,26 @@ STRINGS: dict[str, dict[str, str]] = {
         "ja": "新しい順。クリックでコピー順に。",
     },
     "stack.paste": {"en": "Paste", "zh-Hans": "粘贴", "ja": "ペースト"},
-    "stack.open": {"en": "Open Paste Stack", "zh-Hans": "打开粘贴栈", "ja": "ペーストスタックを開く"},
-    "stack.close": {"en": "Close Paste Stack", "zh-Hans": "关闭粘贴栈", "ja": "ペーストスタックを閉じる"},
-    "stack.title": {"en": "Stack", "zh-Hans": "栈", "ja": "スタック"},
-    "stack.statusWithCount": {"en": "Stack · %lld", "zh-Hans": "栈 · %lld", "ja": "スタック · %lld"},
+    "stack.open": {"en": "Open Paste Stack", "zh-Hans": "打开粘贴堆栈", "ja": "ペーストスタックを開く"},
+    "stack.close": {"en": "Close Paste Stack", "zh-Hans": "关闭粘贴堆栈", "ja": "ペーストスタックを閉じる"},
+    "stack.title": {"en": "Stack", "zh-Hans": "堆栈", "ja": "スタック"},
+    "stack.statusWithCount": {"en": "Stack · %lld", "zh-Hans": "堆栈 · %lld", "ja": "スタック · %lld"},
     "stack.collecting": {"en": "Collecting", "zh-Hans": "收集中", "ja": "収集中"},
-    "stack.closeHelp": {"en": "Close Paste Stack (⇧⌘C)", "zh-Hans": "关闭粘贴栈 (⇧⌘C)", "ja": "ペーストスタックを閉じる (⇧⌘C)"},
+    "stack.closeHelp": {"en": "Close Paste Stack (⇧⌘C)", "zh-Hans": "关闭粘贴堆栈 (⇧⌘C)", "ja": "ペーストスタックを閉じる (⇧⌘C)"},
     "stack.pasteNext": {"en": "⌘V pastes next", "zh-Hans": "⌘V 粘贴下一项", "ja": "⌘V で次をペースト"},
     "stack.emptyTitle": {"en": "Copy to fill the stack", "zh-Hans": "复制内容以填充栈", "ja": "コピーしてスタックを埋める"},
     "stack.emptySubtitle": {"en": "Then ⌘V in any app", "zh-Hans": "然后在任意应用中按 ⌘V", "ja": "その後、任意のアプリで ⌘V"},
     "stack.accessibilityHint": {
         "en": "Grant Accessibility so ⌘V can advance the stack",
-        "zh-Hans": "授予辅助功能权限，以便 ⌘V 可推进栈",
-        "ja": "⌘V でスタックを進めるにはアクセシビリティを許可",
+        "zh-Hans": "请允许辅助功能权限，以便 ⌘V 可推进堆栈",
+        "ja": "⌘V でスタックを進めるにはアクセシビリティを許可してください",
     },
     "stack.resizeHelp": {"en": "Drag to resize height", "zh-Hans": "拖动以调整高度", "ja": "ドラッグで高さを変更"},
     "stack.moveToNext": {"en": "Move to Next", "zh-Hans": "移到下一项", "ja": "次へ移動"},
     "stack.delete": {"en": "Delete", "zh-Hans": "删除", "ja": "削除"},
     # Menu bar
-    "menu.openPaste": {"en": "Open Paste", "zh-Hans": "打开粘贴板", "ja": "ペーストを開く"},
-    "menu.clearStack": {"en": "Clear Paste Stack", "zh-Hans": "清空粘贴栈", "ja": "ペーストスタックをクリア"},
+    "menu.openPaste": {"en": "Open Paste", "zh-Hans": "打开剪贴板", "ja": "クリップボードを開く"},
+    "menu.clearStack": {"en": "Clear Paste Stack", "zh-Hans": "清空粘贴堆栈", "ja": "ペーストスタックをクリア"},
     "menu.pastePlain": {"en": "Paste Without Formatting", "zh-Hans": "粘贴为纯文本", "ja": "書式なしでペースト"},
     "menu.pauseCapture": {"en": "Pause Capture", "zh-Hans": "暂停捕获", "ja": "キャプチャを一時停止"},
     "menu.resumeCapture": {"en": "Resume Capture", "zh-Hans": "恢复捕获", "ja": "キャプチャを再開"},
@@ -99,7 +107,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "timeline.clearFilter": {"en": "Clear filter", "zh-Hans": "清除筛选", "ja": "フィルタを解除"},
     "timeline.selectedCount": {
         "en": "%lld selected — Return to paste",
-        "zh-Hans": "已选 %lld 项 — 按 Return 粘贴",
+        "zh-Hans": "已选 %lld 项 — 按 Return 键粘贴",
         "ja": "%lld 件選択 — Return でペースト",
     },
     "timeline.newFolder": {"en": "New Folder", "zh-Hans": "新建文件夹", "ja": "新規フォルダ"},
@@ -153,7 +161,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "settings.tab.general": {"en": "General", "zh-Hans": "通用", "ja": "一般"},
     "settings.tab.privacy": {"en": "Privacy", "zh-Hans": "隐私", "ja": "プライバシー"},
     "settings.tab.folders": {"en": "Folders", "zh-Hans": "文件夹", "ja": "フォルダ"},
-    "settings.tab.stack": {"en": "Stack", "zh-Hans": "粘贴栈", "ja": "スタック"},
+    "settings.tab.stack": {"en": "Stack", "zh-Hans": "粘贴堆栈", "ja": "スタック"},
     "settings.tab.storage": {"en": "Storage", "zh-Hans": "存储", "ja": "ストレージ"},
     "settings.version": {"en": "Paste It %@ (%@)", "zh-Hans": "Paste It %@ (%@)", "ja": "Paste It %@ (%@)"},
     "settings.aboutBlurb": {
@@ -173,8 +181,8 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "settings.plainTextFootnote": {
         "en": "⌃⌘V pastes once as plain text, then restores the original clipboard (Accessibility required to auto-paste). In the timeline, ⇧↩ pastes the selection as plain text.",
-        "zh-Hans": "⌃⌘V 粘贴一次纯文本后恢复原始剪贴板（自动粘贴需辅助功能权限）。在时间线中，⇧↩ 将选中项粘贴为纯文本。",
-        "ja": "⌃⌘V で一度プレーンテキストをペーストし、元のクリップボードを復元します（自動ペーストにはアクセシビリティが必要）。タイムラインでは ⇧↩ で選択をプレーンテキストとしてペースト。",
+        "zh-Hans": "⌃⌘V 会粘贴一次纯文本，然后恢复原来的剪贴板内容（自动粘贴需要辅助功能权限）。在时间轴中，⇧↩ 会将所选内容粘贴为纯文本。",
+        "ja": "⌃⌘V で一度プレーンテキストをペーストし、元のクリップボードを復元します（自動ペーストにはアクセシビリティが必要）。タイムラインでは ⇧↩ で選択項目をプレーンテキストとしてペーストします。",
     },
     "settings.launchAtLogin": {"en": "Launch at login", "zh-Hans": "登录时启动", "ja": "ログイン時に起動"},
     "settings.keepHistory": {"en": "Keep history", "zh-Hans": "保留历史", "ja": "履歴の保持"},
@@ -184,7 +192,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "settings.stackDirection": {"en": "Default paste direction", "zh-Hans": "默认粘贴方向", "ja": "デフォルトのペースト方向"},
     "settings.stackFootnote": {
         "en": "⇧⌘C opens or closes Paste Stack. While the stack has items, ⌘V in any app pastes the next one (Accessibility required). Runtime controls live in the Stack panel and the ⋯ menu.",
-        "zh-Hans": "⇧⌘C 打开或关闭粘贴栈。栈中有内容时，在任意应用中按 ⌘V 粘贴下一项（需辅助功能权限）。运行时控制在栈面板和 ⋯ 菜单中。",
+        "zh-Hans": "⇧⌘C 可打开或关闭粘贴堆栈。堆栈中有内容时，在任意应用中按 ⌘V 可粘贴下一项（需辅助功能权限）。运行时控制位于堆栈面板和 ⋯ 菜单。",
         "ja": "⇧⌘C でペーストスタックを開閉。スタックに項目がある間、任意のアプリで ⌘V が次をペーストします（アクセシビリティが必要）。実行時の操作はスタックパネルと ⋯ メニューにあります。",
     },
     "settings.maxBinaryStorage": {
@@ -269,7 +277,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "onboarding.paste.title": {"en": "Pick from the timeline", "zh-Hans": "从时间线选取", "ja": "タイムラインから選択"},
     "onboarding.browse.title": {"en": "Preview & edit", "zh-Hans": "预览与编辑", "ja": "プレビューと編集"},
     "onboarding.organize.title": {"en": "Multi-select paste", "zh-Hans": "多选粘贴", "ja": "複数選択してペースト"},
-    "onboarding.stack.title": {"en": "Paste Stack", "zh-Hans": "粘贴栈", "ja": "ペーストスタック"},
+    "onboarding.stack.title": {"en": "Paste Stack", "zh-Hans": "粘贴堆栈", "ja": "ペーストスタック"},
     "onboarding.capture.caption": {
         "en": "Copy anything — Paste It saves it and flashes ⌘C in the menu bar.",
         "zh-Hans": "复制任意内容 — Paste It 会保存并在菜单栏闪烁 ⌘C。",
@@ -322,21 +330,20 @@ def escape_strings_value(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
 
-def write_strings_files(out_dir: Path) -> None:
-    langs = ["en", "zh-Hans", "ja"]
-    for lang in langs:
+def write_strings_files(strings: dict[str, dict[str, str]], out_dir: Path) -> None:
+    for lang in SUPPORTED_LANGS:
         lproj = out_dir / f"{lang}.lproj"
         lproj.mkdir(parents=True, exist_ok=True)
         lines = []
-        for key, locs in sorted(STRINGS.items()):
+        for key, locs in sorted(strings.items()):
             value = locs.get(lang, locs["en"])
             lines.append(f'"{escape_strings_value(key)}" = "{escape_strings_value(value)}";')
         (lproj / "Localizable.strings").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def build_catalog() -> dict:
-    strings: dict = {}
-    for key, locs in STRINGS.items():
+def build_catalog(strings: dict[str, dict[str, str]]) -> dict:
+    catalog_strings: dict = {}
+    for key, locs in strings.items():
         entry: dict = {
             "localizations": {
                 lang: {
@@ -348,19 +355,20 @@ def build_catalog() -> dict:
                 for lang, value in locs.items()
             }
         }
-        strings[key] = entry
+        catalog_strings[key] = entry
     return {
         "sourceLanguage": "en",
-        "strings": strings,
+        "strings": catalog_strings,
         "version": "1.0",
     }
 
 
 def main() -> None:
+    strings = merge_batch_cjk(merge_batch2(STRINGS))
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(build_catalog(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    write_strings_files(LPROJ_ROOT)
-    print(f"Wrote {len(STRINGS)} keys to {OUT} and {LPROJ_ROOT}/*.lproj")
+    OUT.write_text(json.dumps(build_catalog(strings), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_strings_files(strings, LPROJ_ROOT)
+    print(f"Wrote {len(strings)} keys × {len(SUPPORTED_LANGS)} langs to {OUT} and {LPROJ_ROOT}/*.lproj")
 
 
 if __name__ == "__main__":

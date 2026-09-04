@@ -25,7 +25,6 @@ struct TimelineView: View {
 
     var body: some View {
         content
-            .localizedRefreshTrigger(appState: appState)
             .background(ClearHostingBackground())
             .pasteItPanelGlass()
             .onChange(of: historyStore.clips.count) { _, _ in appState.selectFirstIfNeeded() }

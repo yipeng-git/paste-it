@@ -29,7 +29,6 @@ struct PasteStackView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .pasteItPanelGlass()
-        .localizedRefreshTrigger()
     }
 
     private var toolbar: some View {

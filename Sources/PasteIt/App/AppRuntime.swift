@@ -24,7 +24,6 @@ final class AppRuntime: NSObject {
     private var statusItem: NSStatusItem?
     private var keycapsIcon: MenuBarKeycapsIcon?
     private var cmdCVFlashMonitor: CmdCVKeyFlashMonitor?
-    private let localizationObserver = LocalizationObserver()
     private var didStart = false
 
     private override init() {
@@ -141,13 +140,9 @@ final class AppRuntime: NSObject {
         }
 
         applyAgentAPIEnabled(settings.agentAPIEnabled)
-        localizationObserver.start { [weak self] in
-            self?.handleLocaleDidChange()
-        }
     }
 
     func stop() {
-        localizationObserver.stop()
         Analytics.stop()
         AgentAPIServer.shared.stop()
         pasteboardMonitor.stop()
@@ -155,11 +150,6 @@ final class AppRuntime: NSObject {
         cmdCVFlashMonitor?.stop()
         cmdCVFlashMonitor = nil
         pasteStackController.close()
-    }
-
-    private func handleLocaleDidChange() {
-        appState.noteLocaleDidChange()
-        refreshStatusItem()
     }
 
     func applyAgentAPIEnabled(_ enabled: Bool) {

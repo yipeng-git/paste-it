@@ -46,7 +46,6 @@ struct SettingsView: View {
 
             versionFooter
         }
-        .localizedRefreshTrigger(appState: appState)
     }
 
     private var versionFooter: some View {

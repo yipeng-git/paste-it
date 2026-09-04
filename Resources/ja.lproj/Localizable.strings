@@ -39,7 +39,7 @@
 "menu.copyMcpURL" = "MCP URL をコピー";
 "menu.mcp" = "MCP";
 "menu.more" = "その他";
-"menu.openPaste" = "ペーストを開く";
+"menu.openPaste" = "クリップボードを開く";
 "menu.pastePlain" = "書式なしでペースト";
 "menu.pauseCapture" = "キャプチャを一時停止";
 "menu.preferences" = "環境設定…";
@@ -105,7 +105,7 @@
 "settings.maxHistoryItems" = "履歴の最大件数";
 "settings.pastePlainDefault" = "デフォルトでプレーンテキストとしてペースト";
 "settings.pauseCapture" = "クリップボードのキャプチャを一時停止";
-"settings.plainTextFootnote" = "⌃⌘V で一度プレーンテキストをペーストし、元のクリップボードを復元します（自動ペーストにはアクセシビリティが必要）。タイムラインでは ⇧↩ で選択をプレーンテキストとしてペースト。";
+"settings.plainTextFootnote" = "⌃⌘V で一度プレーンテキストをペーストし、元のクリップボードを復元します（自動ペーストにはアクセシビリティが必要）。タイムラインでは ⇧↩ で選択項目をプレーンテキストとしてペーストします。";
 "settings.pruneNow" = "今すぐ整理";
 "settings.seconds" = "秒";
 "settings.showTutorial" = "チュートリアルを表示…";
@@ -120,7 +120,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "バージョン";
 "settings.whatsNew" = "新機能…";
-"stack.accessibilityHint" = "⌘V でスタックを進めるにはアクセシビリティを許可";
+"stack.accessibilityHint" = "⌘V でスタックを進めるにはアクセシビリティを許可してください";
 "stack.close" = "ペーストスタックを閉じる";
 "stack.closeHelp" = "ペーストスタックを閉じる (⇧⌘C)";
 "stack.collecting" = "収集中";
