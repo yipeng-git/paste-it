@@ -1,4 +1,5 @@
 import Foundation
+import PasteItCore
 import SwiftUI
 
 @MainActor
@@ -13,10 +14,10 @@ final class AppSettings: ObservableObject {
 
         var title: String {
             switch self {
-            case .oneDay: return "1 Day"
-            case .oneWeek: return "1 Week"
-            case .oneMonth: return "1 Month"
-            case .forever: return "Forever"
+            case .oneDay: return L10n.tr("keepHistory.oneDay", default: "1 Day")
+            case .oneWeek: return L10n.tr("keepHistory.oneWeek", default: "1 Week")
+            case .oneMonth: return L10n.tr("keepHistory.oneMonth", default: "1 Month")
+            case .forever: return L10n.tr("keepHistory.forever", default: "Forever")
             }
         }
 

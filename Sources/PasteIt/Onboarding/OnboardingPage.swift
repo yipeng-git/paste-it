@@ -1,4 +1,5 @@
 import Foundation
+import PasteItCore
 
 enum OnboardingFlow: String {
     case install
@@ -31,31 +32,47 @@ enum OnboardingPageID: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .capture: return "Copy to save"
-        case .paste: return "Pick from the timeline"
-        case .browse: return "Preview & edit"
-        case .organize: return "Multi-select paste"
-        case .stack: return "Paste Stack"
+        case .capture: return L10n.tr("onboarding.capture.title", default: "Copy to save")
+        case .paste: return L10n.tr("onboarding.paste.title", default: "Pick from the timeline")
+        case .browse: return L10n.tr("onboarding.browse.title", default: "Preview & edit")
+        case .organize: return L10n.tr("onboarding.organize.title", default: "Multi-select paste")
+        case .stack: return L10n.tr("onboarding.stack.title", default: "Paste Stack")
         }
     }
 
     var caption: String {
         switch self {
-        case .capture: return "Copy anything — Paste It saves it and flashes ⌘C in the menu bar."
-        case .paste: return "⇧⌘V opens history. Double-click a clip, then ⌘V — or ⌃⌘V to paste without formatting."
-        case .browse: return "Press Space to preview above the timeline. Click the text to edit."
-        case .organize: return "⌘-click several clips, then press Return to paste them in order."
-        case .stack: return "⇧⌘C opens a queue on the right. Copy several things, then ⌘V in the target app to paste them one by one."
+        case .capture: return L10n.tr("onboarding.capture.caption", default: "Copy anything — Paste It saves it and flashes ⌘C in the menu bar.")
+        case .paste: return L10n.tr("onboarding.paste.caption", default: "⇧⌘V opens history. Double-click a clip, then ⌘V — or ⌃⌘V to paste without formatting.")
+        case .browse: return L10n.tr("onboarding.browse.caption", default: "Press Space to preview above the timeline. Click the text to edit.")
+        case .organize: return L10n.tr("onboarding.organize.caption", default: "⌘-click several clips, then press Return to paste them in order.")
+        case .stack: return L10n.tr("onboarding.stack.caption", default: "⇧⌘C opens a queue on the right. Copy several things, then ⌘V in the target app to paste them one by one.")
         }
     }
 
     var stepLabels: [String] {
         switch self {
-        case .capture: return ["Copy", "Saved"]
-        case .paste: return ["Open", "Double-click", "Paste", "Plain"]
-        case .browse: return ["Space", "Preview", "Edit"]
-        case .organize: return ["⌘-click", "Order", "Return"]
-        case .stack: return ["⇧⌘C", "Copy", "⌘V"]
+        case .capture: return [
+            L10n.tr("onboarding.step.copy", default: "Copy"),
+            L10n.tr("onboarding.step.saved", default: "Saved"),
+        ]
+        case .paste: return [
+            L10n.tr("onboarding.step.open", default: "Open"),
+            L10n.tr("onboarding.step.doubleClick", default: "Double-click"),
+            L10n.tr("onboarding.step.paste", default: "Paste"),
+            L10n.tr("onboarding.step.plain", default: "Plain"),
+        ]
+        case .browse: return [
+            L10n.tr("onboarding.step.space", default: "Space"),
+            L10n.tr("onboarding.step.preview", default: "Preview"),
+            L10n.tr("onboarding.step.edit", default: "Edit"),
+        ]
+        case .organize: return [
+            L10n.tr("onboarding.step.cmdClick", default: "⌘-click"),
+            L10n.tr("onboarding.step.order", default: "Order"),
+            L10n.tr("onboarding.step.return", default: "Return"),
+        ]
+        case .stack: return ["⇧⌘C", L10n.tr("onboarding.step.copy", default: "Copy"), "⌘V"]
         }
     }
 

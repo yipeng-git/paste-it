@@ -42,9 +42,12 @@ public enum ClipPreviewText: Sendable {
     public static func characterFooter(forPreviewText previewText: String) -> String {
         let trimmed = previewText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
-            return "Empty"
+            return L10n.tr("clipType.empty", default: "Empty")
         }
         let count = trimmed.utf16.count
-        return count == 1 ? "1 character" : "\(count) characters"
+        if count == 1 {
+            return L10n.tr("clipPreview.oneCharacter", default: "1 character")
+        }
+        return L10n.tr("clipPreview.characters", default: "%lld characters", count)
     }
 }

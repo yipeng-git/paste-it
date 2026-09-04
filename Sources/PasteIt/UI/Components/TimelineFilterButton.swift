@@ -27,7 +27,7 @@ struct TimelineFilterButton: View {
 
                     if isActive {
                         Text("\(appState.selectedFilter.title) · \(appState.visibleClips.count)")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.system(size: 11, weight: .bold))
                             .monospacedDigit()
                             .lineLimit(1)
                     }
@@ -49,7 +49,7 @@ struct TimelineFilterButton: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help("Clear type filter")
+                .help(L10n.tr("filter.clear", default: "Clear type filter"))
                 .padding(.trailing, 4)
             }
         }
@@ -57,7 +57,7 @@ struct TimelineFilterButton: View {
         .pasteItControlGlass()
         .help(isActive
               ? "Filter: \(appState.selectedFilter.title) · \(appState.visibleClips.count)"
-              : "Filter by type")
+              : L10n.tr("filter.byType", default: "Filter by type"))
         .animation(.easeOut(duration: 0.15), value: isActive)
         .animation(.easeOut(duration: 0.15), value: appState.selectedFilter)
         .animation(.easeOut(duration: 0.15), value: appState.visibleClips.count)
@@ -77,7 +77,7 @@ struct TimelineFilterButton: View {
 
     private var filterMenu: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("Filter by type")
+            Text(L10n.tr("filter.byType", default: "Filter by type"))
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)
@@ -85,22 +85,27 @@ struct TimelineFilterButton: View {
                 .padding(.bottom, 4)
 
             ForEach(FilterCategory.menuItems) { category in
+                let isSelected = appState.selectedFilter == category
                 Button {
                     appState.setFilter(category)
                     isPresented = false
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: category.systemImage)
+                            .font(.system(size: 12))
+                            .fontWeight(isSelected ? .bold : .regular)
                             .frame(width: 16)
                         Text(category.title)
+                            .font(.system(size: 13))
+                            .fontWeight(isSelected ? .bold : .regular)
                         Spacer(minLength: 12)
                         Text(countLabel(for: category))
                             .font(.system(size: 11, weight: .medium).monospacedDigit())
                             .foregroundStyle(.secondary)
                             .frame(minWidth: 28, alignment: .trailing)
-                        if appState.selectedFilter == category {
+                        if isSelected {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 11, weight: .semibold))
+                                .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(Color.accentColor)
                                 .frame(width: 12)
                         } else {
@@ -113,10 +118,7 @@ struct TimelineFilterButton: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
                 .background {
-                    if appState.selectedFilter == category {
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .fill(Color.primary.opacity(0.08))
-                    }
+                    pasteItMenuRowHighlight(isSelected: isSelected)
                 }
             }
         }

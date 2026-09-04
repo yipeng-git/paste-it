@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import PasteItCore
 import SwiftUI
 
 /// Right-rail Stack: compact queue rows, visually distinct from the bottom timeline.
@@ -28,6 +29,7 @@ struct PasteStackView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .pasteItPanelGlass()
+        .localizedRefreshTrigger()
     }
 
     private var toolbar: some View {
@@ -37,15 +39,17 @@ struct PasteStackView: View {
                     Image(systemName: "square.stack.3d.up.fill")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.secondary)
-                    Text("Stack")
+                    Text(L10n.tr("stack.title", default: "Stack"))
                         .font(.system(size: 13, weight: .bold))
                     if stack.isCollecting {
-                        Text("Collecting")
+                        Text(L10n.tr("stack.collecting", default: "Collecting"))
                             .font(.system(size: 9, weight: .semibold))
                             .foregroundStyle(.green)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.green.opacity(0.14), in: Capsule())
+                            .background {
+                                pasteItStatusCapsule(tint: .green)
+                            }
                     }
                 }
                 .allowsHitTesting(false)
@@ -62,16 +66,16 @@ struct PasteStackView: View {
                 }
                 .buttonStyle(.plain)
                 .pasteItControlGlass()
-                .help("Close Paste Stack (⇧⌘C)")
+                .help(L10n.tr("stack.closeHelp", default: "Close Paste Stack (⇧⌘C)"))
             }
 
             HStack(spacing: 8) {
                 HStack(spacing: 8) {
-                    Text(stack.items.isEmpty ? "Empty" : "\(stack.items.count)")
+                    Text(stack.items.isEmpty ? L10n.tr("clipType.empty", default: "Empty") : "\(stack.items.count)")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
-                    Text("⌘V pastes next")
+                    Text(L10n.tr("stack.pasteNext", default: "⌘V pastes next"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.tertiary)
                         .lineLimit(1)
@@ -108,15 +112,15 @@ struct PasteStackView: View {
                 Image(systemName: "doc.on.clipboard")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text("Copy to fill the stack")
+                Text(L10n.tr("stack.emptyTitle", default: "Copy to fill the stack"))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                Text("Then ⌘V in any app")
+                Text(L10n.tr("stack.emptySubtitle", default: "Then ⌘V in any app"))
                     .font(.system(size: 11))
                     .foregroundStyle(.tertiary)
                 if !AXIsProcessTrusted() {
-                    Text("Grant Accessibility so ⌘V can advance the stack")
+                    Text(L10n.tr("stack.accessibilityHint", default: "Grant Accessibility so ⌘V can advance the stack"))
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(.orange)
                         .multilineTextAlignment(.center)
@@ -148,7 +152,7 @@ struct PasteStackView: View {
             .frame(width: 36, height: 4)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .allowsHitTesting(false)
-            .help("Drag to resize height")
+            .help(L10n.tr("stack.resizeHelp", default: "Drag to resize height"))
     }
 
     /// Visual order matches paste order: next-to-paste is at the top.
@@ -169,10 +173,10 @@ struct PasteStackView: View {
             isNext: isNext
         )
         .contextMenu {
-            Button("Move to Next") {
+            Button(L10n.tr("stack.moveToNext", default: "Move to Next")) {
                 stack.promoteToNext(item)
             }
-            Button("Delete", role: .destructive) {
+            Button(L10n.tr("stack.delete", default: "Delete"), role: .destructive) {
                 withAnimation(.easeOut(duration: 0.15)) {
                     stack.remove(item)
                 }

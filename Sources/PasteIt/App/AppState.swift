@@ -20,9 +20,9 @@ enum TimelineTab: Equatable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .timeline: return "Default"
-        case .pinned: return "Pinned"
-        case .folder: return "Folder"
+        case .timeline: return L10n.tr("tab.default", default: "Default")
+        case .pinned: return L10n.tr("tab.pinned", default: "Pinned")
+        case .folder: return L10n.tr("tab.folder", default: "Folder")
         }
     }
 
@@ -74,6 +74,8 @@ final class AppState: ObservableObject {
     @Published var previewClip: ClipItem?
     /// Bumped to ask the open preview bubble to enter text-editing mode.
     @Published var previewEditRequest: Int = 0
+    /// Bumped when macOS preferred language changes so `L10n` strings re-resolve.
+    @Published private(set) var localeRevision = 0
 
     let settings: AppSettings
     let historyStore: HistoryStore
@@ -452,6 +454,11 @@ final class AppState: ObservableObject {
                 statusMessage = nil
             }
         }
+    }
+
+    func noteLocaleDidChange() {
+        localeRevision += 1
+        NotificationCenter.default.post(name: .pasteItLocaleDidChange, object: nil)
     }
 
     private func scheduleSearchDebounce() {

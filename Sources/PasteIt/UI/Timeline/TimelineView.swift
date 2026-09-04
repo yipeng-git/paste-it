@@ -12,8 +12,9 @@ struct TimelineView: View {
     @FocusState private var isSearchFocused: Bool
     /// When false, the real TextField is not in the hierarchy so the panel can't auto-focus it.
     @State private var isSearchActive = false
-    @State private var isShowingCreateFolderSheet = false
+    @State private var isShowingCreateFolderPopover = false
     @State private var newFolderName = ""
+    @Namespace private var tabHighlightNamespace
 
     init(appState: AppState, pasteController: PasteController) {
         self.appState = appState
@@ -24,6 +25,7 @@ struct TimelineView: View {
 
     var body: some View {
         content
+            .localizedRefreshTrigger(appState: appState)
             .background(ClearHostingBackground())
             .pasteItPanelGlass()
             .onChange(of: historyStore.clips.count) { _, _ in appState.selectFirstIfNeeded() }
@@ -47,16 +49,6 @@ struct TimelineView: View {
                 DispatchQueue.main.async {
                     self.appState.syncPreviewToSelection()
                 }
-            }
-            .sheet(isPresented: $isShowingCreateFolderSheet) {
-                CreateFolderSheet(
-                    name: $newFolderName,
-                    onCreate: { createFolder() },
-                    onCancel: {
-                        isShowingCreateFolderSheet = false
-                        newFolderName = ""
-                    }
-                )
             }
     }
 
@@ -96,7 +88,7 @@ struct TimelineView: View {
                             .font(.headline)
                             .foregroundStyle(.secondary)
                         if appState.selectedFilter != .all, appState.query.isEmpty {
-                            Button("Clear filter") {
+                            Button(L10n.tr("timeline.clearFilter", default: "Clear filter")) {
                                 appState.setFilter(.all)
                             }
                             .buttonStyle(.plain)
@@ -149,7 +141,7 @@ struct TimelineView: View {
         }
         let count = appState.orderedSelectedClips.count
         guard count > 1 else { return nil }
-        return "\(count) selected — Return to paste"
+        return L10n.tr("timeline.selectedCount", default: "%lld selected — Return to paste", count)
     }
 
     private var tabPicker: some View {
@@ -168,12 +160,13 @@ struct TimelineView: View {
             }
             .padding(3)
             .pasteItCapsuleGlass()
+            .animation(.easeOut(duration: 0.22), value: appState.selectedTab.id)
 
             if historyStore.canCreateCustomFolder {
                 Button {
                     appState.dismissPreview()
                     newFolderName = ""
-                    isShowingCreateFolderSheet = true
+                    isShowingCreateFolderPopover = true
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 13, weight: .semibold))
@@ -182,17 +175,30 @@ struct TimelineView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
                 .pasteItControlGlass()
-                .help("New Folder")
+                .help(L10n.tr("timeline.newFolderHelp", default: "New Folder"))
+                .popover(isPresented: $isShowingCreateFolderPopover, arrowEdge: .bottom) {
+                    CreateFolderPopover(
+                        name: $newFolderName,
+                        onCreate: { createFolder() },
+                        onCancel: {
+                            isShowingCreateFolderPopover = false
+                            newFolderName = ""
+                        }
+                    )
+                }
             }
         }
     }
 
     private func tabButton(_ tab: TimelineTab, title: String, systemImage: String) -> some View {
-        Button {
-            if appState.selectedTab == tab {
+        let isSelected = appState.selectedTab == tab
+        return Button {
+            if isSelected {
                 appState.dismissPreview()
             } else {
-                appState.selectedTab = tab
+                withAnimation(.easeOut(duration: 0.22)) {
+                    appState.selectedTab = tab
+                }
             }
         } label: {
             Label(title, systemImage: systemImage)
@@ -201,20 +207,20 @@ struct TimelineView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background {
-                    if appState.selectedTab == tab {
-                        Capsule()
-                            .fill(Color.primary.opacity(0.12))
-                    }
+                    pasteItSegmentHighlight(
+                        isSelected: isSelected,
+                        in: tabHighlightNamespace
+                    )
                 }
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(appState.selectedTab == tab ? .primary : .secondary)
+        .foregroundStyle(isSelected ? Color.primary : Color.secondary.opacity(0.68))
     }
 
     private func createFolder() {
         guard let board = historyStore.createCustomFolder(name: newFolderName) else { return }
-        isShowingCreateFolderSheet = false
+        isShowingCreateFolderPopover = false
         newFolderName = ""
         appState.selectedTab = .folder(board.id)
     }
@@ -253,26 +259,26 @@ struct TimelineView: View {
 
     private var emptyMessage: String {
         if !appState.query.isEmpty {
-            return "No matching clips"
+            return L10n.tr("timeline.noMatch", default: "No matching clips")
         }
         if appState.selectedFilter != .all {
             let label = appState.selectedFilter.title
             switch appState.selectedTab {
             case .pinned:
-                return "No \(label) clips in Pinned"
+                return L10n.tr("timeline.noTypeInPinned", default: "No %@ clips in Pinned", label)
             case .folder:
-                return "No \(label) clips in this folder"
+                return L10n.tr("timeline.noTypeInFolder", default: "No %@ clips in this folder", label)
             case .timeline:
-                return "No \(label) clips"
+                return L10n.tr("timeline.noType", default: "No %@ clips", label)
             }
         }
         switch appState.selectedTab {
         case .timeline:
-            return "Copy something to build your clipboard history"
+            return L10n.tr("timeline.emptyDefault", default: "Copy something to build your clipboard history")
         case .pinned:
-            return "Pin clips to keep them here permanently"
+            return L10n.tr("timeline.emptyPinned", default: "Pin clips to keep them here permanently")
         case .folder:
-            return "Add clips to this folder from the context menu"
+            return L10n.tr("timeline.emptyFolder", default: "Add clips to this folder from the context menu")
         }
     }
 
@@ -282,11 +288,11 @@ struct TimelineView: View {
         if case .pinned = appState.selectedTab {
             // skip Pin/Unpin here
         } else if historyStore.isPinned(item) {
-            Button("Unpin") {
+            Button(L10n.tr("timeline.unpin", default: "Unpin")) {
                 appState.togglePinned(item)
             }
         } else {
-            Button("Pin") {
+            Button(L10n.tr("timeline.pin", default: "Pin")) {
                 appState.togglePinned(item)
             }
         }
@@ -303,7 +309,7 @@ struct TimelineView: View {
         }
 
         if !available.isEmpty {
-            Menu("Add to Folder") {
+            Menu(L10n.tr("timeline.addToFolder", default: "Add to Folder")) {
                 ForEach(available) { folder in
                     Button(folder.name) {
                         appState.pin(item, to: folder)
@@ -312,7 +318,7 @@ struct TimelineView: View {
             }
         }
         if !memberships.isEmpty {
-            Menu("Remove from Folder") {
+            Menu(L10n.tr("timeline.removeFromFolder", default: "Remove from Folder")) {
                 ForEach(memberships) { folder in
                     Button(folder.name) {
                         appState.unpin(item, from: folder)
@@ -378,9 +384,9 @@ struct TimelineView: View {
 
     private var deleteTitle: String {
         switch appState.selectedTab {
-        case .timeline: return "Delete"
-        case .pinned: return "Unpin"
-        case .folder: return "Remove from Folder"
+        case .timeline: return L10n.tr("timeline.delete", default: "Delete")
+        case .pinned: return L10n.tr("timeline.unpin", default: "Unpin")
+        case .folder: return L10n.tr("timeline.removeFromFolderAction", default: "Remove from Folder")
         }
     }
 
@@ -659,7 +665,7 @@ private struct TimelineSearchField: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
             if isSearchActive {
-                TextField("Search history", text: $draft)
+                TextField(L10n.tr("timeline.searchHistory", default: "Search history"), text: $draft)
                     .textFieldStyle(.plain)
                     .focused(isSearchFocused)
                     .onSubmit {
@@ -676,7 +682,7 @@ private struct TimelineSearchField: View {
                     .buttonStyle(.plain)
                 }
             } else {
-                Text("Search (⌘F)")
+                Text(L10n.tr("timeline.search", default: "Search (⌘F)"))
                     .foregroundStyle(.tertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -770,9 +776,9 @@ private struct TimelineCardCell<PinMenu: View>: View {
         }
         .draggable(item.id.uuidString)
         .contextMenu {
-            Button("Copy to Clipboard", action: onCopy)
-            Button("Copy as Plain Text", action: onCopyPlain)
-            Button("Edit", action: onEdit)
+            Button(L10n.tr("timeline.copy", default: "Copy to Clipboard"), action: onCopy)
+            Button(L10n.tr("timeline.copyPlain", default: "Copy as Plain Text"), action: onCopyPlain)
+            Button(L10n.tr("timeline.edit", default: "Edit"), action: onEdit)
                 .keyboardShortcut("e")
                 .disabled(!canEdit)
             Divider()
@@ -782,34 +788,51 @@ private struct TimelineCardCell<PinMenu: View>: View {
     }
 }
 
-private struct CreateFolderSheet: View {
+private struct CreateFolderPopover: View {
     @Binding var name: String
     let onCreate: () -> Void
     let onCancel: () -> Void
+
+    @FocusState private var isNameFocused: Bool
 
     private var canCreate: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("New Folder")
-                .font(.headline)
-            TextField("Folder name", text: $name)
-                .textFieldStyle(.roundedBorder)
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.tr("timeline.newFolder", default: "New Folder"))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+
+            TextField(L10n.tr("folders.namePlaceholder", default: "Folder name"), text: $name)
+                .textFieldStyle(.plain)
+                .focused($isNameFocused)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .pasteItControlGlass()
                 .onSubmit {
                     if canCreate { onCreate() }
                 }
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel)
+
+            HStack(spacing: 8) {
+                Spacer(minLength: 0)
+                Button(L10n.tr("common.cancel", default: "Cancel"), action: onCancel)
+                    .pasteItGlassButtonStyle()
                     .keyboardShortcut(.cancelAction)
-                Button("Create", action: onCreate)
+                Button(L10n.tr("common.create", default: "Create"), action: onCreate)
+                    .pasteItGlassButtonStyle()
                     .keyboardShortcut(.defaultAction)
                     .disabled(!canCreate)
             }
         }
-        .padding(20)
-        .frame(width: 320)
+        .padding(14)
+        .frame(width: 280)
+        .pasteItPopoverChrome()
+        .onAppear {
+            DispatchQueue.main.async {
+                isNameFocused = true
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 import AppKit
+import PasteItCore
 import SwiftData
 
 @MainActor
@@ -23,6 +24,7 @@ final class AppRuntime: NSObject {
     private var statusItem: NSStatusItem?
     private var keycapsIcon: MenuBarKeycapsIcon?
     private var cmdCVFlashMonitor: CmdCVKeyFlashMonitor?
+    private let localizationObserver = LocalizationObserver()
     private var didStart = false
 
     private override init() {
@@ -139,9 +141,13 @@ final class AppRuntime: NSObject {
         }
 
         applyAgentAPIEnabled(settings.agentAPIEnabled)
+        localizationObserver.start { [weak self] in
+            self?.handleLocaleDidChange()
+        }
     }
 
     func stop() {
+        localizationObserver.stop()
         Analytics.stop()
         AgentAPIServer.shared.stop()
         pasteboardMonitor.stop()
@@ -149,6 +155,11 @@ final class AppRuntime: NSObject {
         cmdCVFlashMonitor?.stop()
         cmdCVFlashMonitor = nil
         pasteStackController.close()
+    }
+
+    private func handleLocaleDidChange() {
+        appState.noteLocaleDidChange()
+        refreshStatusItem()
     }
 
     func applyAgentAPIEnabled(_ enabled: Bool) {
@@ -202,19 +213,19 @@ final class AppRuntime: NSObject {
 
     private func refreshStatusItem() {
         let stack = pasteStackController.statusTitle
-        let stackLine = stack == "Paste" ? nil : stack
-        var tip = "Paste It — hold ⌘C / ⌘V to press the keys"
+        let stackLine = stack == L10n.tr("stack.paste", default: "Paste") ? nil : stack
+        var tip = L10n.tr("menu.statusTooltip", default: "Paste It — hold ⌘C / ⌘V to press the keys")
         if let stackLine {
             tip += "\n\(stackLine)"
         }
-        tip += "\nLeft-click: timeline · Right-click: menu"
+        tip += "\n" + L10n.tr("menu.statusClickHint", default: "Left-click: timeline · Right-click: menu")
         statusItem?.button?.toolTip = tip
     }
 
     /// Shared app menu used by the timeline's "…" button.
     func makeAppMenu() -> NSMenu {
         let menu = NSMenu()
-        menu.addItem(makeMenuItem(title: "Open Paste", action: #selector(openTimeline), keyEquivalent: "v", shiftCommand: true))
+        menu.addItem(makeMenuItem(title: L10n.tr("menu.openPaste", default: "Open Paste"), action: #selector(openTimeline), keyEquivalent: "v", shiftCommand: true))
         menu.addItem(makeMenuItem(
             title: pasteStackController.toggleMenuTitle,
             action: #selector(togglePasteStack),
@@ -223,34 +234,36 @@ final class AppRuntime: NSObject {
         ))
         if !pasteStackController.items.isEmpty {
             menu.addItem(makeMenuItem(
-                title: "Clear Paste Stack",
+                title: L10n.tr("menu.clearStack", default: "Clear Paste Stack"),
                 action: #selector(clearPasteStack),
                 keyEquivalent: ""
             ))
         }
         menu.addItem(makeMenuItem(
-            title: "Paste Without Formatting",
+            title: L10n.tr("menu.pastePlain", default: "Paste Without Formatting"),
             action: #selector(pasteWithoutFormattingMenu),
             keyEquivalent: "v",
             controlCommand: true
         ))
         menu.addItem(NSMenuItem.separator())
-        let pauseTitle = settings.capturePaused ? "Resume Capture" : "Pause Capture"
+        let pauseTitle = settings.capturePaused
+            ? L10n.tr("menu.resumeCapture", default: "Resume Capture")
+            : L10n.tr("menu.pauseCapture", default: "Pause Capture")
         menu.addItem(makeMenuItem(title: pauseTitle, action: #selector(togglePause), keyEquivalent: "t", shiftCommand: true))
-        let agentItem = makeMenuItem(title: "MCP", action: #selector(toggleAgentAPI), keyEquivalent: "")
+        let agentItem = makeMenuItem(title: L10n.tr("menu.mcp", default: "MCP"), action: #selector(toggleAgentAPI), keyEquivalent: "")
         agentItem.state = settings.agentAPIEnabled ? .on : .off
         menu.addItem(agentItem)
         if settings.agentAPIEnabled {
-            menu.addItem(makeMenuItem(title: "Copy MCP URL", action: #selector(copyAgentAPIURL), keyEquivalent: ""))
+            menu.addItem(makeMenuItem(title: L10n.tr("menu.copyMcpURL", default: "Copy MCP URL"), action: #selector(copyAgentAPIURL), keyEquivalent: ""))
         }
-        menu.addItem(makeMenuItem(title: "Preferences…", action: #selector(openSettings), keyEquivalent: ","))
+        menu.addItem(makeMenuItem(title: L10n.tr("menu.preferences", default: "Preferences…"), action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(makeMenuItem(
-            title: "Check for Updates…",
+            title: L10n.tr("menu.checkUpdates", default: "Check for Updates…"),
             action: #selector(checkForUpdates),
             keyEquivalent: ""
         ))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(makeMenuItem(title: "Quit Paste It", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(makeMenuItem(title: L10n.tr("menu.quit", default: "Quit Paste It"), action: #selector(quit), keyEquivalent: "q"))
         return menu
     }
 

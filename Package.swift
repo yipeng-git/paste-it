@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "PasteIt",
+    defaultLocalization: "en",
     platforms: [
         .macOS(.v14)
     ],

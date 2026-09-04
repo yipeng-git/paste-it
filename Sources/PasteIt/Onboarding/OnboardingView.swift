@@ -81,6 +81,7 @@ struct OnboardingView: View {
         .onChange(of: pageIndex) { _, _ in
             analytics.markStep(currentPage.analyticsName)
         }
+        .localizedRefreshTrigger()
     }
 
     private var titleBlock: some View {

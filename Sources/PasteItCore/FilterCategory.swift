@@ -13,12 +13,12 @@ public enum FilterCategory: String, CaseIterable, Identifiable, Sendable, Codabl
 
     public var title: String {
         switch self {
-        case .all: return "All types"
-        case .text: return "Text"
-        case .number: return "Number"
-        case .link: return "Link"
-        case .image: return "Image"
-        case .file: return "File"
+        case .all: return L10n.tr("filter.all", default: "All types")
+        case .text: return L10n.tr("filter.text", default: "Text")
+        case .number: return L10n.tr("filter.number", default: "Number")
+        case .link: return L10n.tr("filter.link", default: "Link")
+        case .image: return L10n.tr("filter.image", default: "Image")
+        case .file: return L10n.tr("filter.file", default: "File")
         }
     }
 

@@ -2,6 +2,7 @@ import AppKit
 import ApplicationServices
 import Carbon
 import Foundation
+import PasteItCore
 
 @MainActor
 final class PasteStackController: ObservableObject {
@@ -13,8 +14,8 @@ final class PasteStackController: ObservableObject {
 
         var title: String {
             switch self {
-            case .oldestFirst: return "First in, first out"
-            case .newestFirst: return "Last in, first out"
+            case .oldestFirst: return L10n.tr("stack.fifo", default: "First in, first out")
+            case .newestFirst: return L10n.tr("stack.lifo", default: "Last in, first out")
             }
         }
 
@@ -27,8 +28,8 @@ final class PasteStackController: ObservableObject {
 
         var toggleHelp: String {
             switch self {
-            case .oldestFirst: return "Copy order. Click to reverse."
-            case .newestFirst: return "Newest first. Click for copy order."
+            case .oldestFirst: return L10n.tr("stack.fifoHelp", default: "Copy order. Click to reverse.")
+            case .newestFirst: return L10n.tr("stack.lifoHelp", default: "Newest first. Click for copy order.")
             }
         }
     }
@@ -206,16 +207,19 @@ final class PasteStackController: ObservableObject {
 
     var statusTitle: String {
         if isCollecting || !items.isEmpty {
-            return items.isEmpty ? "Stack" : "Stack · \(items.count)"
+            if items.isEmpty {
+                return L10n.tr("stack.title", default: "Stack")
+            }
+            return L10n.tr("stack.statusWithCount", default: "Stack · %lld", items.count)
         }
-        return "Paste"
+        return L10n.tr("stack.paste", default: "Paste")
     }
 
     var toggleMenuTitle: String {
         if isCollecting || !items.isEmpty {
-            return "Close Paste Stack"
+            return L10n.tr("stack.close", default: "Close Paste Stack")
         }
-        return "Open Paste Stack"
+        return L10n.tr("stack.open", default: "Open Paste Stack")
     }
 
     func ensureAccessibilityIfNeeded() {

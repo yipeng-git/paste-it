@@ -1,4 +1,5 @@
 import AppKit
+import PasteItCore
 import SwiftUI
 
 /// Toolbar overflow control, styled to match the search field glass chrome.
@@ -7,24 +8,27 @@ import SwiftUI
 struct AppMenuButton: View {
     var onWillOpen: (() -> Void)? = nil
 
+    private var moreLabel: String { L10n.tr("menu.more", default: "More") }
+
     var body: some View {
-        AppMenuHost(onWillOpen: onWillOpen)
+        AppMenuHost(onWillOpen: onWillOpen, accessibilityLabel: moreLabel)
             .frame(width: 38, height: 28)
             .pasteItControlGlass()
-            .help("More")
-            .accessibilityLabel("More")
+            .help(moreLabel)
+            .accessibilityLabel(moreLabel)
     }
 }
 
 private struct AppMenuHost: NSViewRepresentable {
     var onWillOpen: (() -> Void)?
+    var accessibilityLabel: String
 
     func makeNSView(context: Context) -> NSButton {
         let button = NSButton(frame: .zero)
         button.title = ""
         button.image = NSImage(
             systemSymbolName: "ellipsis",
-            accessibilityDescription: "More"
+            accessibilityDescription: accessibilityLabel
         )
         button.imagePosition = .imageOnly
         button.bezelStyle = .inline

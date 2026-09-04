@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
+import PasteItCore
 
 struct PrivacySettingsView: View {
     @ObservedObject var settings: AppSettings
@@ -14,7 +15,7 @@ struct PrivacySettingsView: View {
         Form {
             Section {
                 Toggle(
-                    "Share anonymous usage analytics",
+                    L10n.tr("privacy.shareAnalytics", default: "Share anonymous usage analytics"),
                     isOn: Binding(
                         get: { settings.analyticsEnabled },
                         set: { enabled in
@@ -24,14 +25,14 @@ struct PrivacySettingsView: View {
                     )
                 )
 
-                DisclosureGroup("What we collect") {
+                DisclosureGroup(L10n.tr("privacy.whatWeCollect", default: "What we collect")) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Events help improve Paste It (activation, panel use, updates). Data is anonymous and sent to PostHog when enabled.")
+                        Text(L10n.tr("privacy.eventsBlurb", default: "Events help improve Paste It (activation, panel use, updates). Data is anonymous and sent to PostHog when enabled."))
                             .font(.callout)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Text("Never collected")
+                        Text(L10n.tr("privacy.neverCollected", default: "Never collected"))
                             .font(.caption.weight(.semibold))
                         ForEach(AnalyticsCatalog.neverCollected, id: \.self) { item in
                             Text("· \(item)")
@@ -39,7 +40,7 @@ struct PrivacySettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        Text("Product events")
+                        Text(L10n.tr("privacy.productEvents", default: "Product events"))
                             .font(.caption.weight(.semibold))
                             .padding(.top, 4)
                         ForEach(AnalyticsCatalog.lifecycleEvents + AnalyticsCatalog.productEvents) { event in
@@ -53,7 +54,7 @@ struct PrivacySettingsView: View {
                         }
 
                         if let url = AnalyticsCatalog.documentationURL {
-                            Link("Full disclosure on GitHub", destination: url)
+                            Link(L10n.tr("privacy.fullDisclosure", default: "Full disclosure on GitHub"), destination: url)
                                 .font(.caption)
                                 .padding(.top, 4)
                         }
@@ -62,14 +63,20 @@ struct PrivacySettingsView: View {
                     .padding(.top, 4)
                 }
             } header: {
-                Text("Analytics")
+                Text(L10n.tr("privacy.analytics", default: "Analytics"))
             } footer: {
-                Text("Optional. Off means no events are sent. See \(AnalyticsCatalog.documentationPath) in the open-source repo.")
+                Text(
+                    L10n.tr(
+                        "privacy.analyticsFooter",
+                        default: "Optional. Off means no events are sent. See %@ in the open-source repo.",
+                        AnalyticsCatalog.documentationPath
+                    )
+                )
             }
 
             Section {
                 if ignoredApps.isEmpty {
-                    Text("No ignored apps")
+                    Text(L10n.tr("privacy.noIgnoredApps", default: "No ignored apps"))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 8)
@@ -104,7 +111,7 @@ struct PrivacySettingsView: View {
                             .frame(width: 28, height: 22)
                     }
                     .buttonStyle(.borderless)
-                    .help("Add App")
+                    .help(L10n.tr("privacy.addApp", default: "Add App"))
 
                     Divider()
                         .frame(height: 16)
@@ -117,26 +124,26 @@ struct PrivacySettingsView: View {
                     }
                     .buttonStyle(.borderless)
                     .disabled(selectedBundleIDs.isEmpty)
-                    .help("Remove App")
+                    .help(L10n.tr("privacy.removeApp", default: "Remove App"))
 
                     Spacer()
                 }
                 .padding(.top, 2)
             } header: {
-                Text("Ignored Apps")
+                Text(L10n.tr("privacy.ignoredApps", default: "Ignored Apps"))
             } footer: {
-                Text("Copies made in these apps are never saved to history. Use this for password managers and other sensitive apps.")
+                Text(L10n.tr("privacy.ignoredAppsFooter", default: "Copies made in these apps are never saved to history. Use this for password managers and other sensitive apps."))
             }
 
             Section {
-                Text("Sensitive clipboard markers from apps — such as password fields and temporary clips — are ignored automatically.")
+                Text(L10n.tr("privacy.protectedBlurb", default: "Sensitive clipboard markers from apps — such as password fields and temporary clips — are ignored automatically."))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } header: {
-                Text("Protected Content")
+                Text(L10n.tr("privacy.protectedContent", default: "Protected Content"))
             } footer: {
-                Text("Ignored Apps skip everything from a whole app. Protected Content skips only marked sensitive pasteboard data, from any app.")
+                Text(L10n.tr("privacy.protectedFooter", default: "Ignored Apps skip everything from a whole app. Protected Content skips only marked sensitive pasteboard data, from any app."))
             }
         }
         .formStyle(.grouped)
@@ -198,7 +205,7 @@ struct PrivacySettingsView: View {
         panel.allowsMultipleSelection = false
         panel.allowedContentTypes = [.application]
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
-        panel.message = "Choose an app to ignore"
+        panel.message = L10n.tr("privacy.chooseAppPanel", default: "Choose an app to ignore")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         guard let bundle = Bundle(url: url),
               let bundleID = bundle.bundleIdentifier,
@@ -254,19 +261,19 @@ private struct AddIgnoredAppSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Add Ignored App")
+                Text(L10n.tr("privacy.addIgnoredApp", default: "Add Ignored App"))
                     .font(.headline)
                 Spacer()
-                Button("Choose…") { onChooseFromDisk() }
+                Button(L10n.tr("privacy.chooseApp", default: "Choose…")) { onChooseFromDisk() }
             }
             .padding()
 
-            TextField("Search", text: $searchText)
+            TextField(L10n.tr("privacy.search", default: "Search"), text: $searchText)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
 
             if isLoading && installedApps.isEmpty {
-                ProgressView("Loading apps…")
+                ProgressView(L10n.tr("privacy.loadingApps", default: "Loading apps…"))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List(candidates) { app in
@@ -295,7 +302,7 @@ private struct AddIgnoredAppSheet: View {
 
             HStack {
                 Spacer()
-                Button("Cancel", action: onCancel)
+                Button(L10n.tr("common.cancel", default: "Cancel"), action: onCancel)
                     .keyboardShortcut(.cancelAction)
             }
             .padding()

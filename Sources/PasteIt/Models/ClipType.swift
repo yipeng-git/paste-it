@@ -15,13 +15,13 @@ enum ClipType: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .text: return "Text"
-        case .richText: return "Rich Text"
-        case .html: return "HTML"
-        case .image: return "Image"
-        case .file: return "File"
-        case .url: return "Link"
-        case .mixed: return "Mixed"
+        case .text: return L10n.tr("clipType.text", default: "Text")
+        case .richText: return L10n.tr("clipType.richText", default: "Rich Text")
+        case .html: return L10n.tr("clipType.html", default: "HTML")
+        case .image: return L10n.tr("clipType.image", default: "Image")
+        case .file: return L10n.tr("clipType.file", default: "File")
+        case .url: return L10n.tr("clipType.url", default: "Link")
+        case .mixed: return L10n.tr("clipType.mixed", default: "Mixed")
         }
     }
 
@@ -53,10 +53,10 @@ enum ClipType: String, Codable, CaseIterable, Identifiable {
     /// site via `LooksLikeNumber` when the underlying type is text-like.
     var displayTitle: String {
         switch self {
-        case .url: return "Link"
-        case .image: return "Image"
-        case .file: return "File"
-        case .text, .richText, .html, .mixed: return "Text"
+        case .url: return L10n.tr("clipType.url", default: "Link")
+        case .image: return L10n.tr("clipType.image", default: "Image")
+        case .file: return L10n.tr("clipType.file", default: "File")
+        case .text, .richText, .html, .mixed: return L10n.tr("clipType.text", default: "Text")
         }
     }
 
@@ -73,9 +73,13 @@ extension ClipItem {
     var cardDisplayTitle: String {
         switch primaryType {
         case .file:
-            return isDirectoryFileClip ? "Folder" : "File"
+            return isDirectoryFileClip
+                ? L10n.tr("clipType.folder", default: "Folder")
+                : L10n.tr("clipType.file", default: "File")
         case .text, .richText, .html:
-            return LooksLikeNumber.matches(plainText) ? "Number" : "Text"
+            return LooksLikeNumber.matches(plainText)
+                ? L10n.tr("filter.number", default: "Number")
+                : L10n.tr("clipType.text", default: "Text")
         default:
             return primaryType.displayTitle
         }
