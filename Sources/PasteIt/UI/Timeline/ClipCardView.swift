@@ -26,14 +26,13 @@ struct ClipCardView: View {
                 metadataFooter(footerText)
             }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
-        .contentShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
+        .pasteItCardGlass()
+        .contentShape(PasteItGlass.cardShape)
         .overlay {
-            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .stroke(isSelected ? Color.accentColor : Color.black.opacity(0.08), lineWidth: isSelected ? 2 : 1)
+            PasteItGlass.cardShape
+                .stroke(isSelected ? Color.accentColor : Color.primary.opacity(0.08), lineWidth: isSelected ? 2 : 1)
         }
-        .shadow(color: .black.opacity(0.10), radius: 6, y: 2)
+        .modifier(ClipCardShadow())
         .task(id: item.id) {
             historyStore.enrichLinkMetadataIfNeeded(for: item)
             await loadMediaIfNeeded()
@@ -300,6 +299,16 @@ struct ClipCardView: View {
             }
         default:
             break
+        }
+    }
+}
+
+private struct ClipCardShadow: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content
+        } else {
+            content.shadow(color: .black.opacity(0.10), radius: 6, y: 2)
         }
     }
 }

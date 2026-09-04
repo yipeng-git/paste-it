@@ -157,6 +157,7 @@ struct ClipQuickPreview: View {
                 isEditingText = false
                 onEditingChanged(false)
             }
+            .localizedRefreshTrigger()
     }
 
     private func publishEditingFocus() {
@@ -299,10 +300,7 @@ struct ClipQuickPreview: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background {
-                            if imageTab == tab {
-                                Capsule()
-                                    .fill(Color.primary.opacity(0.12))
-                            }
+                            pasteItSegmentHighlight(isSelected: imageTab == tab)
                         }
                         .contentShape(Capsule())
                 }
@@ -316,8 +314,8 @@ struct ClipQuickPreview: View {
 
     private var imageViewport: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
+            Color.clear
+                .pasteItPreviewInsetGlass()
 
             if let image = historyStore.fullImage(for: item) ?? historyStore.thumbnailImage(for: item) {
                 Image(nsImage: image)
@@ -375,10 +373,7 @@ struct ClipQuickPreview: View {
                     .scrollContentBackground(.hidden)
                     .focused($isOCREditorFocused)
                     .padding(6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color(nsColor: .textBackgroundColor).opacity(0.55))
-                    )
+                    .pasteItControlGlass()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if isRerunningOCR && !hasOCRText {
                 HStack(spacing: 6) {

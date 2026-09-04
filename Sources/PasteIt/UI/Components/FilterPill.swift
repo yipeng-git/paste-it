@@ -17,7 +17,23 @@ struct FilterPill: View {
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(isSelected ? Color.accentColor.opacity(0.18) : Color.secondary.opacity(0.10), in: Capsule())
+            .background {
+                if isSelected {
+                    if #available(macOS 26, *) {
+                        Capsule()
+                            .fill(.clear)
+                            .glassEffect(.regular.tint(.accentColor), in: Capsule())
+                    } else {
+                        Capsule()
+                            .fill(Color.accentColor.opacity(0.18))
+                    }
+                } else if #available(macOS 26, *) {
+                    EmptyView()
+                } else {
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.10))
+                }
+            }
             .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
         }
         .buttonStyle(.plain)

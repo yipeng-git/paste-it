@@ -28,12 +28,8 @@ struct CardHoverActionBar: View {
             actionButton("trash", help: deleteHelp, action: onDelete)
         }
         .padding(4)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay {
-            Capsule()
-                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
-        }
-        .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
+        .pasteItCapsuleGlass()
+        .modifier(CardHoverActionBarChrome())
     }
 
     private func actionButton(
@@ -65,10 +61,7 @@ private struct ActionBarButton: View {
                 .font(.system(size: 12, weight: isHovered && enabled ? .bold : .semibold))
                 .frame(width: 28, height: 28)
                 .background {
-                    if isHovered {
-                        Circle()
-                            .fill(Color.primary.opacity(enabled ? 0.14 : 0.08))
-                    }
+                    pasteItActionBarButtonHighlight(isHovered: isHovered, enabled: enabled)
                 }
                 .contentShape(Circle())
         }
@@ -84,6 +77,22 @@ private struct ActionBarButton: View {
             withAnimation(.easeOut(duration: 0.1)) {
                 isHovered = hovering
             }
+        }
+    }
+}
+
+/// Legacy stroke/shadow only on pre–Liquid Glass macOS.
+private struct CardHoverActionBarChrome: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content
+        } else {
+            content
+                .overlay {
+                    Capsule()
+                        .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+                }
+                .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
         }
     }
 }

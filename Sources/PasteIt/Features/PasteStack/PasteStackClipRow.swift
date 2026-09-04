@@ -45,10 +45,15 @@ struct PasteStackClipRow: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
     .frame(maxWidth: .infinity, minHeight: PasteStackPanelLayout.rowHeight, maxHeight: PasteStackPanelLayout.rowHeight, alignment: .leading)
-        .background(rowBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .pasteItStackRowGlass(isHighlighted: isNext)
         .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(isNext ? Color.accentColor.opacity(0.85) : Color.black.opacity(0.06), lineWidth: isNext ? 1.5 : 1)
+            if #unavailable(macOS 26) {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(isNext ? Color.accentColor.opacity(0.85) : Color.black.opacity(0.06), lineWidth: isNext ? 1.5 : 1)
+            } else if isNext {
+                PasteItGlass.stackRowShape
+                    .stroke(Color.accentColor.opacity(0.85), lineWidth: 1.5)
+            }
         }
         .task(id: item.id) {
             await loadThumbnailIfNeeded()
@@ -74,12 +79,6 @@ struct PasteStackClipRow: View {
         }
         .frame(width: 36, height: 36)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-
-    private var rowBackground: Color {
-        isNext
-            ? Color.accentColor.opacity(0.10)
-            : Color(nsColor: .windowBackgroundColor).opacity(0.72)
     }
 
     private var previewLine: String {
