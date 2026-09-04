@@ -1,0 +1,21 @@
+Sources/PasteIt/Analytics/Analytics.swift
+  s_f4aadf3ae60236::t_bf64b348da7792 385-386
+docs/analytics.md
+  s_f4aadf3ae60236::t_c169c2cda91b01 29-30,32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "5a72d2df59ae58961612781d154fda89bb610309",
+  "prompts": {},
+  "sessions": {
+    "s_f4aadf3ae60236": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "aaf9239b-0bc1-478c-9af3-5ac7586a7e9a",
+        "model": "composer-2.5"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
