@@ -1,0 +1,103 @@
+Resources/Localization/Localizable.xcstrings
+  s_c390e2fbbce03c::t_b2718512e62d55 9689-12124
+Resources/de.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_f2d04373ef43bc 1-21,118-138
+Resources/en.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_20b686d835fab3 1-21,118-138
+Resources/es.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_dac7d31b2846f6 1-21,118-138
+Resources/fr.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_773714bdbb01ac 1-21,118-138
+Resources/ja.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_5c533050932b76 1-21,118-138
+Resources/ko.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_1509d33fafc254 1-21,118-138
+Resources/pl.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_fe7ae3376422e3 1-21,118-138
+Resources/zh-Hans.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_62fcf097305af3 1-21,118-138
+Resources/zh-Hant.lproj/Localizable.strings
+  s_c390e2fbbce03c::t_308dfb0ca613d5 1-21,118-138
+Sources/PasteIt/AgentAPI/PasteItMCPServer.swift
+  s_c390e2fbbce03c::t_88dfc0b6e3eebe 134
+Sources/PasteIt/AgentAPI/RenderScreenshotHandler.swift
+  s_c390e2fbbce03c::t_e55ec706d327a2 19,97-100
+Sources/PasteIt/App/AppRuntime.swift
+  s_ff5cd7d2d570fc::t_aab534f1e3bb6f 33,240-248,461-462
+Sources/PasteIt/App/AppSettings.swift
+  s_ff5cd7d2d570fc::t_af7d0fd6374932 7-20,68-86
+Sources/PasteIt/App/AppState.swift
+  s_ff5cd7d2d570fc::t_6ed5d2a3c09349 70,230-231,251-252,261-264,270-309,354-358
+Sources/PasteIt/App/RemovalFeedback.swift
+  s_c390e2fbbce03c::t_9e5b2267595026 1-66
+Sources/PasteIt/Core/PasteController.swift
+  s_ff5cd7d2d570fc::t_b4cbe4a9918274 3,16,18,20,27-28,31,34-35,37-45,47-49,51-54,135,138-139,141-145,148,151-155,158-160,162-166,169-170,172
+Sources/PasteIt/Core/SystemPasteSynthesizer.swift
+  s_ff5cd7d2d570fc::t_145f55fcdf68e1 20-28
+Sources/PasteIt/Models/ClipItem.swift
+  s_ff5cd7d2d570fc::t_6301f298aceff5 90-113
+Sources/PasteIt/Onboarding/OnboardingHeroes.swift
+  s_ff5cd7d2d570fc::t_667ca5b9c924c3 114
+Sources/PasteIt/Onboarding/OnboardingPage.swift
+  s_ff5cd7d2d570fc::t_98f61f25fe742f 46,61
+Sources/PasteIt/Settings/DirectPastePermissionView.swift
+  s_ff5cd7d2d570fc::t_73b8a02215a944 1-30
+Sources/PasteIt/Settings/SettingsView.swift
+  s_ff5cd7d2d570fc::t_40f15a4cc696ed 12-19,57-93,155-166,194-198,299,302-303,307
+Sources/PasteIt/Storage/BlobStore.swift
+  s_78ec3a6a1d1390::t_2b543dae8d2ee7 8-18,141-149
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_ff5cd7d2d570fc::t_24b15c1f005e17 10-144,523-539,542,544-546,548-559,561-566,759,881-882,885,897
+Sources/PasteIt/UI/Components/CardHoverActionBar.swift
+  s_ff5cd7d2d570fc::t_d3a6ef721d2f19 2,17,20,26
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_c390e2fbbce03c::t_f9a8516a3b1460 10,17-22,29,36-80,94,128,183-195,399,432-439,444-458,462-471,476-477,479-492,496-503,508-512,514,522-524,526,528-529,533-536,538-547,550-562,566-572,577-579,600,621,626,637,641-646
+Sources/PasteIt/UI/TimelinePanelController.swift
+  s_c390e2fbbce03c::t_d8d1e09905ff29 22,40,113-118,122,178-183,246,266,289,301,378
+Sources/PasteItCore/TimelinePrimaryAction.swift
+  s_ff5cd7d2d570fc::t_e19ba1224200b3 1-22
+Tests/PasteItIntegrationTests/ProductExperienceTests.swift
+  s_c390e2fbbce03c::t_ec7b358ae98570 1-291
+Tests/PasteItIntegrationTests/RemovalFeedbackTests.swift
+  s_c390e2fbbce03c::t_c3319ea69aa5f7 1-49
+Tests/PasteItTests/TimelinePrimaryActionTests.swift
+  s_ff5cd7d2d570fc::t_91e6dba4b36524 1-19
+scripts/generate-localizations.py
+  s_c390e2fbbce03c::t_9952602bec99f8 329-546
+scripts/localization_batch2.py
+  s_c390e2fbbce03c::t_58339135ac3b27 333-592
+scripts/localization_batch_cjk.py
+  s_c390e2fbbce03c::t_c69a0cc9e26025 271-446
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "0a3488f2cec08351a5cc5098080fa28c3cb6dded",
+  "prompts": {},
+  "sessions": {
+    "s_78ec3a6a1d1390": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08087-8fab-7b13-a7e7-771718c544ae",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_c390e2fbbce03c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a080a2-a9d1-7303-89ad-fbdba86ddf45",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_ff5cd7d2d570fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08046-d8ea-7223-95b7-6208818ba63d",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
