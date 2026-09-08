@@ -1,0 +1,19 @@
+AGENTS.md
+  s_cb7c9badd7b86e::t_e43a89e6f873e9 3,5,7-76,80-86,94-112,114-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "a35cb1a37526cab5ab34977105f277e0b906a02b",
+  "prompts": {},
+  "sessions": {
+    "s_cb7c9badd7b86e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08046-741f-7333-9f04-1431455fd9a9",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
