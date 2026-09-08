@@ -111,7 +111,7 @@ private struct PasteHero: View {
                                         )
 
                                         if beat == 1 && index == targetIndex {
-                                            DemoDoubleClickCue(isActive: true)
+                                            KeyCapsule(label: "⌘ C", pulsing: true, emphasized: true)
                                                 .offset(x: 8, y: 10)
                                         }
                                     }

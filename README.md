@@ -29,7 +29,7 @@ macOS 14 or later. Official builds update themselves in the background.
 
 1. Copy as usual — Paste It keeps a local history.
 2. Press **⇧⌘V** (or click the menu bar icon) to open the timeline.
-3. Type to search, or filter by type. Use **⌘1…9** for a quick pick, or select a card and press **Return** to paste.
+3. Click Search (or **⌘F**) to search, or filter by type. Select a card, then use **Return**, double-click, or **⌘1…9** for your primary action (see below).
 4. Press **Space** to preview above the timeline. Click the text to edit; for images you can review OCR, for links you get a page preview.
 5. Pin clips you want to keep, or put them in a custom folder (up to three folders).
 
@@ -38,8 +38,8 @@ macOS 14 or later. Official builds update themselves in the background.
 | Shortcut | Action |
 |----------|--------|
 | **⇧⌘V** | Open / close timeline |
-| **⌘1…9** | Stage that card and close |
-| **Return** | Paste selection (needs Accessibility) |
+| **⌘1…9** | Primary action on that card |
+| **Return** | Primary action on selection |
 | **⇧Return** | Paste as plain text |
 | **Space** | Preview |
 | **⌘E** | Edit selected clip |
@@ -49,9 +49,15 @@ macOS 14 or later. Official builds update themselves in the background.
 
 **Paste Stack:** press **⇧⌘C**, copy several things into the queue, then **⌘V** in the target app to paste them one by one. Direction (oldest / newest first) is in Settings → Stack.
 
-**Multi-select:** **⌘**-click several cards, then **Return** to paste in order.
+**Multi-select:** **⌘**-click several cards, then **Return** in Direct Paste mode to paste in displayed order. **⇧Return** pastes them as plain text in any mode.
 
-Selecting a clip puts it on the system clipboard without Accessibility. Auto-paste (**Return**, Stack, **⌃⌘V**) needs Accessibility.
+Single-click selects without changing the clipboard. **⌘C** or the Copy button copies one clip and keeps the panel open. **Settings → General → Timeline primary action** offers **Direct Paste** and **Copy Only**: double-click, **Return**, and **⌘1…9** all use that action. Direct Paste is the default for both new and existing installs. An explicitly selected Copy Only preference is preserved. **⇧Return** always requests plain-text paste.
+
+Direct paste needs Accessibility. Without it, a single clip is copied and a recovery dialog explains how to return to your app and press **⌘V**. Failed writes keep your selection and show Retry. **⌘C** with multiple clips asks you to select one, rather than silently copying only the first.
+
+**Removal:** Remove from History leaves clips saved in Pinned or folders there. Unpin and Remove from Folder affect that location only. **Menu → Undo Removal / ⌘Z** restores recent removals for **30 seconds**, up to 20 actions in the current app session. Attachments are protected while undo is available. **Delete Everywhere** is confirmed and cannot be undone. Bulk cleanup and shorter retention show the affected count before applying; saved clips are explicitly included or excluded. Confirming bulk cleanup ends removal undo.
+
+Ordinary removal shows a **3-second toast with Undo**; hovering pauses its dismissal, then the remaining display time resumes when the pointer leaves. The toast floats centered 12 points above the panel without changing its layout or taking keyboard focus. It uses native Liquid Glass on macOS 26+ and standard material on older macOS versions; short messages fit a capsule and long messages wrap into a rounded rectangle. Undo highlights on hover and responds visually when pressed; the toast adds no extra window shadow. After it disappears, the menu and **⌘Z** still work within the original 30-second undo window. Folder actions name their destination, such as **Remove from “Work”**. **Delete Everywhere…** opens the permanent-deletion confirmation.
 
 ## Privacy
 

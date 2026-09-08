@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import ImageIO
 import PasteItCore
 
 @MainActor
@@ -12,40 +13,45 @@ final class PasteController {
     var onPasteboardMutation: ((Int) -> Void)?
 
     private let blobStore: BlobStore
+    private let pasteboard: NSPasteboard
 
-    init(blobStore: BlobStore) {
+    init(blobStore: BlobStore, pasteboard: NSPasteboard = .general) {
         self.blobStore = blobStore
+        self.pasteboard = pasteboard
     }
 
     /// Stages a clip onto the system pasteboard, replacing the previous clipboard contents.
     /// Does not synthesize Command+V; the user pastes manually in the target app.
     @discardableResult
     func copyToPasteboard(_ item: ClipItem, mode: PasteMode = .normal) -> Bool {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-
-        let wrote = write(item, to: pasteboard, mode: mode, preloadedImageData: nil)
-        onPasteboardMutation?(pasteboard.changeCount)
-        return wrote
+        guard let objects = preparedObjects(item, mode: mode, imageData: nil) else { return false }
+        return replaceContents(with: objects)
     }
 
-    /// Async variant that reads large image blobs off the main thread before writing.
+    /// Prepare the image before touching the user's clipboard.
     @discardableResult
     func copyToPasteboardAsync(_ item: ClipItem, mode: PasteMode = .normal) async -> Bool {
-        var preloaded: Data?
-        if mode == .normal, item.primaryType == .image {
-            let path = item.blobRelativePath
-            let store = blobStore
-            preloaded = await Task.detached(priority: .userInitiated) {
-                store.data(for: path)
-            }.value
+        if mode != .normal || item.primaryType != .image {
+            return copyToPasteboard(item, mode: mode)
         }
+        let path = item.blobRelativePath
+        let store = blobStore
+        guard let data = await Task.detached(priority: .userInitiated, operation: {
+            store.data(for: path)
+        }).value else { return false }
+        guard !Task.isCancelled,
+              let objects = preparedObjects(item, mode: mode, imageData: data) else { return false }
+        return replaceContents(with: objects)
+    }
 
-        let pasteboard = NSPasteboard.general
+    /// Roll back a failed write and suppress both the attempt and restoration.
+    private func replaceContents(with objects: [NSPasteboardWriting]) -> Bool {
+        let snapshot = snapshotGeneralPasteboard()
         pasteboard.clearContents()
-        let wrote = write(item, to: pasteboard, mode: mode, preloadedImageData: preloaded)
-        onPasteboardMutation?(pasteboard.changeCount)
-        return wrote
+        defer { onPasteboardMutation?(pasteboard.changeCount) }
+        if pasteboard.writeObjects(objects) { return true }
+        if let snapshot { _ = restoreGeneralPasteboard(snapshot) }
+        return false
     }
 
     /// Stages multiple clips as combined plain text on the system pasteboard.
@@ -56,7 +62,6 @@ final class PasteController {
             return copyToPasteboard(item, mode: mode)
         }
 
-        let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         let combined = items.map(\.previewText).joined(separator: "\n")
         let wrote = pasteboard.setString(combined, forType: .string)
@@ -66,7 +71,6 @@ final class PasteController {
 
     /// Deep-copies every pasteboard item/type so we can restore after a temporary rewrite.
     func snapshotGeneralPasteboard() -> GeneralPasteboardSnapshot? {
-        let pasteboard = NSPasteboard.general
         guard let pasteboardItems = pasteboard.pasteboardItems, !pasteboardItems.isEmpty else {
             return nil
         }
@@ -87,7 +91,6 @@ final class PasteController {
 
     /// Plain string currently on the general pasteboard (derives from HTML/RTF when needed).
     func plainTextFromGeneralPasteboard() -> String? {
-        let pasteboard = NSPasteboard.general
         let item = pasteboard.pasteboardItems?.first
         var plain = item?.string(forType: .string) ?? pasteboard.string(forType: .string) ?? ""
         if plain.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -102,7 +105,6 @@ final class PasteController {
     @discardableResult
     func writePlainTextToGeneralPasteboard(_ plain: String, markTransient: Bool = true) -> Bool {
         guard !plain.isEmpty else { return false }
-        let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         let item = NSPasteboardItem()
         item.setString(plain, forType: .string)
@@ -117,7 +119,6 @@ final class PasteController {
     /// Restores a prior deep snapshot onto the general pasteboard.
     @discardableResult
     func restoreGeneralPasteboard(_ snapshot: GeneralPasteboardSnapshot) -> Bool {
-        let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         let objects: [NSPasteboardItem] = snapshot.items.map { item in
             let pasteboardItem = NSPasteboardItem()
@@ -131,51 +132,44 @@ final class PasteController {
         return true
     }
 
-    private func write(
+    private func preparedObjects(
         _ item: ClipItem,
-        to pasteboard: NSPasteboard,
         mode: PasteMode,
-        preloadedImageData: Data?
-    ) -> Bool {
+        imageData: Data?
+    ) -> [NSPasteboardWriting]? {
         if mode == .plainText {
-            return pasteboard.setString(item.previewText, forType: .string)
+            let text: String
+            if item.primaryType == .image { text = item.ocrText ?? item.plainText }
+            else { text = item.previewText }
+            guard !text.isEmpty else { return nil }
+            return [text as NSString]
         }
 
+        let result = NSPasteboardItem()
         switch item.primaryType {
         case .image:
-            let pasteboardItem = NSPasteboardItem()
-            let data = preloadedImageData ?? blobStore.data(for: item.blobRelativePath)
-            if let data {
-                let type: NSPasteboard.PasteboardType = item.blobRelativePath?.hasSuffix(".tiff") == true ? .tiff : .png
-                pasteboardItem.setData(data, forType: type)
-            }
-            if !item.plainText.isEmpty {
-                pasteboardItem.setString(item.plainText, forType: .string)
-            }
-            return pasteboard.writeObjects([pasteboardItem])
+            guard let data = imageData ?? blobStore.data(for: item.blobRelativePath),
+                  CGImageSourceCreateWithData(data as CFData, nil) != nil else { return nil }
+            let type: NSPasteboard.PasteboardType = item.blobRelativePath?.hasSuffix(".tiff") == true ? .tiff : .png
+            result.setData(data, forType: type)
+            if !item.plainText.isEmpty { result.setString(item.plainText, forType: .string) }
         case .file:
             let urls = item.storedFileURLs
-            if !urls.isEmpty {
-                return pasteboard.writeObjects(urls as [NSURL])
-            }
-            return pasteboard.setString(item.previewText, forType: .string)
+            guard !urls.isEmpty,
+                  urls.allSatisfy({ $0.isFileURL && FileManager.default.fileExists(atPath: $0.path) }) else { return nil }
+            return urls as [NSURL]
         case .html, .richText, .mixed, .url, .text:
-            let pasteboardItem = NSPasteboardItem()
-            if !item.plainText.isEmpty {
-                pasteboardItem.setString(item.plainText, forType: .string)
+            if !item.plainText.isEmpty { result.setString(item.plainText, forType: .string) }
+            if let html = item.htmlText, !html.isEmpty { result.setString(html, forType: .html) }
+            if let rtf = item.rtfData, !rtf.isEmpty { result.setData(rtf, forType: .rtf) }
+            if let url = item.fileURLString, item.primaryType == .url {
+                result.setString(url, forType: .init("public.url"))
             }
-            if let htmlText = item.htmlText {
-                pasteboardItem.setString(htmlText, forType: .html)
-            }
-            if let rtfData = item.rtfData {
-                pasteboardItem.setData(rtfData, forType: .rtf)
-            }
-            if let fileURLString = item.fileURLString, item.primaryType == .url {
-                pasteboardItem.setString(fileURLString, forType: NSPasteboard.PasteboardType("public.url"))
-            }
-            return pasteboard.writeObjects([pasteboardItem])
         }
+        guard !result.types.isEmpty else { return nil }
+        return [result]
     }
+
 }
 
 /// Raw pasteboard bytes for temporary rewrite → restore (⌃⌘V).

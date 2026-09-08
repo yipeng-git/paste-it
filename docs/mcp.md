@@ -77,6 +77,8 @@ Result (JSON text content):
 { "path": "/Users/…/AgentScreenshots/render-….png", "width": 1120, "height": 320 }
 ```
 
+To inspect the native removal toast, add `"removalPreviewFolder": "Work"` to `ui`. The renderer adds the selected synthetic clip to a temporary folder, removes that membership through the normal app action, and captures the toast above the panel. The PNG includes the toast and its surrounding margin, so its height is larger than the default timeline screenshot. Toast previews use a separate synthetic backdrop window with dark, white, and colored regions to check transparency and contrast without exposing other apps in the expanded capture area. All preview windows ignore input and are removed after capture. Main history, real folders, and system clipboard content remain untouched.
+
 Card fields (all optional except enough content to render):
 
 | Field | Notes |

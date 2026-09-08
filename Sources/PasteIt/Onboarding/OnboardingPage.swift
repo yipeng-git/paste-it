@@ -43,7 +43,7 @@ enum OnboardingPageID: Int, CaseIterable, Identifiable {
     var caption: String {
         switch self {
         case .capture: return L10n.tr("onboarding.capture.caption", default: "Copy anything — Paste It saves it and flashes ⌘C in the menu bar.")
-        case .paste: return L10n.tr("onboarding.paste.caption", default: "⇧⌘V opens history. Double-click a clip, then ⌘V — or ⌃⌘V to paste without formatting.")
+        case .paste: return L10n.tr("action.tutorial", default: "Select a clip, ⌘C to copy, then ⌘V in your app. Choose Direct Paste in Settings for one-step reuse.")
         case .browse: return L10n.tr("onboarding.browse.caption", default: "Press Space to preview above the timeline. Click the text to edit.")
         case .organize: return L10n.tr("onboarding.organize.caption", default: "⌘-click several clips, then press Return to paste them in order.")
         case .stack: return L10n.tr("onboarding.stack.caption", default: "⇧⌘C opens a queue on the right. Copy several things, then ⌘V in the target app to paste them one by one.")
@@ -58,7 +58,7 @@ enum OnboardingPageID: Int, CaseIterable, Identifiable {
         ]
         case .paste: return [
             L10n.tr("onboarding.step.open", default: "Open"),
-            L10n.tr("onboarding.step.doubleClick", default: "Double-click"),
+            L10n.tr("onboarding.step.copy", default: "Copy"),
             L10n.tr("onboarding.step.paste", default: "Paste"),
             L10n.tr("onboarding.step.plain", default: "Plain"),
         ]

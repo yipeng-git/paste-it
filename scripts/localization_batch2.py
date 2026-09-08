@@ -330,6 +330,266 @@ BATCH2: dict[str, dict[str, str]] = {
 }
 
 
+# Product experience actions and recovery.
+BATCH2.update({
+    "removal.undoShort": {
+        "fr": "Annuler",
+        "de": "Rückgängig",
+        "es": "Deshacer",
+        "pl": "Cofnij"
+    },
+    "removal.namedFolder": {
+        "fr": "Retirer de « %@ »",
+        "de": "Aus „%@“ entfernen",
+        "es": "Quitar de «%@»",
+        "pl": "Usuń z „%@”"
+    },
+    "removal.removedFolder": {
+        "fr": "Retiré de « %@ »",
+        "de": "Aus „%@“ entfernt",
+        "es": "Quitado de «%@»",
+        "pl": "Usunięto z „%@”"
+    },
+    "removal.removedHistory": {
+        "fr": "Retiré de l’historique",
+        "de": "Aus dem Verlauf entfernt",
+        "es": "Quitado del historial",
+        "pl": "Usunięto z historii"
+    },
+    "removal.unpinned": {
+        "fr": "Désépinglé",
+        "de": "Losgelöst",
+        "es": "Desfijado",
+        "pl": "Odpięto"
+    },
+    "removal.restored": {
+        "fr": "Retrait annulé",
+        "de": "Entfernen rückgängig gemacht",
+        "es": "Eliminación deshecha",
+        "pl": "Cofnięto usunięcie"
+    }
+})
+
+BATCH2.update({
+    "action.cannotEdit": {
+        "fr": "Cet élément ne peut pas être modifié",
+        "de": "Dieser Eintrag kann nicht bearbeitet werden",
+        "es": "Este elemento no se puede editar",
+        "pl": "Nie można edytować tego elementu"
+    },
+    "action.copied": {
+        "fr": "Copié dans le presse-papiers",
+        "de": "In die Zwischenablage kopiert",
+        "es": "Copiado al portapapeles",
+        "pl": "Skopiowano do schowka"
+    },
+    "action.copiedManual": {
+        "fr": "Copié. Revenez à votre app et appuyez sur ⌘V. Autorisez l’accessibilité pour coller directement.",
+        "de": "Kopiert. Zur Ziel-App zurückkehren und ⌘V drücken. Für direktes Einfügen Bedienungshilfen erlauben.",
+        "es": "Copiado. Vuelve a tu app y pulsa ⌘V. Permite Accesibilidad para pegar directamente.",
+        "pl": "Skopiowano. Wróć do aplikacji i naciśnij ⌘V. Zezwól na dostęp do Ułatwień dostępu, aby wklejać bezpośrednio."
+    },
+    "action.copyOnly": {
+        "fr": "Copier uniquement",
+        "de": "Nur kopieren",
+        "es": "Solo copiar",
+        "pl": "Tylko kopiuj"
+    },
+    "action.copySingle": {
+        "fr": "Sélectionnez un seul élément à copier. ⇧Return colle plusieurs éléments en texte brut.",
+        "de": "Zum Kopieren einen Eintrag auswählen. ⇧Return fügt mehrere Einträge als reinen Text ein.",
+        "es": "Selecciona un elemento para copiar. ⇧Return pega varios como texto sin formato.",
+        "pl": "Wybierz jeden element do skopiowania. ⇧Return wkleja wiele elementów jako zwykły tekst."
+    },
+    "action.dismiss": {
+        "fr": "Fermer le message",
+        "de": "Meldung schließen",
+        "es": "Cerrar mensaje",
+        "pl": "Zamknij komunikat"
+    },
+    "action.enablePaste": {
+        "fr": "Activer le collage direct",
+        "de": "Direktes Einfügen aktivieren",
+        "es": "Activar pegado directo",
+        "pl": "Włącz bezpośrednie wklejanie"
+    },
+    "action.focusChanged": {
+        "fr": "Collage arrêté : la destination ou l’autorisation a changé. Activez la destination et réessayez les éléments restants.",
+        "de": "Einfügen gestoppt: Ziel oder Berechtigung geändert. Ziel aktivieren und verbleibende Einträge erneut versuchen.",
+        "es": "Pegado detenido: cambió el destino o el permiso. Enfoca el destino e intenta pegar los elementos restantes.",
+        "pl": "Wklejanie zatrzymane: zmienił się cel lub uprawnienie. Uaktywnij cel i spróbuj wkleić pozostałe elementy."
+    },
+    "action.multiPermission": {
+        "fr": "Autorisez l’accessibilité pour coller plusieurs éléments, ou sélectionnez-en un pour le copier manuellement.",
+        "de": "Bedienungshilfen für mehrere Einträge erlauben oder einen Eintrag zum manuellen Kopieren auswählen.",
+        "es": "Permite Accesibilidad para pegar varios elementos o selecciona uno para copiarlo manualmente.",
+        "pl": "Zezwól na Ułatwienia dostępu, aby wkleić wiele elementów, lub wybierz jeden do ręcznego skopiowania."
+    },
+    "action.paste": {
+        "fr": "Collage direct",
+        "de": "Direkt einfügen",
+        "es": "Pegado directo",
+        "pl": "Bezpośrednie wklejanie"
+    },
+    "action.pasteSent": {
+        "fr": "Demande de collage envoyée",
+        "de": "Einfügeanforderung gesendet",
+        "es": "Solicitud de pegado enviada",
+        "pl": "Wysłano żądanie wklejenia"
+    },
+    "action.permissionDetail": {
+        "fr": "L’accessibilité permet à Paste It d’envoyer ⌘V à l’app cible. Sans autorisation, vous pouvez toujours copier et coller manuellement.",
+        "de": "Mit Bedienungshilfen kann Paste It ⌘V an die Ziel-App senden. Ohne Erlaubnis können Sie weiterhin kopieren und manuell einfügen.",
+        "es": "Accesibilidad permite a Paste It enviar ⌘V a la app de destino. Sin permiso, puedes copiar y pegar manualmente.",
+        "pl": "Ułatwienia dostępu pozwalają Paste It wysyłać ⌘V do aplikacji docelowej. Bez uprawnienia nadal możesz kopiować i wklejać ręcznie."
+    },
+    "action.permissionNeeded": {
+        "fr": "Le collage direct nécessite l’accessibilité",
+        "de": "Direktes Einfügen benötigt Bedienungshilfen",
+        "es": "El pegado directo requiere Accesibilidad",
+        "pl": "Bezpośrednie wklejanie wymaga Ułatwień dostępu"
+    },
+    "action.permissionReady": {
+        "fr": "Le collage direct est activé",
+        "de": "Direktes Einfügen ist aktiviert",
+        "es": "El pegado directo está activado",
+        "pl": "Bezpośrednie wklejanie jest włączone"
+    },
+    "action.retry": {
+        "fr": "Réessayer",
+        "de": "Erneut versuchen",
+        "es": "Reintentar",
+        "pl": "Spróbuj ponownie"
+    },
+    "action.returnToApp": {
+        "fr": "Revenir à l’app",
+        "de": "Zur App zurückkehren",
+        "es": "Volver a la app",
+        "pl": "Wróć do aplikacji"
+    },
+    "action.selectionCount": {
+        "fr": "%lld sélectionnés",
+        "de": "%lld ausgewählt",
+        "es": "%lld seleccionados",
+        "pl": "Wybrano: %lld"
+    },
+    "action.setting": {
+        "fr": "Action principale de l’historique",
+        "de": "Hauptaktion im Verlauf",
+        "es": "Acción principal del historial",
+        "pl": "Główna czynność historii"
+    },
+    "action.settingDetail": {
+        "fr": "Le double-clic, Retour et ⌘1–9 exécutent l’action choisie. Le collage direct est le réglage par défaut. ⇧Retour colle toujours en texte brut.",
+        "de": "Doppelklick, Return und ⌘1–9 führen die gewählte Aktion aus. Direktes Einfügen ist der Standard. ⇧Return fügt immer reinen Text ein.",
+        "es": "Doble clic, Retorno y ⌘1–9 ejecutan la acción elegida. Pegar directamente es la opción predeterminada. ⇧Retorno siempre pega texto sin formato.",
+        "pl": "Dwuklik, Return i ⌘1–9 wykonują wybraną czynność. Domyślnie wklejają bezpośrednio. ⇧Return zawsze wkleja zwykły tekst."
+    },
+    "action.tutorial": {
+        "fr": "Sélectionnez un élément, ⌘C pour copier, puis ⌘V dans votre app. Choisissez Collage direct dans les réglages pour une seule action.",
+        "de": "Eintrag auswählen, mit ⌘C kopieren, dann in der Ziel-App ⌘V drücken. Für einen Schritt in den Einstellungen Direkt einfügen wählen.",
+        "es": "Selecciona un elemento, copia con ⌘C y pulsa ⌘V en tu app. Elige Pegado directo en Ajustes para hacerlo en un paso.",
+        "pl": "Wybierz element, skopiuj przez ⌘C i wklej przez ⌘V w aplikacji. Wybierz Bezpośrednie wklejanie w ustawieniach, aby zrobić to jednym krokiem."
+    },
+    "action.writeFailed": {
+        "fr": "Impossible de copier. Le contenu ou le fichier joint est peut-être indisponible. Restaurez le fichier et réessayez.",
+        "de": "Kopieren fehlgeschlagen. Inhalt oder Anhang möglicherweise nicht verfügbar. Datei wiederherstellen und erneut versuchen.",
+        "es": "No se pudo copiar. El contenido o archivo adjunto podría no estar disponible. Restaura el archivo y reintenta.",
+        "pl": "Nie udało się skopiować. Treść lub załącznik mogą być niedostępne. Przywróć plik i spróbuj ponownie."
+    },
+    "removal.clearKeepSaved": {
+        "fr": "Effacer l’historique, garder les épinglés et dossiers…",
+        "de": "Verlauf löschen, Angeheftetes und Ordner behalten…",
+        "es": "Borrar historial, conservar fijados y carpetas…",
+        "pl": "Wyczyść historię, zachowaj przypięte i foldery…"
+    },
+    "removal.confirmCount": {
+        "fr": "%lld éléments seront supprimés définitivement. Cette action est irréversible et met fin à l’annulation des retraits précédents.",
+        "de": "%lld Einträge werden endgültig gelöscht. Dies ist nicht rückgängig zu machen und beendet das Rückgängigmachen vorheriger Entfernungen.",
+        "es": "Se eliminarán permanentemente %lld elementos. No se puede deshacer y finaliza la opción de deshacer retiradas anteriores.",
+        "pl": "Liczba elementów do trwałego usunięcia: %lld. Nie można tego cofnąć; kończy to też możliwość cofnięcia wcześniejszych usunięć."
+    },
+    "removal.confirmDelete": {
+        "fr": "Supprimer les éléments vérifiés",
+        "de": "Geprüfte Einträge löschen",
+        "es": "Eliminar elementos revisados",
+        "pl": "Usuń sprawdzone elementy"
+    },
+    "removal.confirmTitle": {
+        "fr": "Vérifier le nettoyage de l’historique",
+        "de": "Verlaufsbereinigung prüfen",
+        "es": "Revisar limpieza del historial",
+        "pl": "Sprawdź czyszczenie historii"
+    },
+    "removal.everywhere": {
+        "fr": "Supprimer partout",
+        "de": "Überall löschen",
+        "es": "Eliminar de todas partes",
+        "pl": "Usuń ze wszystkich miejsc"
+    },
+    "removal.everywhereDetail": {
+        "fr": "Supprimer cet élément de l’historique, des épinglés et de tous les dossiers ? Cette action est irréversible.",
+        "de": "Diesen Eintrag aus Verlauf, Angeheftet und allen Ordnern löschen? Dies kann nicht rückgängig gemacht werden.",
+        "es": "¿Eliminar este elemento del historial, los fijados y todas las carpetas? No se puede deshacer.",
+        "pl": "Usunąć ten element z historii, przypiętych i wszystkich folderów? Nie można tego cofnąć."
+    },
+    "removal.failedTitle": {
+        "fr": "L’historique n’a pas été modifié",
+        "de": "Verlauf wurde nicht geändert",
+        "es": "El historial no se modificó",
+        "pl": "Historia nie została zmieniona"
+    },
+    "removal.history": {
+        "fr": "Retirer de l’historique",
+        "de": "Aus Verlauf entfernen",
+        "es": "Retirar del historial",
+        "pl": "Usuń z historii"
+    },
+    "removal.includeSaved": {
+        "fr": "Les épinglés et tous les dossiers sont inclus. Les dossiers eux-mêmes sont conservés.",
+        "de": "Angeheftete Einträge und alle Ordnerinhalte sind eingeschlossen. Die Ordner selbst bleiben erhalten.",
+        "es": "Incluye los fijados y todas las carpetas. Las carpetas en sí se conservarán.",
+        "pl": "Obejmuje przypięte elementy i wszystkie foldery. Same foldery zostaną zachowane."
+    },
+    "removal.keepSaved": {
+        "fr": "Les éléments épinglés et ceux des dossiers seront conservés.",
+        "de": "Angeheftete Einträge und Einträge in Ordnern bleiben erhalten.",
+        "es": "Se conservarán los elementos fijados y los de las carpetas.",
+        "pl": "Przypięte elementy i elementy w folderach zostaną zachowane."
+    },
+    "removal.newRetention": {
+        "fr": "Nouvelle durée de conservation : %@",
+        "de": "Neue Aufbewahrungsdauer: %@",
+        "es": "Nuevo periodo de conservación: %@",
+        "pl": "Nowy okres przechowywania: %@"
+    },
+    "removal.saveFailed": {
+        "fr": "Impossible d’enregistrer. L’historique a été restauré ; réessayez.",
+        "de": "Änderung konnte nicht gespeichert werden. Verlauf wiederhergestellt; erneut versuchen.",
+        "es": "No se pudo guardar el cambio. Se restauró el historial; reintenta.",
+        "pl": "Nie udało się zapisać zmiany. Historia została przywrócona; spróbuj ponownie."
+    },
+    "removal.stillSaved": {
+        "fr": "Retiré de l’historique ; conservé dans les épinglés ou les dossiers",
+        "de": "Aus Verlauf entfernt; weiterhin angeheftet oder in Ordnern gespeichert",
+        "es": "Retirado del historial; sigue guardado en fijados o carpetas",
+        "pl": "Usunięto z historii; nadal zapisane w przypiętych lub folderach"
+    },
+    "removal.undo": {
+        "fr": "Annuler le retrait",
+        "de": "Entfernen rückgängig machen",
+        "es": "Deshacer retirada",
+        "pl": "Cofnij usunięcie"
+    },
+    "removal.undoHelp": {
+        "fr": "Annuler les retraits récents pendant 30 secondes (⌘Z).",
+        "de": "Entfernungen 30 Sekunden lang rückgängig machen (⌘Z).",
+        "es": "Deshacer retiradas recientes durante 30 segundos (⌘Z).",
+        "pl": "Cofnij ostatnie usunięcia przez 30 sekund (⌘Z)."
+    }
+})
+
+
 def merge_batch2(strings: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     merged = {key: dict(locs) for key, locs in strings.items()}
     missing = set(merged) - set(BATCH2)

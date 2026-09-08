@@ -30,6 +30,7 @@ final class AppRuntime: NSObject {
         settings = AppSettings()
         blobStore = BlobStore()
         historyStore = HistoryStore(blobStore: blobStore, settings: settings)
+        settings.migratePrimaryAction()
         searchService = SearchService()
         appState = AppState(
             settings: settings,
@@ -236,6 +237,15 @@ final class AppRuntime: NSObject {
             controlCommand: true
         ))
         menu.addItem(NSMenuItem.separator())
+        if historyStore.canUndoRemoval {
+            let undoItem = makeMenuItem(
+                title: L10n.tr("removal.undo", default: "Undo Removal"),
+                action: #selector(undoRemoval), keyEquivalent: "z"
+            )
+            undoItem.toolTip = L10n.tr("removal.undoHelp", default: "Undo recent removals for 30 seconds (⌘Z).")
+            menu.addItem(undoItem)
+            menu.addItem(NSMenuItem.separator())
+        }
         let pauseTitle = settings.capturePaused
             ? L10n.tr("menu.resumeCapture", default: "Resume Capture")
             : L10n.tr("menu.pauseCapture", default: "Pause Capture")
@@ -447,6 +457,8 @@ final class AppRuntime: NSObject {
     @objc private func checkForUpdates() {
         UpdateChecker.shared.checkForUpdates(source: "menu")
     }
+
+    @objc private func undoRemoval() { appState.undoLastRemoval() }
 
     @objc private func quit() {
         NSApp.terminate(nil)

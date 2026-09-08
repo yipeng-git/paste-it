@@ -87,6 +87,30 @@ final class ClipItem: Identifiable {
         self.isHiddenFromTimeline = false
     }
 
+    /// Detached value copy for bounded removal undo; never retain a deleted SwiftData model.
+    func removalSnapshot() -> ClipItem {
+        let copy = ClipItem(
+            id: id, createdAt: createdAt, title: title, plainText: plainText,
+            htmlText: htmlText, rtfData: rtfData, primaryType: primaryType,
+            pasteboardTypes: pasteboardTypes, sourceAppName: sourceAppName,
+            sourceBundleIdentifier: sourceBundleIdentifier, sourceIconPNG: sourceIconPNG,
+            blobRelativePath: blobRelativePath, thumbnailRelativePath: thumbnailRelativePath,
+            fileURLString: fileURLString, ocrText: ocrText, linkTitle: linkTitle,
+            linkIconRelativePath: linkIconRelativePath, linkImageRelativePath: linkImageRelativePath,
+            imagePixelWidth: imagePixelWidth, imagePixelHeight: imagePixelHeight,
+            pinboardIDs: pinboardIDs, contentHash: contentHash
+        )
+        copy.updatedAt = updatedAt
+        copy.lastUsedAt = lastUsedAt
+        copy.copyCount = copyCount
+        copy.isHiddenFromTimeline = isHiddenFromTimeline
+        return copy
+    }
+
+    var attachmentPaths: Set<String> {
+        Set([blobRelativePath, thumbnailRelativePath, linkIconRelativePath, linkImageRelativePath].compactMap { $0 })
+    }
+
     var primaryType: ClipType {
         get { ClipType(rawValue: primaryTypeRaw) ?? .mixed }
         set { primaryTypeRaw = newValue.rawValue }

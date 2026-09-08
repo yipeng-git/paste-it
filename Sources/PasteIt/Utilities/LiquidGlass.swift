@@ -1,5 +1,39 @@
 import SwiftUI
 
+/// AppKit owns the floating window's glass, so it can sample the desktop backdrop.
+/// Keep this separate from the timeline's existing SwiftUI materials.
+private struct ToastGlassBackground: NSViewRepresentable {
+    let cornerRadius: CGFloat
+
+    func makeNSView(context: Context) -> NSView {
+        if #available(macOS 26, *) {
+            let glass = NSGlassEffectView()
+            glass.style = .clear
+            // Keep the accessibility fallback compatible with the bright HUD text.
+            glass.appearance = NSAppearance(named: .darkAqua)
+            glass.cornerRadius = cornerRadius
+            return glass
+        }
+        let material = NSVisualEffectView()
+        material.material = .hudWindow
+        material.appearance = NSAppearance(named: .darkAqua)
+        material.blendingMode = .behindWindow
+        material.state = .active
+        material.wantsLayer = true
+        material.layer?.cornerRadius = cornerRadius
+        material.layer?.masksToBounds = true
+        return material
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        if #available(macOS 26, *), let glass = view as? NSGlassEffectView {
+            glass.cornerRadius = cornerRadius
+        } else {
+            view.layer?.cornerRadius = cornerRadius
+        }
+    }
+}
+
 /// Shared panel/control chrome. Liquid Glass on macOS 26+; material fallback below.
 enum PasteItGlass {
     static let panelShape = RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -43,6 +77,14 @@ extension View {
         } else {
             background(.ultraThinMaterial, in: Capsule())
         }
+    }
+
+    /// A single readable glass surface for transient feedback above the timeline.
+    func pasteItToastGlass(cornerRadius: CGFloat) -> some View {
+        // Clear glass doesn't guarantee text contrast on a white desktop. Dim only
+        // this small surface, leaving the foreground fully opaque and crisp.
+        background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(ToastGlassBackground(cornerRadius: cornerRadius).allowsHitTesting(false))
     }
 
     /// Timeline cards sitting on the glass panel.

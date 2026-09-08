@@ -16,6 +16,7 @@ enum RenderScreenshotHandler {
             let query: String?
             let selectedType: String?
             let selectedIndex: Int?
+            let removalPreviewFolder: String?
         }
     }
 
@@ -93,6 +94,10 @@ enum RenderScreenshotHandler {
 
         // After search debounce / first paint, lock selection then capture.
         await session.finalizeUI(selectedIndex: selectedIndex)
+        if let folderName = request.ui?.removalPreviewFolder {
+            session.previewRemoval(folderName: folderName)
+            try await Task.sleep(for: .milliseconds(220))
+        }
         await Task.yield()
 
         guard let frame = session.panelFrame else {

@@ -7,6 +7,141 @@ import SwiftUI
 
 @MainActor
 final class HistoryStore: ObservableObject {
+    private struct Removal {
+        let id = UUID()
+        let snapshot: ClipItem
+        let tab: TimelineTab
+        let nextID: UUID?
+        let boardNextIDs: [UUID: UUID]
+        let expiresAt: Date
+    }
+    private var removals: [Removal] = []
+    private var removalExpiryTask: Task<Void, Never>?
+    @Published private(set) var latestRemovalID: UUID?
+    @Published private(set) var canUndoRemoval = false
+    @Published var removalError: String?
+
+    /// Up to 20 removals, each recoverable for 30 seconds in this running session.
+    func expireRemovalUndo(now: Date = Date()) {
+        removals.removeAll { $0.expiresAt <= now }
+        updateRemovalProtection()
+    }
+
+    private func updateRemovalProtection() {
+        latestRemovalID = removals.last?.id
+        canUndoRemoval = !removals.isEmpty
+        blobStore.protectForUndo(removals.reduce(into: Set<String>()) { $0.formUnion($1.snapshot.attachmentPaths) })
+        removalExpiryTask?.cancel()
+        guard let expiry = removals.map(\.expiresAt).min() else { return }
+        removalExpiryTask = Task { @MainActor [weak self] in
+            let delay = max(0.01, expiry.timeIntervalSinceNow)
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else { return }
+            self?.expireRemovalUndo()
+        }
+    }
+
+    func discardRemovalUndo() {
+        removals.removeAll()
+        updateRemovalProtection()
+    }
+
+    @discardableResult
+    func undoLastRemoval(expectedID: UUID? = nil) -> (item: ClipItem, tab: TimelineTab)? {
+        expireRemovalUndo()
+        guard let removal = removals.last, expectedID == nil || removal.id == expectedID else { return nil }
+        let snapshot = removal.snapshot
+        let item: ClipItem
+        let existing = clips.first { $0.id == snapshot.id }
+            ?? clips.first { $0.duplicateContentKey == snapshot.duplicateContentKey }
+        if let existing {
+            item = existing
+            if removal.tab == .timeline { item.isHiddenFromTimeline = snapshot.isHiddenFromTimeline }
+        } else {
+            item = snapshot.removalSnapshot()
+            context.insert(item)
+        }
+        let liveBoardIDs = Set(pinboards.map(\.id))
+        item.pinboardIDs = Array(Set(item.pinboardIDs + snapshot.pinboardIDs).intersection(liveBoardIDs))
+        // A folder removed since the action cannot be restored by clip undo; keep the clip reachable.
+        if item.pinboardIDs.isEmpty { item.isHiddenFromTimeline = false }
+        for board in pinboards where item.pinboardIDs.contains(board.id) {
+            guard !board.itemIDs.contains(item.id) else { continue }
+            var ids = board.itemIDs
+            let position = removal.boardNextIDs[board.id].flatMap { ids.firstIndex(of: $0) } ?? ids.count
+            ids.insert(item.id, at: position)
+            board.itemIDs = ids
+        }
+        if existing == nil { item.updatedAt = snapshot.updatedAt }
+        guard saveQuietly() else {
+            context.rollback()
+            refresh()
+            removalError = L10n.tr("removal.saveFailed", default: "Could not save the change. Your history has been restored; try again.")
+            return nil
+        }
+        if existing == nil {
+            let index = removal.nextID.flatMap { next in clips.firstIndex { $0.id == next } }
+                ?? clips.firstIndex(where: { $0.lastUsedAt < snapshot.lastUsedAt })
+                ?? clips.count
+            clips.insert(item, at: index)
+        }
+        removals.removeLast()
+        rebuildIndexes()
+        updateRemovalProtection()
+        notifyChange()
+        if case .folder(let id) = removal.tab, !liveBoardIDs.contains(id) {
+            return (item, .timeline)
+        }
+        return (item, removal.tab)
+    }
+
+    func clearHistoryCandidates(keepSaved: Bool) -> [ClipItem] {
+        clips.filter { !keepSaved || $0.pinboardIDs.isEmpty }
+    }
+
+    func retentionCandidates(_ retention: AppSettings.KeepHistory) -> [ClipItem] {
+        guard let cutoff = retention.cutoffDate else { return [] }
+        return clips.filter { $0.pinboardIDs.isEmpty && $0.createdAt < cutoff }
+    }
+
+    func pruneCandidates() -> [ClipItem] {
+        let unsaved = clips.filter { $0.pinboardIDs.isEmpty }
+        let expired = Set(retentionCandidates(settings.keepHistory).map(\.id))
+        let remaining = unsaved.filter { !expired.contains($0.id) }
+        let overflow = Set(remaining.dropFirst(max(0, settings.maxHistoryItems)).map(\.id))
+        return unsaved.filter { expired.contains($0.id) || overflow.contains($0.id) }
+    }
+
+    /// Delete exactly the reviewed set. New captures after the confirmation opened survive.
+    @discardableResult
+    func deleteReviewedClips(ids: Set<UUID>, keepSaved: Bool, endAllUndo: Bool = true) -> Bool {
+        let victims = clips.filter { ids.contains($0.id) && (!keepSaved || $0.pinboardIDs.isEmpty) }
+        let victimIDs = Set(victims.map(\.id))
+        let victimKeys = Set(victims.map(\.duplicateContentKey))
+        for board in pinboards { board.itemIDs.removeAll { victimIDs.contains($0) } }
+        for item in victims { context.delete(item) }
+        guard saveQuietly() else {
+            context.rollback()
+            refresh()
+            removalError = L10n.tr("removal.saveFailed", default: "Could not save the change. Your history has been restored; try again.")
+            return false
+        }
+        if endAllUndo {
+            discardRemovalUndo()
+        } else {
+            removals.removeAll { victimIDs.contains($0.snapshot.id) || victimKeys.contains($0.snapshot.duplicateContentKey) }
+            updateRemovalProtection()
+        }
+        clips.removeAll { victimIDs.contains($0.id) }
+        rebuildIndexes()
+        notifyChange()
+        return true
+    }
+
+    func deleteEverywhere(_ item: ClipItem) {
+        _ = deleteReviewedClips(ids: [item.id], keepSaved: false, endAllUndo: false)
+    }
+
     @Published private(set) var revision: UInt64 = 0
     struct Change {
         var collectionChanged = false
@@ -385,21 +520,50 @@ final class HistoryStore: ObservableObject {
         notifyChange()
     }
 
-    /// Context-aware remove: Default hides/deletes; Pinned/folder only leave that board.
-    func removeFromTab(_ item: ClipItem, tab: TimelineTab) {
+    /// User removal, with a detached snapshot retained for bounded undo.
+    @discardableResult
+    func removeFromTab(_ item: ClipItem, tab: TimelineTab) -> Bool {
+        guard let index = clips.firstIndex(where: { $0.id == item.id }) else { return false }
+        removalError = nil
+        expireRemovalUndo()
+        let snapshot = item.removalSnapshot()
+        let nextItems = Dictionary(uniqueKeysWithValues: pinboards.compactMap { board -> (UUID, UUID)? in
+            guard let position = board.itemIDs.firstIndex(of: item.id),
+                  let nextID = board.itemIDs.dropFirst(position + 1).first else { return nil }
+            return (board.id, nextID)
+        })
+        let removal = Removal(snapshot: snapshot, tab: tab,
+            nextID: index + 1 < clips.count ? clips[index + 1].id : nil,
+            boardNextIDs: nextItems, expiresAt: Date().addingTimeInterval(30))
+        removals.append(removal)
+        updateRemovalProtection()
         switch tab {
         case .timeline:
-            if item.pinboardIDs.isEmpty {
-                delete(item)
-            } else {
-                hideFromTimeline(item)
-            }
+            item.isHiddenFromTimeline = true
         case .pinned:
-            unpinFromPinnedBoard(item)
+            let board = pinnedPinboard
+            item.pinboardIDs.removeAll { $0 == board.id }
+            board.itemIDs.removeAll { $0 == item.id }
         case .folder(let id):
-            guard let board = pinboards.first(where: { $0.id == id }) else { return }
-            unpin(item, from: board)
+            item.pinboardIDs.removeAll { $0 == id }
+            pinboards.first { $0.id == id }?.itemIDs.removeAll { $0 == item.id }
         }
+        let shouldDelete = item.isHiddenFromTimeline && item.pinboardIDs.isEmpty
+        if shouldDelete { context.delete(item) }
+        guard saveQuietly() else {
+            removals.removeLast()
+            updateRemovalProtection()
+            context.rollback()
+            refresh()
+            removalError = L10n.tr("removal.saveFailed", default: "Could not save the change. Your history has been restored; try again.")
+            return false
+        }
+        if shouldDelete { clips.removeAll { $0.id == snapshot.id } }
+        if removals.count > 20 { removals.removeFirst(removals.count - 20) }
+        rebuildIndexes()
+        updateRemovalProtection()
+        notifyChange()
+        return true
     }
 
     func hideFromTimeline(_ item: ClipItem) {
@@ -592,20 +756,7 @@ final class HistoryStore: ObservableObject {
     }
 
     func clearHistory(keepPinned: Bool = true) {
-        let victims = clips.filter { keepPinned ? $0.pinboardIDs.isEmpty : true }
-        for item in victims {
-            foldedSearchByID.removeValue(forKey: item.id)
-            searchDocumentsByID.removeValue(forKey: item.id)
-            if contentHashIndex[item.contentHash] == item.id {
-                contentHashIndex.removeValue(forKey: item.contentHash)
-            }
-            visualCache.invalidate(clipID: item.id)
-            context.delete(item)
-        }
-        let victimIDs = Set(victims.map(\.id))
-        clips.removeAll { victimIDs.contains($0.id) }
-        saveQuietly()
-        notifyChange()
+        _ = deleteReviewedClips(ids: Set(clips.map(\.id)), keepSaved: keepPinned)
     }
 
     static let pinnedBoardName = "Pinned"
@@ -727,9 +878,11 @@ final class HistoryStore: ObservableObject {
     }
 
     func pruneHistory(force: Bool = true) {
+        expireRemovalUndo()
+        let undoIDs = Set(removals.map { $0.snapshot.id })
         var didDelete = false
         if let cutoff = settings.keepHistory.cutoffDate {
-            let expired = clips.filter { $0.createdAt < cutoff && $0.pinboardIDs.isEmpty }
+            let expired = clips.filter { $0.createdAt < cutoff && $0.pinboardIDs.isEmpty && !undoIDs.contains($0.id) }
             for item in expired {
                 removeFromIndexes(item)
                 context.delete(item)
@@ -741,7 +894,7 @@ final class HistoryStore: ObservableObject {
             }
         }
 
-        let unpinned = clips.filter { $0.pinboardIDs.isEmpty }
+        let unpinned = clips.filter { $0.pinboardIDs.isEmpty && !undoIDs.contains($0.id) }
         if unpinned.count > settings.maxHistoryItems {
             let overflow = Array(unpinned.dropFirst(settings.maxHistoryItems))
             for item in overflow {

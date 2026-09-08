@@ -9,7 +9,9 @@ final class EphemeralTimelineSession {
     private let appState: AppState
     private let tempRoot: URL
     private var panel: NSPanel?
-    private let panelHeight: CGFloat = 320
+    private var removalPreviewBackdrop: NSPanel?
+    private lazy var removalToastController = RemovalToastPanelController(appState: appState)
+    private let panelHeight = TimelinePanelController.panelHeight
     private let bottomInset: CGFloat = 12
 
     private init(historyStore: HistoryStore, appState: AppState, tempRoot: URL) {
@@ -81,6 +83,7 @@ final class EphemeralTimelineSession {
         panel.setFrame(frame, display: true)
         panel.orderFrontRegardless()
         self.panel = panel
+        removalToastController.attach(to: panel)
 
         // Apply query after the view is mounted so `searchFocusRequest` activates the field.
         if !query.isEmpty {
@@ -104,14 +107,56 @@ final class EphemeralTimelineSession {
         await historyStore.awaitMissingLinkPreviews()
     }
 
+    /// Exercise the real removal/feedback path using only this session's synthetic records.
+    func previewRemoval(folderName: String) {
+        guard let item = appState.selectedClip else { return }
+        showRemovalPreviewBackdrop()
+        let folder = historyStore.createPinboard(name: folderName)
+        appState.pin(item, to: folder)
+        appState.unpin(item, from: folder)
+        removalToastController.refresh()
+    }
+
+    /// A separate window exercises real behind-window glass while keeping desktop
+    /// and other app content out of the toast capture's expanded margin.
+    private func showRemovalPreviewBackdrop() {
+        guard let panel else { return }
+        let frame = panel.frame.union(panel.frame.offsetBy(dx: 0, dy: 116))
+        let backdrop = NSPanel(contentRect: frame, styleMask: [.borderless, .nonactivatingPanel],
+                               backing: .buffered, defer: false)
+        backdrop.isReleasedWhenClosed = false
+        backdrop.level = panel.level
+        backdrop.ignoresMouseEvents = true
+        backdrop.hasShadow = false
+        backdrop.hidesOnDeactivate = false
+        backdrop.collectionBehavior = panel.collectionBehavior
+        backdrop.contentView = NSHostingView(rootView: LinearGradient(stops: [
+            .init(color: Color(red: 0.06, green: 0.12, blue: 0.24), location: 0),
+            .init(color: Color(red: 0.10, green: 0.34, blue: 0.65), location: 0.42),
+            .init(color: .white, location: 0.50),
+            .init(color: .white, location: 0.58),
+            .init(color: Color(red: 0.95, green: 0.45, blue: 0.32), location: 0.70),
+            .init(color: Color(red: 0.25, green: 0.12, blue: 0.40), location: 1)
+        ], startPoint: .leading, endPoint: .trailing))
+        backdrop.order(.below, relativeTo: panel.windowNumber)
+        removalPreviewBackdrop = backdrop
+    }
+
     var panelFrame: NSRect? {
-        panel?.frame
+        guard let frame = panel?.frame else { return nil }
+        guard let toastFrame = removalToastController.visibleFrame else { return frame }
+        return frame.union(toastFrame.insetBy(dx: -12, dy: -12))
     }
 
     func tearDown() {
+        appState.removalFeedback.dismiss()
+        removalToastController.hide(animated: false)
+        historyStore.discardRemovalUndo()
         panel?.orderOut(nil)
         panel?.contentViewController = nil
         panel = nil
+        removalPreviewBackdrop?.orderOut(nil)
+        removalPreviewBackdrop = nil
         historyStore.destroyEphemeralFiles()
     }
 

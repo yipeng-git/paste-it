@@ -326,6 +326,224 @@ STRINGS: dict[str, dict[str, str]] = {
 }
 
 
+# Product experience: primary actions, permission recovery, and removal undo.
+STRINGS.update({
+    "removal.undoShort": {
+        "en": "Undo",
+        "zh-Hans": "撤销",
+        "ja": "取り消す"
+    },
+    "removal.namedFolder": {
+        "en": "Remove from “%@”",
+        "zh-Hans": "从「%@」移除",
+        "ja": "「%@」から取り除く"
+    },
+    "removal.removedFolder": {
+        "en": "Removed from “%@”",
+        "zh-Hans": "已从「%@」移除",
+        "ja": "「%@」から取り除きました"
+    },
+    "removal.removedHistory": {
+        "en": "Removed from History",
+        "zh-Hans": "已从历史移除",
+        "ja": "履歴から取り除きました"
+    },
+    "removal.unpinned": {
+        "en": "Unpinned",
+        "zh-Hans": "已取消置顶",
+        "ja": "ピン留めを解除しました"
+    },
+    "removal.restored": {
+        "en": "Removal undone",
+        "zh-Hans": "已撤销移除",
+        "ja": "取り除きを取り消しました"
+    }
+})
+
+STRINGS.update({
+    "action.paste": {
+        "en": "Direct Paste",
+        "zh-Hans": "直接粘贴",
+        "ja": "直接ペースト"
+    },
+    "action.copyOnly": {
+        "en": "Copy Only",
+        "zh-Hans": "仅复制",
+        "ja": "コピーのみ"
+    },
+    "action.cannotEdit": {
+        "en": "Editing is not available for this clip",
+        "zh-Hans": "此剪贴项不支持编辑",
+        "ja": "この項目は編集できません"
+    },
+    "removal.everywhere": {
+        "en": "Delete Everywhere",
+        "zh-Hans": "从所有位置删除",
+        "ja": "すべての場所から削除"
+    },
+    "removal.everywhereDetail": {
+        "en": "Delete this clip from history, Pinned, and all folders? This cannot be undone.",
+        "zh-Hans": "从历史、置顶和所有文件夹中删除此项？此操作无法撤销。",
+        "ja": "履歴、ピン留め、すべてのフォルダからこの項目を削除しますか？取り消しできません。"
+    },
+    "action.dismiss": {
+        "en": "Dismiss message",
+        "zh-Hans": "关闭提示",
+        "ja": "メッセージを閉じる"
+    },
+    "action.retry": {
+        "en": "Retry",
+        "zh-Hans": "重试",
+        "ja": "再試行"
+    },
+    "action.returnToApp": {
+        "en": "Return to App",
+        "zh-Hans": "返回目标应用",
+        "ja": "アプリに戻る"
+    },
+    "action.selectionCount": {
+        "en": "%lld selected",
+        "zh-Hans": "已选 %lld 项",
+        "ja": "%lld 件選択"
+    },
+    "removal.undo": {
+        "en": "Undo Removal",
+        "zh-Hans": "撤销移除",
+        "ja": "取り除きを取り消す"
+    },
+    "removal.undoHelp": {
+        "en": "Undo recent removals for 30 seconds (⌘Z).",
+        "zh-Hans": "30 秒内可撤销最近的移除（⌘Z）。",
+        "ja": "30秒以内の取り除きを取り消します（⌘Z）。"
+    },
+    "action.enablePaste": {
+        "en": "Enable Direct Paste",
+        "zh-Hans": "启用直接粘贴",
+        "ja": "直接ペーストを有効にする"
+    },
+    "removal.stillSaved": {
+        "en": "Removed from History; still saved in Pinned or folders",
+        "zh-Hans": "已从历史移除，仍保存在置顶或文件夹中",
+        "ja": "履歴から取り除きました。ピン留めまたはフォルダには残っています"
+    },
+    "removal.history": {
+        "en": "Remove from History",
+        "zh-Hans": "从历史移除",
+        "ja": "履歴から取り除く"
+    },
+    "action.copySingle": {
+        "en": "Select one clip to copy. Use ⇧Return to paste multiple clips as plain text.",
+        "zh-Hans": "请选择一项进行复制。多项可用 ⇧Return 按纯文本粘贴。",
+        "ja": "コピーする項目を1つ選択してください。複数項目は ⇧Return でプレーンテキストとしてペーストできます。"
+    },
+    "action.writeFailed": {
+        "en": "Could not copy this clip. Its content or attachment may be unavailable. Restore the file, then retry.",
+        "zh-Hans": "无法复制此项，内容或附件可能不可用。请恢复文件后重试。",
+        "ja": "内容または添付ファイルを利用できないためコピーできませんでした。ファイルを復元して再試行してください。"
+    },
+    "action.copiedManual": {
+        "en": "Copied. Return to your app and press ⌘V. Enable Accessibility for direct paste.",
+        "zh-Hans": "已复制。返回目标应用后按 ⌘V。开启辅助功能即可直接粘贴。",
+        "ja": "コピーしました。対象アプリに戻って ⌘V を押してください。直接ペーストにはアクセシビリティを許可してください。"
+    },
+    "action.copied": {
+        "en": "Copied to Clipboard",
+        "zh-Hans": "已复制到剪贴板",
+        "ja": "クリップボードにコピーしました"
+    },
+    "action.multiPermission": {
+        "en": "Enable Accessibility to paste multiple clips, or select one clip to copy manually.",
+        "zh-Hans": "请启用辅助功能以粘贴多项，或选择一项复制后手动粘贴。",
+        "ja": "複数項目のペーストにはアクセシビリティを許可するか、1項目を選んで手動でコピー・ペーストしてください。"
+    },
+    "action.focusChanged": {
+        "en": "Paste stopped because the destination or permission changed. Focus your destination and try the remaining clips again.",
+        "zh-Hans": "目标应用或权限已变化，粘贴已停止。请聚焦目标位置后重试剩余项。",
+        "ja": "対象アプリまたは権限が変わったため停止しました。対象にフォーカスして残りの項目を再試行してください。"
+    },
+    "action.pasteSent": {
+        "en": "Paste request sent",
+        "zh-Hans": "已发送粘贴请求",
+        "ja": "ペースト要求を送信しました"
+    },
+    "removal.confirmTitle": {
+        "en": "Review History Cleanup",
+        "zh-Hans": "确认历史清理范围",
+        "ja": "履歴の整理内容を確認"
+    },
+    "removal.confirmCount": {
+        "en": "%lld clips will be permanently deleted. This cannot be undone and ends removal undo.",
+        "zh-Hans": "将永久删除 %lld 项。此操作无法撤销，并会结束之前的移除撤销。",
+        "ja": "%lld 件を完全に削除します。この操作と以前の項目の削除を取り消せなくなります。"
+    },
+    "removal.keepSaved": {
+        "en": "Pinned clips and clips in folders will be kept.",
+        "zh-Hans": "置顶和文件夹中的内容将保留。",
+        "ja": "ピン留めとフォルダ内の項目は保持されます。"
+    },
+    "removal.includeSaved": {
+        "en": "This includes Pinned and every folder. The folders themselves will remain.",
+        "zh-Hans": "包括置顶和所有文件夹中的内容，文件夹本身将保留。",
+        "ja": "ピン留めとすべてのフォルダ内の項目を含みます。フォルダ自体は保持されます。"
+    },
+    "removal.newRetention": {
+        "en": "New retention period: %@",
+        "zh-Hans": "新的保留期限：%@",
+        "ja": "新しい保存期間：%@"
+    },
+    "removal.confirmDelete": {
+        "en": "Delete Reviewed Clips",
+        "zh-Hans": "删除已确认的记录",
+        "ja": "確認した項目を削除"
+    },
+    "removal.failedTitle": {
+        "en": "History Was Not Changed",
+        "zh-Hans": "历史记录未更改",
+        "ja": "履歴は変更されませんでした"
+    },
+    "action.setting": {
+        "en": "Timeline primary action",
+        "zh-Hans": "时间线主要操作",
+        "ja": "タイムラインの主操作"
+    },
+    "action.settingDetail": {
+        "en": "Double-click, Return, and ⌘1–9 use the selected action. Direct Paste is the default. ⇧Return always pastes plain text.",
+        "zh-Hans": "双击、Return 和 ⌘1–9 统一执行所选操作，默认直接粘贴。⇧Return 始终按纯文本粘贴。",
+        "ja": "ダブルクリック・Return・⌘1–9は選択した操作を実行します。既定は直接ペーストです。⇧Returnは常にプレーンテキストでペーストします。"
+    },
+    "removal.clearKeepSaved": {
+        "en": "Clear History, Keep Pinned & Folders…",
+        "zh-Hans": "清空历史，保留置顶和文件夹…",
+        "ja": "履歴を消去し、ピン留めとフォルダを保持…"
+    },
+    "action.permissionReady": {
+        "en": "Direct paste is enabled",
+        "zh-Hans": "已启用直接粘贴",
+        "ja": "直接ペーストは有効です"
+    },
+    "action.permissionNeeded": {
+        "en": "Direct paste needs Accessibility",
+        "zh-Hans": "直接粘贴需要辅助功能权限",
+        "ja": "直接ペーストにはアクセシビリティが必要です"
+    },
+    "action.permissionDetail": {
+        "en": "Accessibility lets Paste It send ⌘V to your destination app. You can still copy clips and paste them manually without granting access.",
+        "zh-Hans": "辅助功能允许 Paste It 向目标应用发送 ⌘V。未授权也可以复制内容后手动粘贴。",
+        "ja": "アクセシビリティを許可すると対象アプリに ⌘V を送信できます。許可しなくてもコピーして手動でペーストできます。"
+    },
+    "removal.saveFailed": {
+        "en": "Could not save the change. Your history has been restored; try again.",
+        "zh-Hans": "无法保存更改，已恢复历史记录，请重试。",
+        "ja": "変更を保存できませんでした。履歴を復元しました。再試行してください。"
+    },
+    "action.tutorial": {
+        "en": "Select a clip, ⌘C to copy, then ⌘V in your app. Choose Direct Paste in Settings for one-step reuse.",
+        "zh-Hans": "选中一项，按 ⌘C 复制，再到目标应用按 ⌘V。可在设置中选择直接粘贴以一步完成。",
+        "ja": "項目を選んで ⌘C でコピーし、対象アプリで ⌘V。設定で直接ペーストを選ぶと一度の操作で再利用できます。"
+    }
+})
+
+
 def escape_strings_value(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 

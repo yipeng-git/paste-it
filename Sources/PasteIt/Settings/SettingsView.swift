@@ -9,6 +9,14 @@ struct SettingsView: View {
     /// so turning the login item off in System Settings is reflected here.
     @State private var launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
     @State private var updateStatus: String?
+    @State private var pendingCleanup: PendingCleanup?
+
+    private struct PendingCleanup: Identifiable {
+        let id = UUID()
+        let ids: Set<UUID>
+        let keepSaved: Bool
+        let retention: AppSettings.KeepHistory?
+    }
 
     init(appState: AppState) {
         self.appState = appState
@@ -45,6 +53,43 @@ struct SettingsView: View {
             }
 
             versionFooter
+        }
+        .sheet(item: $pendingCleanup) { cleanup in
+            VStack(alignment: .leading, spacing: 16) {
+                Text(L10n.tr("removal.confirmTitle", default: "Review History Cleanup"))
+                    .font(.headline)
+                Text(L10n.tr("removal.confirmCount", default: "%lld clips will be permanently deleted. This cannot be undone and ends removal undo.", cleanup.ids.count))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(cleanup.keepSaved
+                    ? L10n.tr("removal.keepSaved", default: "Pinned clips and clips in folders will be kept.")
+                    : L10n.tr("removal.includeSaved", default: "This includes Pinned and every folder. The folders themselves will remain."))
+                    .foregroundStyle(.secondary)
+                if let retention = cleanup.retention {
+                    Text(L10n.tr("removal.newRetention", default: "New retention period: %@", retention.title))
+                }
+                HStack {
+                    Spacer()
+                    Button(L10n.tr("common.cancel", default: "Cancel"), role: .cancel) { pendingCleanup = nil }
+                        .keyboardShortcut(.cancelAction)
+                    Button(L10n.tr("removal.confirmDelete", default: "Delete Reviewed Clips"), role: .destructive) {
+                        if historyStore.deleteReviewedClips(ids: cleanup.ids, keepSaved: cleanup.keepSaved),
+                           let retention = cleanup.retention {
+                            settings.keepHistory = retention
+                        }
+                        pendingCleanup = nil
+                    }
+                }
+            }
+            .padding(24)
+            .frame(width: 440)
+        }
+        .alert(L10n.tr("removal.failedTitle", default: "History Was Not Changed"), isPresented: Binding(
+            get: { historyStore.removalError != nil },
+            set: { if !$0 { historyStore.removalError = nil } }
+        )) {
+            Button(L10n.tr("action.dismiss", default: "Dismiss message")) { historyStore.removalError = nil }
+        } message: {
+            Text(historyStore.removalError ?? "")
         }
     }
 
@@ -107,6 +152,18 @@ struct SettingsView: View {
 
     private var general: some View {
         Form {
+            Picker(L10n.tr("action.setting", default: "Timeline primary action"), selection: Binding(
+                get: { settings.timelinePrimaryAction },
+                set: { settings.timelinePrimaryAction = $0 }
+            )) {
+                ForEach(TimelinePrimaryAction.allCases) { action in
+                    Text(action.title).tag(action)
+                }
+            }
+            Text(L10n.tr("action.settingDetail", default: "Double-click, Return, and ⌘1–9 use the selected action. Direct Paste is the default. ⇧Return always pastes plain text."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            DirectPastePermissionView()
             Toggle(L10n.tr("settings.pauseCapture", default: "Pause clipboard capture"), isOn: $settings.capturePaused)
             Toggle(L10n.tr("settings.pastePlainDefault", default: "Paste as plain text by default"), isOn: $settings.pasteAsPlainTextByDefault)
             Text(L10n.tr("settings.plainTextFootnote", default: "⌃⌘V pastes once as plain text, then restores the original clipboard (Accessibility required to auto-paste). In the timeline, ⇧↩ pastes the selection as plain text."))
@@ -134,7 +191,11 @@ struct SettingsView: View {
 
             Picker(L10n.tr("settings.keepHistory", default: "Keep history"), selection: Binding(
                 get: { settings.keepHistory },
-                set: { settings.keepHistory = $0; historyStore.pruneHistory() }
+                set: { retention in
+                    let ids = Set(historyStore.retentionCandidates(retention).map(\.id))
+                    if ids.isEmpty { settings.keepHistory = retention }
+                    else { pendingCleanup = PendingCleanup(ids: ids, keepSaved: true, retention: retention) }
+                }
             )) {
                 ForEach(AppSettings.KeepHistory.allCases) { option in
                     Text(option.title).tag(option)
@@ -235,15 +296,15 @@ struct SettingsView: View {
             )
 
             Button(L10n.tr("settings.pruneNow", default: "Prune Now")) {
-                historyStore.pruneHistory()
+                pendingCleanup = PendingCleanup(ids: Set(historyStore.pruneCandidates().map(\.id)), keepSaved: true, retention: nil)
             }
 
-            Button(L10n.tr("settings.clearKeepPinned", default: "Clear History, Keep Pinned"), role: .destructive) {
-                historyStore.clearHistory(keepPinned: true)
+            Button(L10n.tr("removal.clearKeepSaved", default: "Clear History, Keep Pinned & Folders…"), role: .destructive) {
+                pendingCleanup = PendingCleanup(ids: Set(historyStore.clearHistoryCandidates(keepSaved: true).map(\.id)), keepSaved: true, retention: nil)
             }
 
             Button(L10n.tr("settings.clearAllHistory", default: "Clear All History"), role: .destructive) {
-                historyStore.clearHistory(keepPinned: false)
+                pendingCleanup = PendingCleanup(ids: Set(historyStore.clips.map(\.id)), keepSaved: false, retention: nil)
             }
         }
         .formStyle(.grouped)

@@ -268,6 +268,182 @@ BATCH_CJK: dict[str, dict[str, str]] = {
 }
 
 
+# Product experience actions and recovery.
+BATCH_CJK.update({
+    "removal.undoShort": {
+        "zh-Hant": "復原",
+        "ko": "실행 취소"
+    },
+    "removal.namedFolder": {
+        "zh-Hant": "從「%@」移除",
+        "ko": "“%@”에서 제거"
+    },
+    "removal.removedFolder": {
+        "zh-Hant": "已從「%@」移除",
+        "ko": "“%@”에서 제거됨"
+    },
+    "removal.removedHistory": {
+        "zh-Hant": "已從歷史記錄移除",
+        "ko": "기록에서 제거됨"
+    },
+    "removal.unpinned": {
+        "zh-Hant": "已取消釘選",
+        "ko": "고정 해제됨"
+    },
+    "removal.restored": {
+        "zh-Hant": "已復原移除",
+        "ko": "제거 실행 취소됨"
+    }
+})
+
+BATCH_CJK.update({
+    "action.paste": {
+        "zh-Hant": "直接貼上",
+        "ko": "바로 붙여넣기"
+    },
+    "action.copyOnly": {
+        "zh-Hant": "僅複製",
+        "ko": "복사만"
+    },
+    "action.cannotEdit": {
+        "zh-Hant": "此剪貼項不支援編輯",
+        "ko": "이 항목은 편집할 수 없습니다"
+    },
+    "removal.everywhere": {
+        "zh-Hant": "從所有位置刪除",
+        "ko": "모든 위치에서 삭제"
+    },
+    "removal.everywhereDetail": {
+        "zh-Hant": "從歷史、釘選和所有檔案夾中刪除此項？此操作無法還原。",
+        "ko": "기록, 고정 및 모든 폴더에서 이 항목을 삭제할까요? 실행 취소할 수 없습니다."
+    },
+    "action.dismiss": {
+        "zh-Hant": "關閉提示",
+        "ko": "메시지 닫기"
+    },
+    "action.retry": {
+        "zh-Hant": "重試",
+        "ko": "다시 시도"
+    },
+    "action.returnToApp": {
+        "zh-Hant": "返回目標應用程式",
+        "ko": "앱으로 돌아가기"
+    },
+    "action.selectionCount": {
+        "zh-Hant": "已選 %lld 項",
+        "ko": "%lld개 선택됨"
+    },
+    "removal.undo": {
+        "zh-Hant": "還原移除",
+        "ko": "제거 실행 취소"
+    },
+    "removal.undoHelp": {
+        "zh-Hant": "30 秒內可還原最近的移除（⌘Z）。",
+        "ko": "30초 이내의 제거를 실행 취소합니다 (⌘Z)."
+    },
+    "action.enablePaste": {
+        "zh-Hant": "啟用直接貼上",
+        "ko": "바로 붙여넣기 활성화"
+    },
+    "removal.stillSaved": {
+        "zh-Hant": "已從歷史移除，仍儲存在釘選或檔案夾中",
+        "ko": "기록에서 제거했으며 고정 또는 폴더에는 남아 있습니다"
+    },
+    "removal.history": {
+        "zh-Hant": "從歷史移除",
+        "ko": "기록에서 제거"
+    },
+    "action.copySingle": {
+        "zh-Hant": "請選擇一項進行複製。多項可用 ⇧Return 以純文字貼上。",
+        "ko": "복사할 항목 하나를 선택하세요. 여러 항목은 ⇧Return으로 일반 텍스트로 붙여넣을 수 있습니다."
+    },
+    "action.writeFailed": {
+        "zh-Hant": "無法複製此項，內容或附件可能無法使用。請復原檔案後重試。",
+        "ko": "내용이나 첨부 파일을 사용할 수 없어 복사하지 못했습니다. 파일을 복원한 후 다시 시도하세요."
+    },
+    "action.copiedManual": {
+        "zh-Hant": "已複製。返回目標應用程式後按 ⌘V。開啟輔助使用即可直接貼上。",
+        "ko": "복사했습니다. 대상 앱으로 돌아가 ⌘V를 누르세요. 바로 붙여넣으려면 손쉬운 사용을 허용하세요."
+    },
+    "action.copied": {
+        "zh-Hant": "已複製到剪貼簿",
+        "ko": "클립보드에 복사했습니다"
+    },
+    "action.multiPermission": {
+        "zh-Hant": "請啟用輔助使用以貼上多項，或選擇一項複製後手動貼上。",
+        "ko": "여러 항목을 붙여넣으려면 손쉬운 사용을 허용하거나 항목 하나를 선택해 수동으로 복사하고 붙여넣으세요."
+    },
+    "action.focusChanged": {
+        "zh-Hant": "目標應用程式或權限已變更，貼上已停止。請聚焦目標位置後重試剩餘項目。",
+        "ko": "대상 앱이나 권한이 변경되어 중단했습니다. 대상에 포커스를 맞춘 후 나머지 항목을 다시 시도하세요."
+    },
+    "action.pasteSent": {
+        "zh-Hant": "已傳送貼上要求",
+        "ko": "붙여넣기 요청을 보냈습니다"
+    },
+    "removal.confirmTitle": {
+        "zh-Hant": "確認歷史清理範圍",
+        "ko": "기록 정리 범위 확인"
+    },
+    "removal.confirmCount": {
+        "zh-Hant": "將永久刪除 %lld 項。此操作無法還原，並會結束先前的移除還原。",
+        "ko": "%lld개 항목을 영구 삭제합니다. 이 작업은 실행 취소할 수 없으며 이전 제거의 실행 취소도 종료됩니다."
+    },
+    "removal.keepSaved": {
+        "zh-Hant": "釘選和檔案夾中的內容將保留。",
+        "ko": "고정 및 폴더의 항목은 유지됩니다."
+    },
+    "removal.includeSaved": {
+        "zh-Hant": "包括釘選和所有檔案夾中的內容，檔案夾本身將保留。",
+        "ko": "고정 및 모든 폴더의 항목이 포함됩니다. 폴더 자체는 유지됩니다."
+    },
+    "removal.newRetention": {
+        "zh-Hant": "新的保留期限：%@",
+        "ko": "새 보관 기간: %@"
+    },
+    "removal.confirmDelete": {
+        "zh-Hant": "刪除已確認的記錄",
+        "ko": "확인한 항목 삭제"
+    },
+    "removal.failedTitle": {
+        "zh-Hant": "歷史記錄未變更",
+        "ko": "기록이 변경되지 않았습니다"
+    },
+    "action.setting": {
+        "zh-Hant": "時間軸主要操作",
+        "ko": "타임라인 기본 동작"
+    },
+    "action.settingDetail": {
+        "zh-Hant": "按兩下、Return 和 ⌘1–9 統一執行所選操作，預設直接貼上。⇧Return 一律以純文字貼上。",
+        "ko": "더블 클릭, Return, ⌘1–9는 선택한 동작을 실행합니다. 기본값은 바로 붙여넣기입니다. ⇧Return은 항상 일반 텍스트로 붙여넣습니다."
+    },
+    "removal.clearKeepSaved": {
+        "zh-Hant": "清除歷史，保留釘選和檔案夾…",
+        "ko": "기록 지우기, 고정 및 폴더 유지…"
+    },
+    "action.permissionReady": {
+        "zh-Hant": "已啟用直接貼上",
+        "ko": "바로 붙여넣기가 활성화되었습니다"
+    },
+    "action.permissionNeeded": {
+        "zh-Hant": "直接貼上需要輔助使用權限",
+        "ko": "바로 붙여넣기에 손쉬운 사용 권한이 필요합니다"
+    },
+    "action.permissionDetail": {
+        "zh-Hant": "輔助使用允許 Paste It 向目標應用程式傳送 ⌘V。未授權也可以複製內容後手動貼上。",
+        "ko": "손쉬운 사용을 허용하면 Paste It이 대상 앱에 ⌘V를 보낼 수 있습니다. 허용하지 않아도 복사 후 수동으로 붙여넣을 수 있습니다."
+    },
+    "removal.saveFailed": {
+        "zh-Hant": "無法儲存變更，已復原歷史記錄，請重試。",
+        "ko": "변경 사항을 저장하지 못해 기록을 복원했습니다. 다시 시도하세요."
+    },
+    "action.tutorial": {
+        "zh-Hant": "選取一項，按 ⌘C 複製，再到目標應用程式按 ⌘V。可在設定中選擇直接貼上以一步完成。",
+        "ko": "항목을 선택하고 ⌘C로 복사한 후 대상 앱에서 ⌘V를 누르세요. 설정에서 바로 붙여넣기를 선택하면 한 번에 재사용할 수 있습니다."
+    }
+})
+
+
 def merge_batch_cjk(strings: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     merged = {key: dict(locs) for key, locs in strings.items()}
     missing = set(merged) - set(BATCH_CJK)

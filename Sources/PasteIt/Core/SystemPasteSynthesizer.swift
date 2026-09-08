@@ -17,6 +17,15 @@ enum SystemPasteSynthesizer {
         AXIsProcessTrusted()
     }
 
+    @MainActor
+    static func openAccessibilitySettings() {
+        let key = "AXTrustedCheckOptionPrompt" as CFString
+        _ = AXIsProcessTrustedWithOptions([key: true] as CFDictionary)
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
     /// Prompts once per process lifetime when Accessibility is missing.
     static func ensureAccessibilityIfNeeded(didPrompt: inout Bool) {
         guard !AXIsProcessTrusted() else { return }

@@ -67,6 +67,7 @@ final class AppState: ObservableObject {
         }
     }
     @Published var statusMessage: String?
+    let removalFeedback = RemovalFeedback()
     /// Bumped when the timeline wants the search field to take focus (⌘F).
     @Published var searchFocusRequest: Int = 0
     /// Bumped when the timeline should resign search focus (panel show / Esc).
@@ -226,7 +227,8 @@ final class AppState: ObservableObject {
     /// current board removes just that row immediately; the coalesced history event confirms membership.
     func togglePinned(_ item: ClipItem) {
         if historyStore.isPinned(item) {
-            historyStore.unpinFromPinnedBoard(item)
+            guard historyStore.removeFromTab(item, tab: .pinned) else { return }
+            showRemovalFeedback(from: .pinned)
             if selectedTab == .pinned {
                 invalidateTabCaches()
                 visibleClips.removeAll { $0.id == item.id }
@@ -246,7 +248,8 @@ final class AppState: ObservableObject {
     }
 
     func unpin(_ item: ClipItem, from folder: Pinboard) {
-        historyStore.unpin(item, from: folder)
+        guard historyStore.removeFromTab(item, tab: .folder(folder.id)) else { return }
+        showRemovalFeedback(from: .folder(folder.id))
         if case .folder(let id) = selectedTab, id == folder.id {
             invalidateTabCaches()
             visibleClips.removeAll { $0.id == item.id }
@@ -255,10 +258,53 @@ final class AppState: ObservableObject {
     }
 
     func removeClipFromCurrentTab(_ item: ClipItem) {
-        historyStore.removeFromTab(item, tab: selectedTab)
+        let tab = selectedTab
+        let staysSaved = tab == .timeline && !item.pinboardIDs.isEmpty
+        guard historyStore.removeFromTab(item, tab: tab) else { return }
+        showRemovalFeedback(from: tab, staysSaved: staysSaved)
         invalidateTabCaches()
         visibleClips.removeAll { $0.id == item.id }
         pruneSelectionToVisibleClips()
+    }
+
+    func removalTitle(for tab: TimelineTab) -> String {
+        switch tab {
+        case .timeline: return L10n.tr("removal.history", default: "Remove from History")
+        case .pinned: return L10n.tr("timeline.unpin", default: "Unpin")
+        case .folder(let id):
+            let name = historyStore.customFolders.first { $0.id == id }?.name ?? tab.title
+            return L10n.tr("removal.namedFolder", default: "Remove from “%@”", name)
+        }
+    }
+
+    private func showRemovalFeedback(from tab: TimelineTab, staysSaved: Bool = false) {
+        let message: String
+        switch tab {
+        case .timeline:
+            message = staysSaved
+                ? L10n.tr("removal.stillSaved", default: "Removed from History; still saved in Pinned or folders")
+                : L10n.tr("removal.removedHistory", default: "Removed from History")
+        case .pinned:
+            message = L10n.tr("removal.unpinned", default: "Unpinned")
+        case .folder(let id):
+            let name = historyStore.customFolders.first { $0.id == id }?.name ?? tab.title
+            message = L10n.tr("removal.removedFolder", default: "Removed from “%@”", name)
+        }
+        removalFeedback.show(message, removalID: historyStore.latestRemovalID)
+    }
+
+    func undoLastRemoval(expectedID: UUID? = nil) {
+        guard let restored = historyStore.undoLastRemoval(expectedID: expectedID) else { return }
+        removalFeedback.show(L10n.tr("removal.restored", default: "Removal undone"))
+        selectedTab = restored.tab
+        invalidateTabCaches()
+        rebuildVisibleClips()
+        Task { @MainActor in
+            await awaitSearchResults()
+            if visibleClips.contains(where: { $0.id == restored.item.id }) {
+                selectOnly(restored.item.id)
+            }
+        }
     }
 
     func resetFiltersForPanelShow() {
@@ -303,6 +349,11 @@ final class AppState: ObservableObject {
     func selectOnly(_ id: UUID) {
         if selectedClipID != id { selectedClipID = id }
         if selectedClipIDs != [id] { selectedClipIDs = [id] }
+    }
+
+    func selectClipsForRecovery(_ ids: [UUID]) {
+        selectedClipID = ids.first
+        selectedClipIDs = ids
     }
 
     /// Single-click a timeline card while a Space preview may be open.

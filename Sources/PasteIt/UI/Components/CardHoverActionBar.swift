@@ -1,4 +1,5 @@
 import SwiftUI
+import PasteItCore
 
 /// Compact hover toolbar for timeline cards (Copy / Edit / Pin / Delete).
 struct CardHoverActionBar: View {
@@ -13,16 +14,16 @@ struct CardHoverActionBar: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            actionButton("doc.on.doc", help: "Copy to Clipboard", action: onCopy)
+            actionButton("doc.on.doc", help: L10n.tr("timeline.copy", default: "Copy to Clipboard"), action: onCopy)
             actionButton(
                 "pencil",
-                help: canEdit ? "Edit" : "Editing isn’t available for this clip",
+                help: canEdit ? L10n.tr("timeline.edit", default: "Edit") : L10n.tr("action.cannotEdit", default: "Editing is not available for this clip"),
                 enabled: canEdit,
                 action: onEdit
             )
             actionButton(
                 isPinned ? "pin.slash" : "pin",
-                help: isPinned ? "Unpin" : "Pin",
+                help: isPinned ? L10n.tr("timeline.unpin", default: "Unpin") : L10n.tr("timeline.pin", default: "Pin"),
                 action: onPin
             )
             actionButton("trash", help: deleteHelp, action: onDelete)

@@ -4,6 +4,20 @@ import SwiftUI
 
 @MainActor
 final class AppSettings: ObservableObject {
+    @AppStorage("timelinePrimaryAction") private var timelinePrimaryActionRaw = ""
+
+    var timelinePrimaryAction: TimelinePrimaryAction {
+        get { .initialValue(saved: timelinePrimaryActionRaw) }
+        set {
+            objectWillChange.send()
+            timelinePrimaryActionRaw = newValue.rawValue
+        }
+    }
+
+    func migratePrimaryAction() {
+        timelinePrimaryAction = .initialValue(saved: timelinePrimaryActionRaw)
+    }
+
     enum KeepHistory: String, CaseIterable, Identifiable {
         case oneDay
         case oneWeek
@@ -50,6 +64,25 @@ final class AppSettings: ObservableObject {
         PasteStackController.Direction.oldestFirst.rawValue
     @AppStorage("ignoredBundleIdentifiers") private var ignoredBundleIdentifiersRaw: String = defaultIgnoredApps.joined(separator: "\n")
     @AppStorage("ignoredPasteboardTypes") private var ignoredPasteboardTypesRaw: String = defaultIgnoredTypes.joined(separator: "\n")
+
+    /// Injectable preferences keep integration tests out of the user's defaults domain.
+    init(defaults: UserDefaults = .standard) {
+        _timelinePrimaryActionRaw = AppStorage(wrappedValue: "", "timelinePrimaryAction", store: defaults)
+        _clipboardCheckInterval = AppStorage(wrappedValue: 0.35, "clipboardCheckInterval", store: defaults)
+        _capturePaused = AppStorage(wrappedValue: false, "capturePaused", store: defaults)
+        _keepHistoryRaw = AppStorage(wrappedValue: KeepHistory.forever.rawValue, "keepHistory", store: defaults)
+        _maxHistoryItems = AppStorage(wrappedValue: 5000, "maxHistoryItems", store: defaults)
+        _maxBlobMegabytes = AppStorage(wrappedValue: 1024, "maxBlobMegabytes", store: defaults)
+        _launchAtLogin = AppStorage(wrappedValue: true, "launchAtLogin", store: defaults)
+        _pasteAsPlainTextByDefault = AppStorage(wrappedValue: false, "pasteAsPlainTextByDefault", store: defaults)
+        _hasCompletedOnboarding = AppStorage(wrappedValue: false, "hasCompletedOnboarding", store: defaults)
+        _seenWhatsNewContentVersion = AppStorage(wrappedValue: 0, "seenWhatsNewContentVersion", store: defaults)
+        _agentAPIEnabled = AppStorage(wrappedValue: false, "agentAPIEnabled", store: defaults)
+        _analyticsEnabled = AppStorage(wrappedValue: true, "analyticsEnabled", store: defaults)
+        _pasteStackDefaultDirectionRaw = AppStorage(wrappedValue: PasteStackController.Direction.oldestFirst.rawValue, "pasteStackDefaultDirection", store: defaults)
+        _ignoredBundleIdentifiersRaw = AppStorage(wrappedValue: defaultIgnoredApps.joined(separator: "\n"), "ignoredBundleIdentifiers", store: defaults)
+        _ignoredPasteboardTypesRaw = AppStorage(wrappedValue: defaultIgnoredTypes.joined(separator: "\n"), "ignoredPasteboardTypes", store: defaults)
+    }
 
     var keepHistory: KeepHistory {
         get { KeepHistory(rawValue: keepHistoryRaw) ?? .forever }

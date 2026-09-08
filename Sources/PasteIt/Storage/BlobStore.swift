@@ -5,6 +5,17 @@ import UniformTypeIdentifiers
 
 final class BlobStore: @unchecked Sendable {
     private let fileManager = FileManager.default
+    private let protectionLock = NSLock()
+    private var undoProtectedPaths = Set<String>()
+
+    func protectForUndo(_ paths: Set<String>) {
+        protectionLock.lock()
+        defer { protectionLock.unlock() }
+        undoProtectedPaths = Set(paths.map {
+            rootURL.appendingPathComponent($0).standardizedFileURL.resolvingSymlinksInPath().path
+        })
+    }
+
     let rootURL: URL
     let blobsURL: URL
     let thumbnailsURL: URL
@@ -127,8 +138,15 @@ final class BlobStore: @unchecked Sendable {
 
         var runningTotal = total
         for file in files.sorted(by: { $0.1 < $1.1 }) {
-            try? fileManager.removeItem(at: file.0)
-            runningTotal -= file.2
+            // Check dynamically: an undo can start while this background prune is running.
+            protectionLock.lock()
+            if !undoProtectedPaths.contains(file.0.standardizedFileURL.resolvingSymlinksInPath().path) {
+                do {
+                    try fileManager.removeItem(at: file.0)
+                    runningTotal -= file.2
+                } catch { /* Retry cleanup later; do not count a failed removal. */ }
+            }
+            protectionLock.unlock()
             if runningTotal <= limitBytes { break }
         }
     }

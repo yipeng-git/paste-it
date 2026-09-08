@@ -131,7 +131,7 @@ enum PasteItMCPTools {
                     ],
                     "ui": [
                         "type": "object",
-                        "description": "Optional UI state: query, selectedType, selectedIndex",
+                        "description": "Optional UI state: query, selectedType, selectedIndex, removalPreviewFolder (synthetic removal toast)",
                     ],
                     "outputPath": [
                         "type": "string",

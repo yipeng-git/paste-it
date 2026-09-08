@@ -19,6 +19,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
     private let appState: AppState
     private let pasteController: PasteController
     private var panel: NSPanel?
+    private lazy var removalToastController = RemovalToastPanelController(appState: appState)
     private var globalOutsideClickMonitor: Any?
     private var localOutsideClickMonitor: Any?
     /// Slide-in / slide-out are distinct so hide can interrupt an in-flight show
@@ -36,7 +37,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
     weak var detachedWindowController: ClipDetachedWindowController?
     weak var pasteStackPanelController: PasteStackPanelController?
 
-    private let panelHeight: CGFloat = 320
+    static let panelHeight: CGFloat = 320
     private let bottomInset: CGFloat = 12
     private let animationDuration: CFTimeInterval = 0.28
 
@@ -109,11 +110,16 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         }
     }
 
-    private func performShow(source: TimelinePanelOpenSource) {
+    func showPreservingContext() {
+        guard panelAnimation == .none else { return }
+        performShow(source: .menu, preserveContext: true)
+    }
+
+    private func performShow(source: TimelinePanelOpenSource, preserveContext: Bool = false) {
         let wasVisible = panel?.isVisible == true
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        if !appState.isReadyForInstantShow() {
+        if !preserveContext && !appState.isReadyForInstantShow() {
             appState.resetFiltersForPanelShow()
         }
 
@@ -169,7 +175,12 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         })
     }
 
-    func hide(completion: (@Sendable () -> Void)? = nil) {
+    private var preserveContextForHide = false
+
+    func hide(preserveContext: Bool = false, completion: (@Sendable () -> Void)? = nil) {
+        appState.removalFeedback.dismiss()
+        removalToastController.hide(animated: false)
+        if panelAnimation != .hiding { preserveContextForHide = preserveContext }
         isPreparingShow = false
         if let completion {
             pendingHideCompletions.append(completion)
@@ -232,7 +243,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
                 panel.alphaValue = 1
                 self.panelAnimation = .none
                 Analytics.endPanelSession()
-                self.appState.prepareForNextPanelShow()
+                if !self.preserveContextForHide { self.appState.prepareForNextPanelShow() }
                 self.flushHideCompletions()
             }
         })
@@ -252,7 +263,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         hostingController.sizingOptions = []
 
         let panel = FloatingTimelinePanel(
-            contentRect: NSRect(x: 0, y: 0, width: 1120, height: panelHeight),
+            contentRect: NSRect(x: 0, y: 0, width: 1120, height: Self.panelHeight),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -275,6 +286,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         // rectangular hosting surface, which shows as opaque corner "ears".
         PanelCornerMask.apply(to: hostingController.view)
         PanelCornerMask.apply(to: panel.contentView)
+        removalToastController.attach(to: panel)
 
         return panel
     }
@@ -286,7 +298,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         // Sit just above the Dock / menu-safe area with a small breathing gap.
         let visibleFrame = screen.visibleFrame
         let width = min(1120, max(640, visibleFrame.width - 32))
-        let height = panelHeight
+        let height = Self.panelHeight
         let origin = NSPoint(
             x: visibleFrame.midX - width / 2,
             y: visibleFrame.minY + bottomInset
@@ -363,6 +375,7 @@ final class TimelinePanelController: NSObject, NSWindowDelegate {
         guard let panel, panel.isVisible else { return }
         let mouse = NSEvent.mouseLocation
         if panel.frame.contains(mouse) { return }
+        if removalToastController.visibleFrame?.contains(mouse) == true { return }
         // Clicks on detached preview / Paste Stack should not dismiss the timeline.
         // Only count *visible* windows — ordered-out panels keep their last frame and would
         // otherwise swallow outside clicks (especially a centered preview bubble).
