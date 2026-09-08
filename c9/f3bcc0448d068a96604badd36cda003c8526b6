@@ -1,0 +1,61 @@
+Package.swift
+  s_950158c9536365::t_c8eb63ed91b9d4 48-52
+Sources/PasteIt/Core/PasteboardMonitor.swift
+  s_421b0e6ff2e6c3::t_48e5556e445a32 66-67,125,190-192
+Sources/PasteIt/Models/ClipItem.swift
+  s_950158c9536365::t_e611e7a5f4ce56 126
+Sources/PasteIt/Search/LinkMetadataService.swift
+  s_950158c9536365::t_d8a34d6d9b597e 3,5,14-16,31,39-42,46-47,52-76,89,93-96,107,124,137,202-203
+Sources/PasteIt/Storage/ClipVisualCache.swift
+  s_950158c9536365::t_2c7b71cb93572f 4,15-25,31-41,44-48,50,53,56-59,63-69,71-74,76-86,129,133,135-142,146,154,158-163
+Sources/PasteIt/Storage/HistoryStore.swift
+  s_950158c9536365::t_b501c3ba0ceb7d 2-3,10-38,50,186-198,209,224,235-237,266,268-269,313-314,316,362-363,373-376,381,385,410,427,434-438,448-449,517-535,545-546,551,553,597-598,605-606,608,643,661,682,701,720,739-740,758,791,793-796,802,829,926
+Sources/PasteIt/UI/Components/TimelineFilterButton.swift
+  s_950158c9536365::t_83518c3e74e7d1 67-75,150
+Sources/PasteIt/UI/Components/TimelineScrollReset.swift
+  s_950158c9536365::t_42c250add890e8 1-42
+Sources/PasteIt/UI/Timeline/ClipQuickPreview.swift
+  s_421b0e6ff2e6c3::t_31abafad97bd58 29-30,52-54,90-93,307,312,314-315,318-325
+Sources/PasteIt/UI/Timeline/TimelineView.swift
+  s_421b0e6ff2e6c3::t_db15f8bfa123d2 67-73,75,134,705-734
+Sources/PasteItCore/ClipPreviewText.swift
+  s_950158c9536365::t_018016ecd1277e 11,23,41-55,59-63
+Sources/PasteItCore/ClipSearchIndex.swift
+  s_950158c9536365::t_ace613ac0dc210 1-92
+Sources/PasteItCore/CostBoundedCache.swift
+  s_950158c9536365::t_cc75624cadfe53 1-41
+Sources/PasteItCore/ImageDownsampler.swift
+  s_950158c9536365::t_d01e46e553facb 1-17
+Sources/PasteItCore/SearchQuery.swift
+  s_950158c9536365::t_c48eb7ffe87191 1-58
+Tests/PasteItIntegrationTests/TimelineStateTests.swift
+  s_421b0e6ff2e6c3::t_e5f0df2955a34a 1-87
+Tests/PasteItTests/ClipPreviewTextTests.swift
+  s_421b0e6ff2e6c3::t_b82ffef030c3ed 5,8-34
+Tests/PasteItTests/PerformanceRegressionTests.swift
+  s_950158c9536365::t_9db68d522fc172 1-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "c9f3bcc0448d068a96604badd36cda003c8526b6",
+  "prompts": {},
+  "sessions": {
+    "s_421b0e6ff2e6c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0804f-2cbe-78b2-8ad2-72e5a74f6029",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_950158c9536365": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08045-e215-78a3-b9fb-34e2902a9bea",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
