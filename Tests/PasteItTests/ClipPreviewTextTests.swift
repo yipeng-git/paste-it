@@ -2,8 +2,36 @@ import Foundation
 import Testing
 @testable import PasteItCore
 
+@MainActor
 @Suite("ClipPreviewText — card vs Space preview alignment")
 struct ClipPreviewTextTests {
+    @Test
+    func nonemptyPlainTextNeverEvaluatesRichImporter() {
+        var importCount = 0
+        func importRich() -> String? { importCount += 1; return "rich" }
+        let result = ClipPreviewText.resolve(
+            plainText: "plain", richPlainText: importRich(), hasRichPayload: true,
+            ocrText: nil, fileURLString: nil, typeTitle: "Text"
+        )
+        #expect(result == "plain")
+        #expect(importCount == 0)
+        let fallback = ClipPreviewText.resolve(
+            plainText: " \n", richPlainText: importRich(), hasRichPayload: true,
+            ocrText: nil, fileURLString: nil, typeTitle: "Text"
+        )
+        #expect(fallback == "rich")
+        #expect(importCount == 1)
+    }
+
+    @Test
+    func summaryPreservesGraphemesAndFullCharacterCount() {
+        let original = "👨‍👩‍👧‍👦你好e\u{301}abcdef"
+        let summary = ClipPreviewText.Summary(original, limit: 4)
+        #expect(summary.text == "👨‍👩‍👧‍👦你好e\u{301}…")
+        #expect(summary.characterCount == original.utf16.count)
+        #expect(ClipPreviewText.Summary("abcd", limit: 4).text == "abcd")
+        #expect(ClipPreviewText.Summary("  ").footer == "Empty")
+    }
     @Test
     func plainTextPreferredOverRich() {
         let resolved = ClipPreviewText.resolve(

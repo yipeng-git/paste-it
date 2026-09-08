@@ -1,7 +1,8 @@
 import AppKit
 import Foundation
+import PasteItCore
 
-struct LinkMetadata {
+struct LinkMetadata: Sendable {
     var title: String?
     var iconData: Data?
     var imageData: Data?
@@ -10,7 +11,9 @@ struct LinkMetadata {
 actor LinkMetadataService {
     static let shared = LinkMetadataService()
 
-    private var cache: [String: LinkMetadata] = [:]
+    private var cache = CostBoundedCache<String, LinkMetadata>(countLimit: 64, costLimit: 24 * 1024 * 1024)
+    private var activeFetches = 0
+    private var fetchWaiters: [CheckedContinuation<Void, Never>] = []
     private var inFlight: [String: Task<LinkMetadata, Never>] = [:]
 
     private let session: URLSession = {
@@ -25,7 +28,7 @@ actor LinkMetadataService {
 
     func metadata(for url: URL) async -> LinkMetadata {
         let key = Self.cacheKey(for: url)
-        if let cached = cache[key] {
+        if let cached = cache.value(for: key) {
             return cached
         }
         if let existing = inFlight[key] {
@@ -33,13 +36,42 @@ actor LinkMetadataService {
         }
 
         let task = Task<LinkMetadata, Never> {
-            await self.fetchMetadata(for: url)
+            await self.acquireFetchSlot()
+            defer { self.releaseFetchSlot() }
+            guard !Task.isCancelled else { return LinkMetadata() }
+            return await self.fetchMetadata(for: url)
         }
         inFlight[key] = task
         let result = await task.value
-        cache[key] = result
+        let cost = (result.iconData?.count ?? 0) + (result.imageData?.count ?? 0) + (result.title?.utf8.count ?? 0)
+        cache.insert(result, for: key, cost: cost)
         inFlight[key] = nil
         return result
+    }
+
+    private func acquireFetchSlot() async {
+        if activeFetches < 4 { activeFetches += 1; return }
+        await withCheckedContinuation { fetchWaiters.append($0) }
+    }
+
+    private func releaseFetchSlot() {
+        if fetchWaiters.isEmpty { activeFetches -= 1 }
+        else { fetchWaiters.removeFirst().resume() }
+    }
+
+    /// Enforce limits while receiving, including responses without Content-Length.
+    private func download(_ request: URLRequest, limit: Int) async throws -> Data? {
+        let (bytes, response) = try await session.bytes(for: request)
+        defer { bytes.task.cancel() }
+        guard let http = response as? HTTPURLResponse, (200..<400).contains(http.statusCode),
+              response.expectedContentLength <= Int64(limit) else { return nil }
+        var data = Data()
+        data.reserveCapacity(min(limit, max(0, Int(response.expectedContentLength))))
+        for try await byte in bytes {
+            guard data.count < limit, !Task.isCancelled else { return nil }
+            data.append(byte)
+        }
+        return data
     }
 
     private func fetchMetadata(for url: URL) async -> LinkMetadata {
@@ -54,11 +86,14 @@ actor LinkMetadataService {
         }
 
         let baseURL = url
-        metadata.title = Self.firstMatch(in: html, patterns: [
+        let rawTitle = Self.firstMatch(in: html, patterns: [
             #"property=["']og:title["']\s+content=["']([^"']+)["']"#,
             #"content=["']([^"']+)["']\s+property=["']og:title["']"#,
             #"<title[^>]*>([^<]+)</title>"#
-        ]).map(Self.decodeHTMLEntities)
+        ])
+        if let rawTitle {
+            metadata.title = await MainActor.run { Self.decodeHTMLEntities(rawTitle) }
+        }
 
         if let ogImage = Self.firstMatch(in: html, patterns: [
             #"property=["']og:image["']\s+content=["']([^"']+)["']"#,
@@ -69,7 +104,7 @@ actor LinkMetadataService {
 
         let iconCandidates = Self.iconHrefs(in: html)
             .compactMap { URL(string: $0, relativeTo: baseURL)?.absoluteURL }
-        for candidate in iconCandidates {
+        for candidate in iconCandidates.prefix(3) {
             if let data = await downloadImage(from: candidate) {
                 metadata.iconData = data
                 break
@@ -86,10 +121,7 @@ actor LinkMetadataService {
         var request = URLRequest(url: url)
         request.setValue("text/html,application/xhtml+xml", forHTTPHeaderField: "Accept")
         do {
-            let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200..<400).contains(http.statusCode) else {
-                return nil
-            }
+            guard let data = try await download(request, limit: 2 * 1024 * 1024) else { return nil }
             if let utf8 = String(data: data, encoding: .utf8) {
                 return utf8
             }
@@ -102,10 +134,7 @@ actor LinkMetadataService {
     private func downloadImage(from url: URL?) async -> Data? {
         guard let url else { return nil }
         do {
-            let (data, response) = try await session.data(from: url)
-            guard let http = response as? HTTPURLResponse, (200..<400).contains(http.statusCode) else {
-                return nil
-            }
+            guard let data = try await download(URLRequest(url: url), limit: 8 * 1024 * 1024) else { return nil }
             guard !data.isEmpty, NSImage(data: data) != nil else { return nil }
             return data
         } catch {
@@ -170,8 +199,8 @@ actor LinkMetadataService {
         return hrefs
     }
 
-    private static func decodeHTMLEntities(_ string: String) -> String {
-        guard let data = string.data(using: .utf8) else { return string }
+    @MainActor private static func decodeHTMLEntities(_ string: String) -> String {
+        guard string.contains("&"), let data = string.data(using: .utf8) else { return string }
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .documentType: NSAttributedString.DocumentType.html,
             .characterEncoding: String.Encoding.utf8.rawValue

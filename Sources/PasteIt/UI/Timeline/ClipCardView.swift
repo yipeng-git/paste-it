@@ -33,8 +33,11 @@ struct ClipCardView: View {
                 .stroke(isSelected ? Color.accentColor : Color.primary.opacity(0.08), lineWidth: isSelected ? 2 : 1)
         }
         .modifier(ClipCardShadow())
-        .task(id: item.id) {
-            historyStore.enrichLinkMetadataIfNeeded(for: item)
+        .task(id: "\(item.id)|\(item.thumbnailRelativePath ?? "")|\(item.linkImageRelativePath ?? "")|\(item.linkIconRelativePath ?? "")") {
+            if item.primaryType == .url { historyStore.enrichLinkMetadataIfNeeded(for: item) }
+            thumbnailImage = nil
+            linkPreviewImage = nil
+            linkIconImage = nil
             await loadMediaIfNeeded()
         }
     }
@@ -98,13 +101,13 @@ struct ClipCardView: View {
     /// space-bar quick preview (`ClipQuickPreview`) instead.
     private var textContent: some View {
         Group {
-            let text = item.previewText.trimmingCharacters(in: .whitespacesAndNewlines)
-            if text.isEmpty {
+            let summary = ClipVisualCache.shared.cardText(for: item)
+            if summary.characterCount == 0 {
                 Text("Empty")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(.tertiary)
             } else {
-                highlightedText(item.previewText, font: .system(size: 14, weight: .regular), lineLimit: 8)
+                highlightedText(summary.text, font: .system(size: 14, weight: .regular), lineLimit: 8)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -185,7 +188,7 @@ struct ClipCardView: View {
             Image(systemName: item.isDirectoryFileClip ? "folder.fill" : "doc.fill")
                 .font(.system(size: 34))
                 .foregroundStyle(.secondary)
-            highlightedText(item.previewText, font: .system(size: 13, weight: .medium), lineLimit: 3)
+            highlightedText(ClipVisualCache.shared.cardText(for: item).text, font: .system(size: 13, weight: .medium), lineLimit: 3)
                 .multilineTextAlignment(.center)
             if item.storedFileURLs.count > 1 {
                 Text("\(item.storedFileURLs.count) items")
@@ -212,7 +215,7 @@ struct ClipCardView: View {
     private var metadataFooterText: String? {
         switch item.primaryType {
         case .text, .richText, .html, .mixed:
-            return ClipPreviewText.characterFooter(forPreviewText: item.previewText)
+            return ClipVisualCache.shared.cardText(for: item).footer
         case .image:
             guard let size = historyStore.imagePixelSize(for: item) else { return nil }
             return "\(size.width) × \(size.height)"
@@ -233,44 +236,7 @@ struct ClipCardView: View {
     }
 
     private func highlightedText(_ text: String, font: Font, lineLimit: Int) -> some View {
-        Group {
-            if queryTerms.isEmpty {
-                Text(text)
-            } else {
-                Text(highlightedAttributedString(text))
-            }
-        }
-        .font(font)
-        .lineLimit(lineLimit)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var queryTerms: [String] {
-        query
-            .split(whereSeparator: \.isWhitespace)
-            .map(String.init)
-            .filter { !$0.isEmpty && !$0.contains(":") }
-    }
-
-    private func highlightedAttributedString(_ text: String) -> AttributedString {
-        var attributed = AttributedString(text)
-        let terms = queryTerms
-        guard !terms.isEmpty else { return attributed }
-
-        let lowercased = text.lowercased()
-        for term in terms {
-            let needle = term.lowercased()
-            var searchStart = lowercased.startIndex
-            while let range = lowercased.range(of: needle, range: searchStart..<lowercased.endIndex) {
-                if let attrStart = AttributedString.Index(range.lowerBound, within: attributed),
-                   let attrEnd = AttributedString.Index(range.upperBound, within: attributed) {
-                    attributed[attrStart..<attrEnd].backgroundColor = Color(hex: "FFE566")
-                    attributed[attrStart..<attrEnd].foregroundColor = .primary
-                }
-                searchStart = range.upperBound
-            }
-        }
-        return attributed
+        HighlightedClipText(text: text, query: query, font: font, lineLimit: lineLimit).equatable()
     }
 
     private func loadMediaIfNeeded() async {
@@ -301,6 +267,60 @@ struct ClipCardView: View {
             break
         }
     }
+}
+
+/// Unchanged text/query values reuse the rendered highlight when selection or hover changes.
+private struct HighlightedClipText: View, Equatable {
+    let text: String
+    let query: String
+    let font: Font
+    let lineLimit: Int
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.text == rhs.text && lhs.query == rhs.query && lhs.font == rhs.font && lhs.lineLimit == rhs.lineLimit
+    }
+
+    var body: some View {
+        Group {
+            if queryTerms.isEmpty {
+                Text(text)
+            } else {
+                Text(highlightedAttributedString(text))
+            }
+        }
+        .font(font)
+        .lineLimit(lineLimit)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var queryTerms: [String] {
+        query
+            .split(whereSeparator: \.isWhitespace)
+            .map(String.init)
+            .filter { !$0.isEmpty && !$0.contains(":") }
+    }
+
+    private func highlightedAttributedString(_ text: String) -> AttributedString {
+        var attributed = AttributedString(text)
+        let terms = queryTerms
+        guard !terms.isEmpty else { return attributed }
+
+        for term in terms {
+            var searchStart = text.startIndex
+            while searchStart < text.endIndex,
+                  let range = text.range(of: term, options: [.caseInsensitive, .diacriticInsensitive], range: searchStart..<text.endIndex),
+                  !range.isEmpty {
+                if let attrStart = AttributedString.Index(range.lowerBound, within: attributed),
+                   let attrEnd = AttributedString.Index(range.upperBound, within: attributed) {
+                    attributed[attrStart..<attrEnd].backgroundColor = Color(hex: "FFE566")
+                    attributed[attrStart..<attrEnd].foregroundColor = .primary
+                }
+                searchStart = range.upperBound
+            }
+        }
+        return attributed
+    }
+
 }
 
 private struct ClipCardShadow: ViewModifier {

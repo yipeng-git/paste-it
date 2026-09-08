@@ -26,6 +26,8 @@ struct ClipQuickPreview: View {
     @State private var textFocusToken: Int = 0
     @State private var isEditingText = false
 
+    @State private var previewImage: NSImage?
+    @State private var didLoadImage = false
     @State private var imageTab: ImageTab = .image
     @State private var isEditingOCR = false
     @State private var ocrDraft = ""
@@ -47,25 +49,9 @@ struct ClipQuickPreview: View {
         self.onClose = onClose
         self.onEditingChanged = onEditingChanged
 
-        // Seed editor state synchronously so the first paint isn't empty.
-        let usesRich = item.primaryType == .html
-            || item.primaryType == .richText
-            || item.htmlText != nil
-            || item.rtfData != nil
-        if usesRich {
-            let readable = RichTextCodec.glassReadable(RichTextCodec.attributedString(from: item))
-            _richText = State(initialValue: readable)
-            _baselineRich = State(initialValue: (readable.copy() as? NSAttributedString) ?? NSAttributedString(attributedString: readable))
-            _plainText = State(initialValue: "")
-            _baselinePlain = State(initialValue: "")
-        } else {
-            let text = item.previewText
-            _plainText = State(initialValue: text)
-            _baselinePlain = State(initialValue: text)
-            _richText = State(initialValue: NSAttributedString())
-            _baselineRich = State(initialValue: NSAttributedString())
-        }
-        _loadedItemID = State(initialValue: item.id)
+        // Full rich import belongs to the mounted preview, not each value initialization.
+        _plainText = State(initialValue: item.plainText)
+        _baselinePlain = State(initialValue: item.plainText)
         _ocrDraft = State(initialValue: item.ocrText ?? "")
     }
 
@@ -101,8 +87,10 @@ struct ClipQuickPreview: View {
                 if let previous = loadedItemID, previous != item.id {
                     commitTextEdits(for: previous)
                 }
-                loadContent(for: item)
-                loadedItemID = item.id
+                if loadedItemID != item.id {
+                    loadContent(for: item)
+                    loadedItemID = item.id
+                }
                 imageTab = .image
                 isEditingOCR = false
                 isEditingText = false
@@ -316,14 +304,24 @@ struct ClipQuickPreview: View {
             Color.clear
                 .pasteItPreviewInsetGlass()
 
-            if let image = historyStore.fullImage(for: item) ?? historyStore.thumbnailImage(for: item) {
+            if let image = previewImage {
                 Image(nsImage: image)
                     .resizable()
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            } else {
+            } else if didLoadImage {
                 ContentUnavailableView("No Preview", systemImage: "photo")
+            } else {
+                ProgressView()
             }
+        }
+        .task(id: item.id) {
+            didLoadImage = false
+            previewImage = historyStore.cachedThumbnailImage(for: item)
+            let image = await historyStore.loadPreviewImage(for: item)
+            guard !Task.isCancelled else { return }
+            previewImage = image
+            didLoadImage = true
         }
     }
 

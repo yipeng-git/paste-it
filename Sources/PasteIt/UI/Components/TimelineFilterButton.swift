@@ -64,6 +64,15 @@ struct TimelineFilterButton: View {
         .popover(isPresented: $isPresented, arrowEdge: .bottom) {
             filterMenu
         }
+        .onReceive(appState.historyStore.changes) { _ in
+            if isPresented { scheduleFilterCounts() }
+        }
+        .onChange(of: appState.searchHighlight) { _, _ in
+            if isPresented { scheduleFilterCounts() }
+        }
+        .onChange(of: appState.selectedTab) { _, _ in
+            if isPresented { scheduleFilterCounts() }
+        }
         .onChange(of: isPresented) { _, presented in
             if presented {
                 scheduleFilterCounts()
@@ -138,7 +147,7 @@ struct TimelineFilterButton: View {
         countsTask = Task { @MainActor in
             await Task.yield()
             guard !Task.isCancelled else { return }
-            let counts = appState.countsMatchingAllFilters()
+            let counts = await appState.countsMatchingAllFilters()
             guard !Task.isCancelled else { return }
             filterCounts = counts
         }

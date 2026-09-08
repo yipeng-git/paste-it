@@ -89,8 +89,9 @@ final class EphemeralTimelineSession {
         }
     }
 
-    /// Call after settle so search debounce has rebuilt `visibleClips`.
-    func finalizeUI(selectedIndex: Int) {
+    /// Wait for the actual background result, not an assumed debounce duration.
+    func finalizeUI(selectedIndex: Int) async {
+        await appState.awaitSearchResults()
         let clips = appState.visibleClips
         if clips.indices.contains(selectedIndex) {
             appState.selectOnly(clips[selectedIndex].id)

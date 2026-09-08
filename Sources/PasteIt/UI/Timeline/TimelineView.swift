@@ -64,22 +64,15 @@ struct TimelineView: View {
         return VStack(spacing: 0) {
             toolbar
             ZStack {
-                // Remount on scrollToStartRequest so offset resets to the natural
-                // resting position (with leading inset) — no scroll animation, no
-                // scrollTo(.leading) which would flush the first card to the edge.
-                // LazyHStack: create cards on demand. Avoid windowed spacers sized to
-                // full history — multi-million-pt clear views stall panel open.
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 14) {
-                        ForEach(clips) { item in
-                            card(item, quickIndex: quickIndexes[item.id], isSelected: selectedIDs.contains(item.id))
-                        }
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 18)
-                    .padding(.top, 8)
+                TimelineCardStrip(
+                    clips: clips, version: appState.visibleClipsVersion,
+                    selectedIDs: selectedIDs, query: appState.searchHighlight,
+                    scrollRequest: appState.scrollToStartRequest,
+                    historyRevision: historyStore.revision, tab: appState.selectedTab
+                ) { item in
+                    card(item, quickIndex: quickIndexes[item.id], isSelected: selectedIDs.contains(item.id))
                 }
-                .id(appState.scrollToStartRequest)
+                .equatable()
 
                 if clips.isEmpty {
                     VStack(spacing: 10) {
@@ -138,7 +131,7 @@ struct TimelineView: View {
         if let status = appState.statusMessage {
             return status
         }
-        let count = appState.orderedSelectedClips.count
+        let count = appState.selectedCount
         guard count > 1 else { return nil }
         return L10n.tr("timeline.selectedCount", default: "%lld selected — Return to paste", count)
     }
@@ -705,6 +698,36 @@ private struct TimelineSearchField: View {
         }
         .onChange(of: appState.searchFieldSeed) { _, _ in
             draft = appState.query
+        }
+    }
+}
+
+/// A dependency boundary: status/focus/toolbar changes do not reevaluate the lazy strip.
+private struct TimelineCardStrip<Card: View>: View, Equatable {
+    let clips: [ClipItem]
+    let version: UInt64
+    let selectedIDs: Set<UUID>
+    let query: String
+    let scrollRequest: Int
+    let historyRevision: UInt64
+    let tab: TimelineTab
+    @ViewBuilder let card: (ClipItem) -> Card
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.version == rhs.version && lhs.selectedIDs == rhs.selectedIDs
+            && lhs.query == rhs.query && lhs.scrollRequest == rhs.scrollRequest
+            && lhs.historyRevision == rhs.historyRevision && lhs.tab == rhs.tab
+    }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 14) {
+                ForEach(clips) { item in card(item) }
+            }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 18)
+            .padding(.top, 8)
+            .background(TimelineScrollReset(request: scrollRequest))
         }
     }
 }

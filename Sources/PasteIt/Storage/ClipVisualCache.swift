@@ -1,6 +1,7 @@
 import AppKit
 import ImageIO
 import SwiftUI
+import PasteItCore
 
 /// Caches decoded images, banner colors, pixel sizes.
 /// Image dictionary uses NSCache so memory can be reclaimed under pressure.
@@ -11,54 +12,78 @@ final class ClipVisualCache {
     private let imageByPath = NSCache<NSString, NSImage>()
     private let sourceIconByBundle = NSCache<NSString, NSImage>()
     private var pixelSizeByClip: [UUID: (width: Int, height: Int)] = [:]
-    private var inflightLoads: [String: Task<NSImage?, Never>] = [:]
+    private var inflightLoads: [String: Task<CGImage?, Never>] = [:]
+    private var loadTokens: [String: UUID] = [:]
+    private final class TextEntry {
+        let revision: Date
+        let summary: ClipPreviewText.Summary
+        init(item: ClipItem) {
+            revision = item.updatedAt
+            summary = ClipPreviewText.Summary(item.previewText)
+        }
+    }
+    private let textByClip = NSCache<NSUUID, TextEntry>()
 
     init() {
         imageByPath.countLimit = 120
         imageByPath.totalCostLimit = 48 * 1024 * 1024
         sourceIconByBundle.countLimit = 64
+        textByClip.countLimit = 240
     }
 
-    func cachedImage(at relativePath: String?) -> NSImage? {
+    func cardText(for item: ClipItem) -> ClipPreviewText.Summary {
+        let key = item.id as NSUUID
+        if let entry = textByClip.object(forKey: key), entry.revision == item.updatedAt {
+            return entry.summary
+        }
+        let entry = TextEntry(item: item)
+        textByClip.setObject(entry, forKey: key)
+        return entry.summary
+    }
+
+    private func imageKey(_ path: String, blobStore: BlobStore, maxPixelSize: Int) -> String {
+        "\(blobStore.rootURL.path)|\(path)|\(maxPixelSize)"
+    }
+
+    func cachedImage(at relativePath: String?, blobStore: BlobStore, maxPixelSize: Int = 720) -> NSImage? {
         guard let relativePath else { return nil }
-        return imageByPath.object(forKey: relativePath as NSString)
+        return imageByPath.object(forKey: imageKey(relativePath, blobStore: blobStore, maxPixelSize: maxPixelSize) as NSString)
     }
 
-    /// Synchronous decode — prefer `loadImage` / `cachedImage` on hot UI paths.
+    /// Legacy full-image access for non-card callers. UI preview uses async downsampling.
     func image(at relativePath: String?, blobStore: BlobStore) -> NSImage? {
         guard let relativePath else { return nil }
-        if let cached = imageByPath.object(forKey: relativePath as NSString) {
-            return cached
-        }
-        guard let url = blobStore.url(for: relativePath),
-              let image = NSImage(contentsOf: url) else {
-            return nil
-        }
-        imageByPath.setObject(image, forKey: relativePath as NSString, cost: estimatedCost(for: image))
+        let key = imageKey(relativePath, blobStore: blobStore, maxPixelSize: 0) as NSString
+        if let cached = imageByPath.object(forKey: key) { return cached }
+        guard let url = blobStore.url(for: relativePath), let image = NSImage(contentsOf: url) else { return nil }
+        imageByPath.setObject(image, forKey: key, cost: estimatedCost(for: image))
         return image
     }
 
-    func loadImage(at relativePath: String?, blobStore: BlobStore) async -> NSImage? {
-        guard let relativePath else { return nil }
-        if let cached = imageByPath.object(forKey: relativePath as NSString) {
-            return cached
+    func loadImage(at relativePath: String?, blobStore: BlobStore, maxPixelSize: Int = 720) async -> NSImage? {
+        guard let relativePath, let url = blobStore.url(for: relativePath) else { return nil }
+        let key = imageKey(relativePath, blobStore: blobStore, maxPixelSize: maxPixelSize)
+        if let cached = imageByPath.object(forKey: key as NSString) { return cached }
+        if let existing = inflightLoads[key] {
+            guard let bitmap = await existing.value, !Task.isCancelled else { return nil }
+            return NSImage(cgImage: bitmap, size: .zero)
         }
-        if let existing = inflightLoads[relativePath] {
-            return await existing.value
+        let token = UUID()
+        let task = Task.detached(priority: .userInitiated) { () -> CGImage? in
+            guard !Task.isCancelled else { return nil }
+            return ImageDownsampler.image(at: url, maxPixelSize: maxPixelSize)
         }
-
-        let url = blobStore.url(for: relativePath)
-        let task = Task.detached(priority: .userInitiated) { () -> NSImage? in
-            guard let url else { return nil }
-            return NSImage(contentsOf: url)
-        }
-        inflightLoads[relativePath] = task
-        let image = await task.value
-        inflightLoads[relativePath] = nil
-        if let image {
-            imageByPath.setObject(image, forKey: relativePath as NSString, cost: estimatedCost(for: image))
-        }
-        return image
+        inflightLoads[key] = task
+        loadTokens[key] = token
+        let bitmap = await task.value
+        // Invalidation must not allow an older load to refill the cache.
+        guard loadTokens[key] == token else { return nil }
+        inflightLoads[key] = nil
+        loadTokens[key] = nil
+        guard let bitmap else { return nil }
+        let image = NSImage(cgImage: bitmap, size: .zero)
+        imageByPath.setObject(image, forKey: key as NSString, cost: bitmap.bytesPerRow * bitmap.height)
+        return Task.isCancelled ? nil : image
     }
 
     /// Resolve source app icon by bundle ID (no per-clip PNG in the store).
@@ -101,17 +126,24 @@ final class ClipVisualCache {
     }
 
     func invalidate(clipID: UUID) {
+        textByClip.removeObject(forKey: clipID as NSUUID)
         pixelSizeByClip.removeValue(forKey: clipID)
     }
 
-    func invalidatePath(_ relativePath: String?) {
+    func invalidatePath(_ relativePath: String?, blobStore: BlobStore) {
         guard let relativePath else { return }
-        imageByPath.removeObject(forKey: relativePath as NSString)
-        inflightLoads[relativePath]?.cancel()
-        inflightLoads[relativePath] = nil
+        // These are the three supported decode sizes: original, card and preview.
+        for size in [0, 720, 1_600] {
+            imageByPath.removeObject(forKey: imageKey(relativePath, blobStore: blobStore, maxPixelSize: size) as NSString)
+        }
+        for key in Array(inflightLoads.keys) where key.contains("|\(relativePath)|") {
+            inflightLoads.removeValue(forKey: key)?.cancel()
+            loadTokens[key] = nil
+        }
     }
 
     func removeAll() {
+        textByClip.removeAllObjects()
         imageByPath.removeAllObjects()
         sourceIconByBundle.removeAllObjects()
         pixelSizeByClip.removeAll(keepingCapacity: true)
@@ -119,10 +151,15 @@ final class ClipVisualCache {
             task.cancel()
         }
         inflightLoads.removeAll(keepingCapacity: true)
+        loadTokens.removeAll(keepingCapacity: true)
     }
 
     private func estimatedCost(for image: NSImage) -> Int {
-        let pixels = max(Int(image.size.width * image.size.height), 1)
-        return pixels * 4
+        image.representations.reduce(0) { total, representation in
+            if let bitmap = representation as? NSBitmapImageRep {
+                return total + bitmap.bytesPerRow * bitmap.pixelsHigh
+            }
+            return total + max(representation.pixelsWide * representation.pixelsHigh, 1) * 4
+        }
     }
 }

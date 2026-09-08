@@ -1,12 +1,41 @@
 import AppKit
+import Combine
+import PasteItCore
 import Foundation
 import SwiftData
 import SwiftUI
 
 @MainActor
 final class HistoryStore: ObservableObject {
-    @Published private(set) var clips: [ClipItem] = []
-    @Published private(set) var pinboards: [Pinboard] = []
+    @Published private(set) var revision: UInt64 = 0
+    struct Change {
+        var collectionChanged = false
+        var contentIDs = Set<UUID>()
+    }
+    let changes = PassthroughSubject<Change, Never>()
+    private var pendingChange: Change?
+    private(set) var clips: [ClipItem] = [] {
+        didSet { notifyChange() }
+    }
+    private(set) var pinboards: [Pinboard] = [] {
+        didSet { notifyChange() }
+    }
+
+    /// Publish after a logical transaction, coalescing array edits and model changes.
+    private func notifyChange(contentID: UUID? = nil) {
+        let needsSchedule = pendingChange == nil
+        var change = pendingChange ?? Change()
+        if let contentID { change.contentIDs.insert(contentID) }
+        else { change.collectionChanged = true }
+        pendingChange = change
+        guard needsSchedule else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let change = self.pendingChange else { return }
+            self.pendingChange = nil
+            self.revision &+= 1
+            self.changes.send(change)
+        }
+    }
 
     let container: ModelContainer
     let context: ModelContext
@@ -18,6 +47,7 @@ final class HistoryStore: ObservableObject {
     private var enrichingIDs = Set<UUID>()
     private var contentHashIndex: [String: UUID] = [:]
     private var foldedSearchByID: [UUID: String] = [:]
+    private var searchDocumentsByID: [UUID: ClipSearchDocument] = [:]
     private var addsSinceLastPrune = 0
     private let pruneEveryNAdds = 25
     private var pendingBlobPruneTask: Task<Void, Never>?
@@ -153,6 +183,19 @@ final class HistoryStore: ObservableObject {
         return folded
     }
 
+    func searchDocuments(for items: [ClipItem]) -> [ClipSearchDocument] {
+        items.map { item in
+            if let cached = searchDocumentsByID[item.id], cached.revision == item.updatedAt { return cached }
+            let document = ClipSearchDocument(
+                id: item.id, revision: item.updatedAt, type: item.primaryTypeRaw,
+                plainText: item.plainText, searchText: item.searchableText,
+                sourceApp: item.sourceAppName, createdAt: item.createdAt
+            )
+            searchDocumentsByID[item.id] = document
+            return document
+        }
+    }
+
     /// Moves a clip to the front of history after copy / paste from the timeline.
     /// Mirrors Paste: bumps `timestamp` (`lastUsedAt`), keeps original `createdAt`.
     func promoteToFront(_ item: ClipItem) {
@@ -163,7 +206,7 @@ final class HistoryStore: ObservableObject {
             clips.insert(item, at: 0)
         }
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     func add(_ capturedClip: CapturedClip) {
@@ -178,7 +221,7 @@ final class HistoryStore: ObservableObject {
             clips.removeAll { $0.id == existing.id }
             clips.insert(existing, at: 0)
             saveQuietly()
-            objectWillChange.send()
+            notifyChange()
             return
         }
 
@@ -189,8 +232,9 @@ final class HistoryStore: ObservableObject {
         }
         clips.insert(item, at: 0)
         contentHashIndex[item.contentHash] = item.id
-        foldedSearchByID[item.id] = item.foldedSearchHaystack
-        objectWillChange.send()
+        foldedSearchByID.removeValue(forKey: item.id)
+        searchDocumentsByID.removeValue(forKey: item.id)
+        notifyChange()
 
         if let blobPath = capturedClip.pendingOCRBlobRelativePath {
             scheduleOCR(for: item.id, blobRelativePath: blobPath)
@@ -219,10 +263,10 @@ final class HistoryStore: ObservableObject {
             return
         }
         item.updatedAt = Date()
-        foldedSearchByID[id] = item.foldedSearchHaystack
+        foldedSearchByID.removeValue(forKey: id)
         saveQuietly()
-        // Avoid full array replace — notify observers that searchable content changed.
-        objectWillChange.send()
+        // Only this item changed; do not invalidate unfiltered tab membership.
+        notifyChange(contentID: id)
     }
 
     /// Re-runs Vision OCR on the clip's image blob and writes the result back.
@@ -266,9 +310,10 @@ final class HistoryStore: ObservableObject {
             }
             contentHashIndex[item.contentHash] = item.id
         }
-        foldedSearchByID[item.id] = item.foldedSearchHaystack
+        foldedSearchByID.removeValue(forKey: item.id)
+        searchDocumentsByID.removeValue(forKey: item.id)
         saveQuietly()
-        objectWillChange.send()
+        notifyChange(contentID: item.id)
     }
 
     @discardableResult
@@ -314,8 +359,8 @@ final class HistoryStore: ObservableObject {
         saveQuietly()
         clips.insert(newItem, at: 0)
         contentHashIndex[newItem.contentHash] = newItem.id
-        foldedSearchByID[newItem.id] = newItem.foldedSearchHaystack
-        objectWillChange.send()
+        foldedSearchByID.removeValue(forKey: newItem.id)
+        notifyChange()
         enrichLinkMetadataIfNeeded(for: newItem.id)
         return newItem
     }
@@ -325,18 +370,19 @@ final class HistoryStore: ObservableObject {
             pinboard.itemIDs.removeAll { $0 == item.id }
         }
         visualCache.invalidate(clipID: item.id)
-        visualCache.invalidatePath(item.thumbnailRelativePath)
-        visualCache.invalidatePath(item.blobRelativePath)
-        visualCache.invalidatePath(item.linkIconRelativePath)
-        visualCache.invalidatePath(item.linkImageRelativePath)
+        visualCache.invalidatePath(item.thumbnailRelativePath, blobStore: blobStore)
+        visualCache.invalidatePath(item.blobRelativePath, blobStore: blobStore)
+        visualCache.invalidatePath(item.linkIconRelativePath, blobStore: blobStore)
+        visualCache.invalidatePath(item.linkImageRelativePath, blobStore: blobStore)
         if contentHashIndex[item.contentHash] == item.id {
             contentHashIndex.removeValue(forKey: item.contentHash)
         }
         foldedSearchByID.removeValue(forKey: item.id)
+        searchDocumentsByID.removeValue(forKey: item.id)
         context.delete(item)
         clips.removeAll { $0.id == item.id }
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     /// Context-aware remove: Default hides/deletes; Pinned/folder only leave that board.
@@ -361,7 +407,7 @@ final class HistoryStore: ObservableObject {
         item.isHiddenFromTimeline = true
         item.updatedAt = Date()
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     /// After leaving the last pinboard, a timeline-hidden clip has nowhere to live — delete it.
@@ -378,11 +424,16 @@ final class HistoryStore: ObservableObject {
 
     /// Cache hit only — never blocks the main thread on disk IO.
     func cachedThumbnailImage(for item: ClipItem) -> NSImage? {
-        visualCache.cachedImage(at: item.thumbnailRelativePath)
+        visualCache.cachedImage(at: item.thumbnailRelativePath, blobStore: blobStore)
     }
 
     func loadThumbnailImage(for item: ClipItem) async -> NSImage? {
         await visualCache.loadImage(at: item.thumbnailRelativePath, blobStore: blobStore)
+    }
+
+    func loadPreviewImage(for item: ClipItem) async -> NSImage? {
+        await visualCache.loadImage(at: item.blobRelativePath ?? item.thumbnailRelativePath,
+                                    blobStore: blobStore, maxPixelSize: 1_600)
     }
 
     func fullImage(for item: ClipItem) -> NSImage? {
@@ -394,8 +445,8 @@ final class HistoryStore: ObservableObject {
     }
 
     func cachedLinkPreviewImage(for item: ClipItem) -> NSImage? {
-        visualCache.cachedImage(at: item.linkImageRelativePath)
-            ?? visualCache.cachedImage(at: item.linkIconRelativePath)
+        visualCache.cachedImage(at: item.linkImageRelativePath, blobStore: blobStore)
+            ?? visualCache.cachedImage(at: item.linkIconRelativePath, blobStore: blobStore)
     }
 
     func loadLinkPreviewImage(for item: ClipItem) async -> NSImage? {
@@ -463,7 +514,25 @@ final class HistoryStore: ObservableObject {
         defer { enrichingIDs.remove(id) }
 
         let metadata = await linkMetadataService.metadata(for: url)
-        guard let liveItem = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else { return false }
+        let store = blobStore
+        let paths = await Task.detached(priority: .utility) {
+            let icon = needsIcon ? metadata.iconData.flatMap {
+                try? store.storeThumbnail(fromImageData: $0, maxDimension: 128)?.path
+            } : nil
+            let image = needsImage ? metadata.imageData.flatMap {
+                try? store.storeThumbnail(fromImageData: $0, maxDimension: 720)?.path
+            } : nil
+            return (icon, image)
+        }.value
+        guard let liveItem = clips.first(where: { $0.id == id }) ?? fetchClip(id: id) else {
+            // The clip was deleted while metadata was in flight; discard only these new files.
+            await Task.detached(priority: .utility) {
+                for path in [paths.0, paths.1].compactMap({ $0 }) {
+                    if let url = store.url(for: path) { try? FileManager.default.removeItem(at: url) }
+                }
+            }.value
+            return false
+        }
 
         var didUpdate = false
         if needsTitle, let title = metadata.title, !title.isEmpty {
@@ -473,29 +542,15 @@ final class HistoryStore: ObservableObject {
             }
             didUpdate = true
         }
-        if needsIcon, let iconData = metadata.iconData {
-            liveItem.linkIconRelativePath = try? blobStore.store(
-                data: iconData,
-                preferredExtension: "png",
-                id: UUID()
-            )
-            didUpdate = true
-        }
-        if needsImage, let imageData = metadata.imageData {
-            liveItem.linkImageRelativePath = try? blobStore.store(
-                data: imageData,
-                preferredExtension: "jpg",
-                id: UUID()
-            )
-            didUpdate = true
-        }
+        if let icon = paths.0 { liveItem.linkIconRelativePath = icon; didUpdate = true }
+        if let image = paths.1 { liveItem.linkImageRelativePath = image; didUpdate = true }
 
         if didUpdate {
             liveItem.updatedAt = Date()
             visualCache.invalidate(clipID: id)
-            foldedSearchByID[id] = liveItem.foldedSearchHaystack
+            foldedSearchByID.removeValue(forKey: id)
             saveQuietly()
-            objectWillChange.send()
+            notifyChange(contentID: id)
         }
 
         return liveItem.linkImageRelativePath != nil || liveItem.linkIconRelativePath != nil
@@ -539,18 +594,18 @@ final class HistoryStore: ObservableObject {
     func clearHistory(keepPinned: Bool = true) {
         let victims = clips.filter { keepPinned ? $0.pinboardIDs.isEmpty : true }
         for item in victims {
+            foldedSearchByID.removeValue(forKey: item.id)
+            searchDocumentsByID.removeValue(forKey: item.id)
             if contentHashIndex[item.contentHash] == item.id {
                 contentHashIndex.removeValue(forKey: item.contentHash)
             }
-            foldedSearchByID.removeValue(forKey: item.id)
             visualCache.invalidate(clipID: item.id)
             context.delete(item)
         }
-        clips.removeAll { item in
-            victims.contains(where: { $0.id == item.id })
-        }
+        let victimIDs = Set(victims.map(\.id))
+        clips.removeAll { victimIDs.contains($0.id) }
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     static let pinnedBoardName = "Pinned"
@@ -585,7 +640,7 @@ final class HistoryStore: ObservableObject {
         context.insert(pinboard)
         saveQuietly()
         pinboards.append(pinboard)
-        objectWillChange.send()
+        notifyChange()
         return pinboard
     }
 
@@ -603,7 +658,7 @@ final class HistoryStore: ObservableObject {
         pinboard.name = name
         pinboard.updatedAt = Date()
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     /// Renames a custom folder. Refuses the system Pinned board and reserved names.
@@ -620,12 +675,11 @@ final class HistoryStore: ObservableObject {
     func deletePinboard(_ pinboard: Pinboard) {
         for item in clips where item.pinboardIDs.contains(pinboard.id) {
             item.pinboardIDs.removeAll { $0 == pinboard.id }
-            foldedSearchByID[item.id] = item.foldedSearchHaystack
         }
         context.delete(pinboard)
         pinboards.removeAll { $0.id == pinboard.id }
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     /// Deletes a custom folder. Refuses the system Pinned board.
@@ -644,7 +698,7 @@ final class HistoryStore: ObservableObject {
             pinboard.itemIDs.insert(item.id, at: 0)
         }
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     /// Pins to the system Pinned board so the item survives history pruning.
@@ -663,7 +717,7 @@ final class HistoryStore: ObservableObject {
             item.pinboardIDs = []
         }
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
         purgeIfOrphaned(item)
     }
 
@@ -682,7 +736,8 @@ final class HistoryStore: ObservableObject {
                 didDelete = true
             }
             if !expired.isEmpty {
-                clips.removeAll { item in expired.contains(where: { $0.id == item.id }) }
+                let expiredIDs = Set(expired.map(\.id))
+                clips.removeAll { expiredIDs.contains($0.id) }
             }
         }
 
@@ -700,7 +755,7 @@ final class HistoryStore: ObservableObject {
 
         if didDelete {
             saveQuietly()
-            objectWillChange.send()
+            notifyChange()
         }
 
         scheduleBlobPrune()
@@ -733,19 +788,20 @@ final class HistoryStore: ObservableObject {
             contentHashIndex.removeValue(forKey: item.contentHash)
         }
         foldedSearchByID.removeValue(forKey: item.id)
+        searchDocumentsByID.removeValue(forKey: item.id)
         visualCache.invalidate(clipID: item.id)
-        visualCache.invalidatePath(item.thumbnailRelativePath)
-        visualCache.invalidatePath(item.blobRelativePath)
-        visualCache.invalidatePath(item.linkIconRelativePath)
-        visualCache.invalidatePath(item.linkImageRelativePath)
+        visualCache.invalidatePath(item.thumbnailRelativePath, blobStore: blobStore)
+        visualCache.invalidatePath(item.blobRelativePath, blobStore: blobStore)
+        visualCache.invalidatePath(item.linkIconRelativePath, blobStore: blobStore)
+        visualCache.invalidatePath(item.linkImageRelativePath, blobStore: blobStore)
     }
 
     private func rebuildIndexes() {
         contentHashIndex.removeAll(keepingCapacity: true)
         foldedSearchByID.removeAll(keepingCapacity: true)
+        searchDocumentsByID.removeAll(keepingCapacity: true)
         for item in clips {
             contentHashIndex[item.contentHash] = item.id
-            foldedSearchByID[item.id] = item.foldedSearchHaystack
         }
     }
 
@@ -770,7 +826,7 @@ final class HistoryStore: ObservableObject {
         favorites.name = Self.pinnedBoardName
         favorites.updatedAt = Date()
         saveQuietly()
-        objectWillChange.send()
+        notifyChange()
     }
 
     @discardableResult
@@ -867,7 +923,7 @@ final class HistoryStore: ObservableObject {
         if saveQuietly() {
             UserDefaults.standard.set(true, forKey: Self.didBackfillLastUsedAtKey)
             clips.sort { $0.lastUsedAt > $1.lastUsedAt }
-            objectWillChange.send()
+            notifyChange()
             NSLog("PasteIt: backfilled lastUsedAt for \(clips.count) clips")
         } else {
             NSLog("PasteIt: failed to backfill lastUsedAt; will retry next launch")

@@ -121,12 +121,9 @@ final class ClipItem: Identifiable {
 
     var previewText: String {
         let hasRich = htmlText != nil || rtfData != nil
-        let richPlain: String? = hasRich
-            ? RichPlainText.extract(htmlText: htmlText, rtfData: rtfData)
-            : nil
         return ClipPreviewText.resolve(
             plainText: plainText,
-            richPlainText: richPlain,
+            richPlainText: hasRich ? RichPlainText.extract(htmlText: htmlText, rtfData: rtfData) : nil,
             hasRichPayload: hasRich,
             ocrText: ocrText,
             fileURLString: fileURLString,

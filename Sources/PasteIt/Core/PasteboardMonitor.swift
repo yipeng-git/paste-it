@@ -63,6 +63,8 @@ final class PasteboardMonitor: NSObject {
     }
 
     private func captureIfNeeded() async {
+        // Do not consume a newer changeCount while another snapshot is being normalized.
+        guard !isCapturing else { return }
         let current = pasteboard.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
@@ -120,7 +122,7 @@ final class PasteboardMonitor: NSObject {
         let rtf = first.data(forType: .rtf)
         // Only treat bitmap as image content when this is not a Finder file copy.
         let pngData = fileURLs.isEmpty ? first.data(forType: .png) : nil
-        let tiffData = fileURLs.isEmpty ? first.data(forType: .tiff) : nil
+        let tiffData = fileURLs.isEmpty && pngData == nil ? first.data(forType: .tiff) : nil
         let imageData = pngData ?? tiffData
         let imageExtension = pngData != nil ? "png" : "tiff"
 
@@ -185,7 +187,9 @@ final class PasteboardMonitor: NSObject {
         // Some apps put content only in HTML/RTF (empty or whitespace plain text).
         // Derive a real plain string so title / cards / search match Space preview & edit.
         if plainText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            let derived = RichPlainText.extract(htmlText: html, rtfData: rtf)
+            let derived = await MainActor.run {
+                RichPlainText.extract(htmlText: html, rtfData: rtf)
+            }
             if !derived.isEmpty {
                 plainText = derived
             }

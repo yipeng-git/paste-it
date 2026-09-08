@@ -92,7 +92,7 @@ enum RenderScreenshotHandler {
         try await Task.sleep(nanoseconds: settleNs)
 
         // After search debounce / first paint, lock selection then capture.
-        session.finalizeUI(selectedIndex: selectedIndex)
+        await session.finalizeUI(selectedIndex: selectedIndex)
         await Task.yield()
 
         guard let frame = session.panelFrame else {

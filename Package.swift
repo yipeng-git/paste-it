@@ -45,6 +45,11 @@ let package = Package(
             name: "PasteItTests",
             dependencies: ["PasteItCore"],
             path: "Tests/PasteItTests"
+        ),
+        .testTarget(
+            name: "PasteItIntegrationTests",
+            dependencies: ["PasteIt", "PasteItCore"],
+            path: "Tests/PasteItIntegrationTests"
         )
     ]
 )
