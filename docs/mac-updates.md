@@ -43,10 +43,11 @@ This runs the whole chain:
 2. Bumps `CFBundleShortVersionString` and `CFBundleVersion` +1.
 3. `package-release.sh` — builds **arm64** and **universal** apps, signs, notarizes, staples, writes two DMGs under `dist/`.
 4. Regenerates `appcast.xml`; enclosure URLs point at this repo’s Release download URLs.
-5. `gh release create mac-v{ver}` on **this repository** with both DMGs.
-6. Copies the appcast to `docs/appcast.xml`, commits, tags `mac-v{ver}`, pushes.
+5. Create a draft GitHub Release on **this repository** and upload both DMGs.
+6. Copy the appcast to `docs/appcast.xml`, commit, tag `mac-v{ver}`, and push the exact release commit and tag.
+7. Publish the draft only after the tag is available remotely. This prevents GitHub from generating a tag at the previous default-branch commit.
 
-Flags: `--dry-run`, `--skip-package`, `--no-push`.
+Flags: `--dry-run`, `--skip-package`, `--no-push`. With `--no-push`, the GitHub Release remains a draft until the local commit/tag are pushed and the draft is published.
 
 Override the release target with `PASTEIT_RELEASE_REPO=owner/name` if `origin` is not set yet.
 

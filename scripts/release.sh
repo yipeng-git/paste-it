@@ -262,9 +262,10 @@ rm -f "$MARKER"
 
 # ----------------------------------------------------------- github release
 if [[ "$DRY_RUN" -eq 0 ]]; then
-  log "Create GitHub Release $TAG on $RELEASE_REPO"
+  log "Upload draft GitHub Release $TAG on $RELEASE_REPO"
   gh release create "$TAG" "${ASSETS[@]}" \
     --repo "$RELEASE_REPO" \
+    --draft \
     --title "Paste It $VERSION" \
     --notes "Paste It for Mac $VERSION (build $NEW_BUILD).
 
@@ -291,8 +292,10 @@ if [[ "$DRY_RUN" -eq 0 ]]; then
   git -C "$ROOT" tag "$TAG"
   if [[ "$NO_PUSH" -eq 0 ]]; then
     git -C "$ROOT" push origin HEAD "$TAG"
+    log "Publish GitHub Release $TAG after its exact tag is available"
+    gh release edit "$TAG" --repo "$RELEASE_REPO" --draft=false
   else
-    echo "  (--no-push: run 'git push origin HEAD $TAG' when ready)"
+    echo "  (--no-push: release remains a draft; push HEAD and $TAG, then publish the draft)"
   fi
 else
   log "(dry-run: skipping commit/tag/push — Info.plist and docs/appcast.xml are modified locally)"
