@@ -1,0 +1,19 @@
+Info.plist
+  s_483df91b4c2d94::t_a6766da0ca7670 34,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "6e904596a5b55831176af2c7a8f15fd76698dafe",
+  "prompts": {},
+  "sessions": {
+    "s_483df91b4c2d94": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a084be-d84a-7262-847c-50f0c6940f7f",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
