@@ -22,6 +22,7 @@ source "$ROOT/scripts/lib/posthog-secrets.sh"
 
 SKIP_NOTARIZE=0
 SKIP_DMG=0
+REPACK_DMG=0
 CONFIGURATION=release
 # both | arm64 | universal
 VARIANT=both
@@ -32,6 +33,7 @@ Usage: package-release.sh [options]
 
   --skip-notarize   Sign only (no notarytool / stapler)
   --skip-dmg        Stop after signed (and optionally notarized) .app
+  --repack-dmg      Reuse existing signed, notarized apps; rebuild only DMGs
   --variant NAME    both (default) | arm64 | universal
   -h, --help        Show this help
 
@@ -47,6 +49,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --skip-notarize) SKIP_NOTARIZE=1; shift ;;
     --skip-dmg) SKIP_DMG=1; shift ;;
+    --repack-dmg) REPACK_DMG=1; shift ;;
     --variant)
       VARIANT="${2:-}"
       [[ "$VARIANT" == "both" || "$VARIANT" == "arm64" || "$VARIANT" == "universal" ]] \
@@ -180,74 +183,18 @@ notarize_app() {
 create_dmg() {
   local app="$1"
   local dmg_path="$2"
-  local volname="Paste It"
-  local stage="$DIST/dmg-stage-$(basename "$dmg_path" .dmg)"
-  local dmg_rw="$DIST/.pasteit-rw-$(basename "$dmg_path" .dmg).dmg"
-  local dmg_background="$ROOT/Resources/dmg-background.png"
-  local mount_dir="/Volumes/$volname"
-
-  echo "==> Create DMG → $dmg_path"
-  rm -rf "$stage" "$dmg_path" "$dmg_rw"
-  mkdir -p "$stage"
-  cp -R "$app" "$stage/"
-  ln -s /Applications "$stage/Applications"
-  if [[ -f "$dmg_background" ]]; then
-    mkdir -p "$stage/.background"
-    cp "$dmg_background" "$stage/.background/background.png"
+  local dmg_tools="$ROOT/.tools/dmg-layout"
+  if [[ ! -x "$dmg_tools/bin/dmgbuild" ]]; then
+    python3 -m venv "$dmg_tools"
+    "$dmg_tools/bin/python" -m pip install -r "$ROOT/scripts/dmg-layout-requirements.txt"
   fi
 
-  local stage_mb
-  stage_mb="$(du -sm "$stage" | cut -f1)"
-  hdiutil create \
-    -volname "$volname" \
-    -srcfolder "$stage" \
-    -fs HFS+ \
-    -format UDRW \
-    -size "$((stage_mb + 40))m" \
-    -ov \
-    "$dmg_rw"
-
-  if [[ -d "$mount_dir" ]]; then
-    hdiutil detach "$mount_dir" -force >/dev/null 2>&1 || true
-  fi
-  hdiutil attach "$dmg_rw" -noverify -noautoopen -mountpoint "$mount_dir"
-
-  echo "==> Style DMG window (Finder)"
-  osascript <<OSA || echo "  (Finder styling skipped/failed — DMG contents are still fine, just unstyled)"
-tell application "Finder"
-  tell disk "$volname"
-    open
-    set current view of container window to icon view
-    set toolbar visible of container window to false
-    set statusbar visible of container window to false
-    set pathbar visible of container window to false
-    set the bounds of container window to {400, 100, 1060, 528}
-    set theViewOptions to the icon view options of container window
-    set arrangement of theViewOptions to not arranged
-    set icon size of theViewOptions to 128
-    set text size of theViewOptions to 12
-    try
-      set background picture of theViewOptions to POSIX file "$mount_dir/.background/background.png"
-    end try
-    set position of item "$APP_NAME" of container window to {180, 180}
-    set position of item "Applications" of container window to {480, 180}
-    close
-    open
-    update without registering applications
-    delay 2
-  end tell
-end tell
-OSA
-
-  sync
-  hdiutil detach "$mount_dir" -force
-
-  echo "==> Compress DMG"
+  echo "==> Create compact drag-install DMG → $dmg_path"
+  # Generate Finder metadata directly with dmgbuild. Keep the two-icon layout
+  # while omitting background artwork and live Finder automation.
   rm -f "$dmg_path"
-  hdiutil convert "$dmg_rw" -format UDZO -imagekey zlib-level=9 -o "$dmg_path"
-  rm -f "$dmg_rw"
-  rm -rf "$stage"
-
+  "$dmg_tools/bin/dmgbuild" -s "$ROOT/scripts/dmg-settings.py" \
+    -D app="$app" "Paste It" "$dmg_path"
   sign "$dmg_path"
 }
 
@@ -306,6 +253,26 @@ package_variant() {
   fi
   create_dmg "$app" "$dmg"
 }
+
+# A layout-only reissue preserves the released application version and signature.
+if [[ "$REPACK_DMG" -eq 1 ]]; then
+  [[ "$SKIP_DMG" -eq 0 && "$SKIP_NOTARIZE" -eq 0 ]] || { echo "--repack-dmg requires notarized apps and DMG output" >&2; exit 1; }
+  variants=(arm64 universal)
+  [[ "$VARIANT" == "both" ]] || variants=("$VARIANT")
+  # Validate every input before replacing any archive.
+  for label in "${variants[@]}"; do
+    app="$DIST/$label/$APP_NAME"
+    [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" == "$SHORT_VERSION" ]]
+    [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app/Contents/Info.plist")" == "$BUILD_VERSION" ]]
+    codesign --verify --deep --strict "$app"
+    codesign -dv --verbose=4 "$app" 2>&1 | grep 'Authority=Developer ID Application:' >/dev/null
+    xcrun stapler validate "$app"
+  done
+  for label in "${variants[@]}"; do
+    create_dmg "$DIST/$label/$APP_NAME" "$DIST/PasteIt-$SHORT_VERSION-$label.dmg"
+  done
+  exit 0
+fi
 
 # --- build ---
 rm -rf "$DIST"

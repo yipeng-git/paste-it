@@ -53,7 +53,11 @@ export PASTEIT_NOTARY_PROFILE="paste-it-notary"
 ./scripts/package-release.sh --variant arm64
 ```
 
-DMG 背景图：[`Resources/dmg-background.png`](../Resources/dmg-background.png)，由 [`scripts/make-dmg-background.py`](../scripts/make-dmg-background.py) 生成。
+DMG 使用紧凑的左右拖拽安装布局：应用在左、Applications 快捷方式在右，540 × 320 pt 窗口、96 pt 图标，隐藏侧栏和工具栏。不嵌入背景图或箭头。使用固定版本的 `dmgbuild` 直接生成 Finder 布局元数据；配置见 `scripts/dmg-settings.py`，工具安装在忽略的 `.tools/dmg-layout/`。
+
+布局参考 [VLC 的公开配置](https://github.com/videolan/vlc/blob/master/extras/package/macosx/dmg/dmg_settings.py) 与 [IINA 的打包脚本](https://github.com/iina/iina/blob/develop/other/generate_dmg.sh)：保留固定窗口和同高的左右图标，去掉项目自己的装饰背景。540 × 320 是本项目选择的尺寸。
+
+仅重新封装现有版本的安装盘时，可运行 `./scripts/package-release.sh --repack-dmg`。它会先验证 `dist/arm64` 和 `dist/universal` 中应用的版本、Developer ID 签名及公证票据，再重新生成并签名 DMG；应用本体与版本号保持不变。替换已发布附件时必须重新签署 Sparkle 更新并同步更新源的签名和大小。
 
 ## 发版衔接
 

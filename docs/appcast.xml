@@ -8,7 +8,7 @@
             <sparkle:version>9</sparkle:version>
             <sparkle:shortVersionString>0.2.7</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.7/PasteIt-0.2.7-universal.dmg" length="10011305" type="application/octet-stream" sparkle:edSignature="MOiZAleJBwKWx1dWOvaNfMKVaP9KkJFAiid2Eb7yuhWY9iopcIGmfaNUAuX3JqWMQdTmTrX1KGb9WAl2TerEAQ=="/>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.7/PasteIt-0.2.7-universal.dmg" length="10635432" type="application/octet-stream" sparkle:edSignature="OEWRuuWTVqYa1xnlmhQaXbR/WbpeuuqTTL+ymc7lndh+CTLXEj7y0h98qTpDIt5qEajeAz0LQgiGknK38jIlCQ=="/>
         </item>
         <item>
             <title>0.2.7</title>
@@ -17,7 +17,7 @@
             <sparkle:shortVersionString>0.2.7</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.7/PasteIt-0.2.7-arm64.dmg" length="7125653" type="application/octet-stream" sparkle:edSignature="uiPwhnsC4PVkrfYVn2fx+Wbzhzj3t180xHM/ia7KpI2P4H0CqF8hwNuY/z695/ygs8J7IK+uDcs3uS06DEFmAg=="/>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.7/PasteIt-0.2.7-arm64.dmg" length="7466838" type="application/octet-stream" sparkle:edSignature="F00fREjn1UHXH3kYQHs268OV5tirdhSDeDlE61uYSdguN7dZk00mqDPsy7d3wMC2SDpCAhTjEcPThEyD2i6hAg=="/>
         </item>
         <item>
             <title>0.2.6</title>
