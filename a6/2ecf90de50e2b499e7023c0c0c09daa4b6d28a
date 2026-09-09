@@ -1,0 +1,35 @@
+docs/appcast.xml
+  s_47c6d8c2501485::t_d13c60f17fa834 11,20
+docs/mac-packaging.md
+  s_7cbf8ce1d1acc8::t_768b352802afb9 56-60
+scripts/dmg-layout-requirements.txt
+  s_7cbf8ce1d1acc8::t_5b2750b3cb334b 1-3
+scripts/dmg-settings.py
+  s_7cbf8ce1d1acc8::t_4d4d2a70a979c9 1-27
+scripts/package-release.sh
+  s_7cbf8ce1d1acc8::t_b965105811f7a9 25,36,52,186-189,192-194,196-197,257-276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "a62ecf90de50e2b499e7023c0c0c09daa4b6d28a",
+  "prompts": {},
+  "sessions": {
+    "s_47c6d8c2501485": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08425-08f6-7842-b850-820da54aff34",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_7cbf8ce1d1acc8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0841d-0f72-7c70-b3cd-b3287f3d603f",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
