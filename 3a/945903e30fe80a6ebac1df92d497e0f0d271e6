@@ -1,0 +1,65 @@
+README.ja.md
+  s_545d28457f080c::t_3a2096d9082f57 62-63
+README.ko.md
+  s_545d28457f080c::t_e43a13880b350f 62-63
+README.md
+  s_545d28457f080c::t_270d4eff4da112 62-63
+README.zh-CN.md
+  s_545d28457f080c::t_c48b1e4950eec8 62-63
+Resources/Localization/Localizable.xcstrings
+  s_bfa4b7716ac604::t_bc0de97be6f350 12125-12878
+Resources/de.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_1ed2023b5eca3b 144-153,164,168,177
+Resources/en.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_742e4c509f5046 144-153,164,168,177
+Resources/es.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_c416a0c260f520 144-153,164,168,177
+Resources/fr.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_6d664811098795 144-153,164,168,177
+Resources/ja.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_232ab797a1596e 144-153,164,168,177
+Resources/ko.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_66c61ec4a28096 144-153,164,168,177
+Resources/pl.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_628a4bec38a19f 144-153,164,168,177
+Resources/zh-Hans.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_db71d64fc29515 144-153,164,168,177
+Resources/zh-Hant.lproj/Localizable.strings
+  s_bfa4b7716ac604::t_0e8ce148b9b183 144-153,164,168,177
+Sources/PasteIt/Settings/PrivacySettingsView.swift
+  s_bfa4b7716ac604::t_ddf13d47483b81 16-19
+Sources/PasteIt/Settings/SettingsView.swift
+  s_bfa4b7716ac604::t_c0bf475fdc9e89 5-50,59-60,76-92,94-114,155-183,195-208,213,230,244,249-262,264-266,271-278,280-282,284-289,292-332,334,336-358,360-363,366-386,388-389,391-399,408-418,420-421,424-426,433-439,441-443,446-449,451-453
+Sources/PasteIt/Settings/SettingsWindowController.swift
+  s_bfa4b7716ac604::t_a6e8ca281a385f 3,32,34-35,39-46,50-52,62-92
+scripts/generate-localizations.py
+  s_bfa4b7716ac604::t_6e397ec55f0b47 584-649
+scripts/localization_batch2.py
+  s_bfa4b7716ac604::t_26893d5cde234f 593-670
+scripts/localization_batch_cjk.py
+  s_bfa4b7716ac604::t_1f2ab7c584e351 447-500
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "3a945903e30fe80a6ebac1df92d497e0f0d271e6",
+  "prompts": {},
+  "sessions": {
+    "s_545d28457f080c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a084ac-793d-75a3-aea4-2a2cccb3855e",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_bfa4b7716ac604": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08452-cfc1-7e92-824b-57555577b60f",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
