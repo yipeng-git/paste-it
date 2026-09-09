@@ -1,0 +1,27 @@
+Package.swift
+  s_483df91b4c2d94::t_522e699f146fe8 37-38,40-48
+docs/mac-packaging.md
+  s_483df91b4c2d94::t_9e9125fb2b31d6 48-49
+scripts/dmg-settings.py
+  s_483df91b4c2d94::t_fba53a4fd963b9 8
+scripts/package-release.sh
+  s_483df91b4c2d94::t_b6fd0587a6f5f4 123-126
+scripts/run-app.sh
+  s_483df91b4c2d94::t_e42fda1e4e9dd5 13-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "9a5f16f3b86b7bdd813706ec8f872f4e1a6857f1",
+  "prompts": {},
+  "sessions": {
+    "s_483df91b4c2d94": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a084be-d84a-7262-847c-50f0c6940f7f",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
