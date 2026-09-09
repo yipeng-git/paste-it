@@ -1,0 +1,23 @@
+docs/mac-updates.md
+  s_ff5cd7d2d570fc::t_8a491564351868 69-72
+scripts/generate-appcast.sh
+  s_ff5cd7d2d570fc::t_74e411ef19027e 56-58
+scripts/release.sh
+  s_ff5cd7d2d570fc::t_54f51233c29bc8 245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "63afd581d3996555c80e117fdb392556cda39ff0",
+  "prompts": {},
+  "sessions": {
+    "s_ff5cd7d2d570fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08046-d8ea-7223-95b7-6208818ba63d",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
