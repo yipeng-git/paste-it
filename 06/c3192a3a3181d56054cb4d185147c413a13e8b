@@ -1,0 +1,21 @@
+docs/mac-updates.md
+  s_ff5cd7d2d570fc::t_dfd216748e20f1 46-48,50
+scripts/release.sh
+  s_ff5cd7d2d570fc::t_c78877ee163cfb 265,268,295-296,298
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "06c3192a3a3181d56054cb4d185147c413a13e8b",
+  "prompts": {},
+  "sessions": {
+    "s_ff5cd7d2d570fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08046-d8ea-7223-95b7-6208818ba63d",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
