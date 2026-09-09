@@ -1,0 +1,21 @@
+Info.plist
+  s_ff5cd7d2d570fc::t_804e293c795588 34,36
+docs/appcast.xml
+  s_ff5cd7d2d570fc::t_6b6236159cddd2 5-35,38,46,55,61,63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "a178f5aca4e685585d925fe392f5e6066de98b29",
+  "prompts": {},
+  "sessions": {
+    "s_ff5cd7d2d570fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08046-d8ea-7223-95b7-6208818ba63d",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
