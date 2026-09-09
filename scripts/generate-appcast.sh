@@ -53,7 +53,9 @@ fi
 
 echo "Using $GENERATE_APPCAST"
 echo "Scanning $UPDATES"
-"$GENERATE_APPCAST" "$UPDATES"
+# Both architecture lanes share bundle/build identifiers, which gives their
+# deltas identical names. Ship full signed archives until deltas are namespaced.
+"$GENERATE_APPCAST" --maximum-deltas 0 "$UPDATES"
 
 if [[ -f "$UPDATES/appcast.xml" ]]; then
   echo "Generated $UPDATES/appcast.xml"

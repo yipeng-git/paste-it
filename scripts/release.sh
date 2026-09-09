@@ -141,7 +141,6 @@ mkdir -p "$UPDATES"
 cp -f "$DMG_ARM64_PATH" "$UPDATES/"
 cp -f "$DMG_UNIVERSAL_PATH" "$UPDATES/"
 
-MARKER="$(mktemp)"
 ARM_WORK="$(mktemp -d)"
 UNI_WORK="$(mktemp -d)"
 cleanup_appcast_work() { rm -rf "$ARM_WORK" "$UNI_WORK"; }
@@ -169,16 +168,6 @@ shopt -u nullglob
 
 UPDATES_DIR="$ARM_WORK" "$SCRIPTS/generate-appcast.sh"
 UPDATES_DIR="$UNI_WORK" "$SCRIPTS/generate-appcast.sh"
-
-# Collect deltas produced in work dirs into updates/ (sanitize spaces).
-shopt -s nullglob
-for f in "$ARM_WORK"/*.delta "$UNI_WORK"/*.delta; do
-  [[ -f "$f" ]] || continue
-  base="$(basename "$f")"
-  base="${base// /.}"
-  cp -f "$f" "$UPDATES/$base"
-done
-shopt -u nullglob
 
 log "Merge per-arch appcasts + rewrite enclosure URLs → $DOWNLOAD_BASE/mac-v{version}/…"
 python3 - "$ARM_WORK/appcast.xml" "$UNI_WORK/appcast.xml" "$UPDATES/appcast.xml" "$DOWNLOAD_BASE" <<'PY'
@@ -253,12 +242,8 @@ PY
 trap - EXIT
 cleanup_appcast_work
 
-# Delta files produced by this run belong to this release's assets.
+# Publish the complete signed archives for both architectures.
 ASSETS=("$UPDATES/$DMG_ARM64" "$UPDATES/$DMG_UNIVERSAL")
-while IFS= read -r -d '' delta; do
-  ASSETS+=("$delta")
-done < <(find "$UPDATES" -name '*.delta' -newer "$MARKER" -print0)
-rm -f "$MARKER"
 
 # ----------------------------------------------------------- github release
 if [[ "$DRY_RUN" -eq 0 ]]; then

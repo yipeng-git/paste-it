@@ -66,3 +66,7 @@ Install the build under `/Applications` and use **Settings → About → Check f
 ## Local debug
 
 Debug `.app` from `./scripts/run-app.sh` embeds `Sparkle.framework`. Automatic checks still hit the public feed.
+
+### Full-archive updates
+
+The release workflow disables delta generation and publishes full signed DMGs. Both architecture lanes share the same bundle name and build number; Sparkle otherwise generates identical delta filenames for different binaries. Full archives avoid collisions and preserve architecture-specific signatures.
