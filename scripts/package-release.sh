@@ -118,10 +118,12 @@ bin_path_for_arch() {
 
 build_arch() {
   local arch="$1"
-  echo "==> swift build -c $CONFIGURATION --arch $arch (hardened)"
-  swift build -c "$CONFIGURATION" --arch "$arch" "${BUILD_FLAGS[@]}"
   local bin_dir
   bin_dir="$(bin_path_for_arch "$arch")"
+  # SwiftPM can leave removed/excluded resources in an incremental build bundle.
+  rm -rf "$bin_dir/PasteIt_PasteIt.bundle"
+  echo "==> swift build -c $CONFIGURATION --arch $arch (hardened)"
+  swift build -c "$CONFIGURATION" --arch "$arch" "${BUILD_FLAGS[@]}"
   [[ -x "$bin_dir/PasteIt" ]] || { echo "Missing binary: $bin_dir/PasteIt" >&2; exit 1; }
   [[ -d "$bin_dir/Sparkle.framework" ]] \
     || { echo "Missing Sparkle.framework next to binary (SPM copy step failed?)" >&2; exit 1; }

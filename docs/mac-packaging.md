@@ -45,6 +45,8 @@ export PASTEIT_NOTARY_PROFILE="paste-it-notary"
 
 默认产出两份 DMG：`dist/PasteIt-{ver}-arm64.dmg` 与 `dist/PasteIt-{ver}-universal.dmg`。
 
+DMG 使用 UDZO（zlib）压缩，显式设置 `compression_level = 9`，避免使用系统默认的低压缩等级。应用图标 `Assets.car` 和 `AppIcon.icns` 仅放在主应用的 `Contents/Resources/`；SwiftPM 资源包仅声明各语言的 `.lproj` 目录，不打入重复图标、宣传 PNG 或 `Localizable.xcstrings` 源表。新增语言时同步 `Package.swift` 的资源列表。打包和调试脚本在构建前清理旧的 SwiftPM 资源包，避免增量构建残留已删除的安装盘背景等资源。
+
 常用选项：
 
 ```sh

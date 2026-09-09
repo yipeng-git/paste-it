@@ -34,8 +34,18 @@ let package = Package(
                 .product(name: "PostHog", package: "posthog-ios")
             ],
             path: "Sources/PasteIt",
+            // Only runtime translations belong in the SwiftPM bundle. App icons
+            // are installed once in the main bundle by the packaging scripts.
             resources: [
-                .process("../../Resources")
+                .process("../../Resources/de.lproj"),
+                .process("../../Resources/en.lproj"),
+                .process("../../Resources/es.lproj"),
+                .process("../../Resources/fr.lproj"),
+                .process("../../Resources/ja.lproj"),
+                .process("../../Resources/ko.lproj"),
+                .process("../../Resources/pl.lproj"),
+                .process("../../Resources/zh-Hans.lproj"),
+                .process("../../Resources/zh-Hant.lproj")
             ],
             linkerSettings: [
                 .linkedFramework("WebKit")

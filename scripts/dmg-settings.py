@@ -5,6 +5,7 @@ application = defines['app']
 files = [application]
 symlinks = {'Applications': '/Applications'}
 format = 'UDZO'
+compression_level = 9
 filesystem = 'HFS+'
 background = None
 window_rect = ((200, 200), (540, 320))

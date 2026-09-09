@@ -9,8 +9,10 @@ cd "$ROOT"
 # shellcheck source=lib/posthog-secrets.sh
 source "$ROOT/scripts/lib/posthog-secrets.sh"
 
-swift build -c debug
 BIN_DIR="$(swift build -c debug --show-bin-path)"
+# SwiftPM can leave removed/excluded resources in an incremental build bundle.
+rm -rf "$BIN_DIR/PasteIt_PasteIt.bundle"
+swift build -c debug
 BIN="$BIN_DIR/PasteIt"
 APP="$ROOT/.build/PasteIt.app"
 ICON="$ROOT/Resources/AppIcon.icns"
