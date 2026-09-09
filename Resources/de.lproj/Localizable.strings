@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "Gesamten Verlauf löschen";
 "settings.clearKeepPinned" = "Verlauf löschen, Angeheftetes behalten";
 "settings.clipboardPolling" = "Zwischenablage-Abfrage";
+"settings.group.advanced" = "Erweitert";
+"settings.group.capture" = "Erfassung";
+"settings.group.cleanup" = "Verlauf bereinigen";
+"settings.group.help" = "Hilfe";
+"settings.group.history" = "Verlauf";
+"settings.group.pasting" = "Einfügen";
+"settings.group.permissions" = "Systemberechtigungen";
+"settings.group.shortcuts" = "Tastaturkurzbefehle";
+"settings.group.startup" = "Start";
+"settings.group.updates" = "Updates";
 "settings.keepHistory" = "Verlauf behalten";
 "settings.launchAtLogin" = "Beim Anmelden öffnen";
 "settings.maxBinaryStorage" = "Max. Binärspeicher: %lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "Jetzt bereinigen";
 "settings.seconds" = "s";
 "settings.showTutorial" = "Tutorial anzeigen…";
+"settings.sidebar.clipboard" = "Zwischenablage";
 "settings.stackDirection" = "Standard-Einfügerichtung";
 "settings.stackFootnote" = "⇧⌘C öffnet oder schließt den Einfügestapel. Solange Einträge vorhanden sind, fügt ⌘V in einer App den nächsten ein (Bedienungshilfen erforderlich). Steuerung im Stapel-Panel und im ⋯-Menü.";
 "settings.tab.about" = "Über";
+"settings.tab.clipboard" = "Zwischenablage & Verlauf";
 "settings.tab.folders" = "Ordner";
 "settings.tab.general" = "Allgemein";
 "settings.tab.privacy" = "Datenschutz";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "Version";
 "settings.whatsNew" = "Neuigkeiten…";
+"settings.windowTitle" = "Paste It Einstellungen";
 "stack.accessibilityHint" = "Bedienungshilfen erlauben, damit ⌘V den Stapel voranbringt";
 "stack.close" = "Einfügestapel schließen";
 "stack.closeHelp" = "Einfügestapel schließen (⇧⌘C)";

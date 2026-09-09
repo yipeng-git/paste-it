@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "Tout effacer";
 "settings.clearKeepPinned" = "Effacer l'historique, garder les épinglés";
 "settings.clipboardPolling" = "Interrogation du presse-papiers";
+"settings.group.advanced" = "Avancé";
+"settings.group.capture" = "Capture";
+"settings.group.cleanup" = "Nettoyage de l’historique";
+"settings.group.help" = "Aide";
+"settings.group.history" = "Historique";
+"settings.group.pasting" = "Collage";
+"settings.group.permissions" = "Autorisations système";
+"settings.group.shortcuts" = "Raccourcis clavier";
+"settings.group.startup" = "Démarrage";
+"settings.group.updates" = "Mises à jour";
 "settings.keepHistory" = "Conserver l'historique";
 "settings.launchAtLogin" = "Ouvrir à la connexion";
 "settings.maxBinaryStorage" = "Stockage binaire max. : %lld Mo";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "Nettoyer maintenant";
 "settings.seconds" = "s";
 "settings.showTutorial" = "Afficher le tutoriel…";
+"settings.sidebar.clipboard" = "Presse-papiers";
 "settings.stackDirection" = "Direction de collage par défaut";
 "settings.stackFootnote" = "⇧⌘C ouvre ou ferme la pile de collage. Tant qu'elle contient des éléments, ⌘V dans une app colle le suivant (accessibilité requise). Les contrôles sont dans le panneau Pile et le menu ⋯.";
 "settings.tab.about" = "À propos";
+"settings.tab.clipboard" = "Presse-papiers et historique";
 "settings.tab.folders" = "Dossiers";
 "settings.tab.general" = "Général";
 "settings.tab.privacy" = "Confidentialité";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "Version";
 "settings.whatsNew" = "Nouveautés…";
+"settings.windowTitle" = "Réglages de Paste It";
 "stack.accessibilityHint" = "Autorisez l'accessibilité pour que ⌘V fasse avancer la pile";
 "stack.close" = "Fermer la pile de collage";
 "stack.closeHelp" = "Fermer la pile de collage (⇧⌘C)";

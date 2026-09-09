@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "清除所有歷史記錄";
 "settings.clearKeepPinned" = "清除歷史記錄，保留已釘選項目";
 "settings.clipboardPolling" = "剪貼簿輪詢";
+"settings.group.advanced" = "進階設定";
+"settings.group.capture" = "剪貼簿擷取";
+"settings.group.cleanup" = "清理記錄";
+"settings.group.help" = "輔助說明";
+"settings.group.history" = "歷史記錄";
+"settings.group.pasting" = "貼上行為";
+"settings.group.permissions" = "系統權限";
+"settings.group.shortcuts" = "鍵盤快速鍵";
+"settings.group.startup" = "啟動";
+"settings.group.updates" = "應用程式更新";
 "settings.keepHistory" = "保留歷史記錄";
 "settings.launchAtLogin" = "登入時打開";
 "settings.maxBinaryStorage" = "二進位資料上限：%lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "立即整理";
 "settings.seconds" = "秒";
 "settings.showTutorial" = "顯示教學課程…";
+"settings.sidebar.clipboard" = "剪貼簿";
 "settings.stackDirection" = "預設貼上方向";
 "settings.stackFootnote" = "⇧⌘C 可打開或關閉貼上堆疊。堆疊中有內容時，在任意 App 中按 ⌘V 會貼上下一項（需要「輔助使用」）。執行時控制項位於堆疊面板與 ⋯ 選單。";
 "settings.tab.about" = "關於";
+"settings.tab.clipboard" = "剪貼簿與記錄";
 "settings.tab.folders" = "檔案夾";
 "settings.tab.general" = "一般";
 "settings.tab.privacy" = "隱私權";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "版本";
 "settings.whatsNew" = "新功能…";
+"settings.windowTitle" = "Paste It 設定";
 "stack.accessibilityHint" = "請允許「輔助使用」，⌘V 才能推進堆疊";
 "stack.close" = "關閉貼上堆疊";
 "stack.closeHelp" = "關閉貼上堆疊 (⇧⌘C)";

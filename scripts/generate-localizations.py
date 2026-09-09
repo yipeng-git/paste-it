@@ -581,6 +581,72 @@ def build_catalog(strings: dict[str, dict[str, str]]) -> dict:
     }
 
 
+# Native settings navigation and grouped forms.
+STRINGS.update({
+    "settings.windowTitle": {
+        "en": "Paste It Settings",
+        "zh-Hans": "Paste It 设置",
+        "ja": "Paste It 設定"
+    },
+    "settings.sidebar.clipboard": {"en": "Clipboard", "zh-Hans": "剪贴板", "ja": "クリップボード"},
+    "settings.tab.clipboard": {
+        "en": "Clipboard & History",
+        "zh-Hans": "剪贴板与历史",
+        "ja": "クリップボードと履歴"
+    },
+    "settings.group.startup": {
+        "en": "Startup",
+        "zh-Hans": "启动",
+        "ja": "起動"
+    },
+    "settings.group.pasting": {
+        "en": "Pasting",
+        "zh-Hans": "粘贴行为",
+        "ja": "ペースト"
+    },
+    "settings.group.shortcuts": {
+        "en": "Keyboard Shortcuts",
+        "zh-Hans": "键盘快捷键",
+        "ja": "キーボードショートカット"
+    },
+    "settings.group.capture": {
+        "en": "Capture",
+        "zh-Hans": "剪贴板采集",
+        "ja": "キャプチャ"
+    },
+    "settings.group.history": {
+        "en": "History",
+        "zh-Hans": "历史记录",
+        "ja": "履歴"
+    },
+    "settings.group.advanced": {
+        "en": "Advanced",
+        "zh-Hans": "高级设置",
+        "ja": "詳細設定"
+    },
+    "settings.group.permissions": {
+        "en": "System Permissions",
+        "zh-Hans": "系统权限",
+        "ja": "システム権限"
+    },
+    "settings.group.cleanup": {
+        "en": "History Cleanup",
+        "zh-Hans": "清理历史",
+        "ja": "履歴の削除"
+    },
+    "settings.group.updates": {
+        "en": "Updates",
+        "zh-Hans": "应用更新",
+        "ja": "アップデート"
+    },
+    "settings.group.help": {
+        "en": "Help",
+        "zh-Hans": "帮助",
+        "ja": "ヘルプ"
+    }
+})
+
+
 def main() -> None:
     strings = merge_batch_cjk(merge_batch2(STRINGS))
     OUT.parent.mkdir(parents=True, exist_ok=True)

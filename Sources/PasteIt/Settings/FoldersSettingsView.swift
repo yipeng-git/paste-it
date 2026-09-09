@@ -110,7 +110,6 @@ struct FoldersSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .padding()
         .sheet(isPresented: $isShowingAddSheet) {
             FolderNameSheet(
                 title: L10n.tr("timeline.newFolder", default: "New Folder"),

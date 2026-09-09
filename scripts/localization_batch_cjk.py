@@ -444,6 +444,60 @@ BATCH_CJK.update({
 })
 
 
+# Native settings navigation and grouped forms.
+BATCH_CJK.update({
+    "settings.windowTitle": {
+        "zh-Hant": "Paste It 設定",
+        "ko": "Paste It 설정"
+    },
+    "settings.sidebar.clipboard": {"zh-Hant": "剪貼簿", "ko": "클립보드"},
+    "settings.tab.clipboard": {
+        "zh-Hant": "剪貼簿與記錄",
+        "ko": "클립보드 및 기록"
+    },
+    "settings.group.startup": {
+        "zh-Hant": "啟動",
+        "ko": "시작"
+    },
+    "settings.group.pasting": {
+        "zh-Hant": "貼上行為",
+        "ko": "붙여넣기"
+    },
+    "settings.group.shortcuts": {
+        "zh-Hant": "鍵盤快速鍵",
+        "ko": "키보드 단축키"
+    },
+    "settings.group.capture": {
+        "zh-Hant": "剪貼簿擷取",
+        "ko": "캡처"
+    },
+    "settings.group.history": {
+        "zh-Hant": "歷史記錄",
+        "ko": "기록"
+    },
+    "settings.group.advanced": {
+        "zh-Hant": "進階設定",
+        "ko": "고급 설정"
+    },
+    "settings.group.permissions": {
+        "zh-Hant": "系統權限",
+        "ko": "시스템 권한"
+    },
+    "settings.group.cleanup": {
+        "zh-Hant": "清理記錄",
+        "ko": "기록 정리"
+    },
+    "settings.group.updates": {
+        "zh-Hant": "應用程式更新",
+        "ko": "업데이트"
+    },
+    "settings.group.help": {
+        "zh-Hant": "輔助說明",
+        "ko": "도움말"
+    }
+})
+
+
 def merge_batch_cjk(strings: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     merged = {key: dict(locs) for key, locs in strings.items()}
     missing = set(merged) - set(BATCH_CJK)

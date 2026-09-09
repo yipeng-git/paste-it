@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "모든 기록 지우기";
 "settings.clearKeepPinned" = "기록 지우기(고정 항목 유지)";
 "settings.clipboardPolling" = "클립보드 확인 간격";
+"settings.group.advanced" = "고급 설정";
+"settings.group.capture" = "캡처";
+"settings.group.cleanup" = "기록 정리";
+"settings.group.help" = "도움말";
+"settings.group.history" = "기록";
+"settings.group.pasting" = "붙여넣기";
+"settings.group.permissions" = "시스템 권한";
+"settings.group.shortcuts" = "키보드 단축키";
+"settings.group.startup" = "시작";
+"settings.group.updates" = "업데이트";
 "settings.keepHistory" = "기록 보관";
 "settings.launchAtLogin" = "로그인 시 실행";
 "settings.maxBinaryStorage" = "최대 바이너리 저장 용량: %lldMB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "지금 정리";
 "settings.seconds" = "초";
 "settings.showTutorial" = "튜토리얼 보기…";
+"settings.sidebar.clipboard" = "클립보드";
 "settings.stackDirection" = "기본 붙여넣기 순서";
 "settings.stackFootnote" = "⇧⌘C로 붙여넣기 스택을 열고 닫을 수 있습니다. 스택에 항목이 있는 동안 다른 App에서 ⌘V를 누르면 다음 항목이 붙여넣어집니다(손쉬운 사용 필요). 실행 중 제어는 스택 패널과 ⋯ 메뉴에 있습니다.";
 "settings.tab.about" = "정보";
+"settings.tab.clipboard" = "클립보드 및 기록";
 "settings.tab.folders" = "폴더";
 "settings.tab.general" = "일반";
 "settings.tab.privacy" = "개인정보 보호";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "버전";
 "settings.whatsNew" = "새로운 기능…";
+"settings.windowTitle" = "Paste It 설정";
 "stack.accessibilityHint" = "⌘V로 스택을 진행하려면 손쉬운 사용을 허용하세요";
 "stack.close" = "붙여넣기 스택 닫기";
 "stack.closeHelp" = "붙여넣기 스택 닫기(⇧⌘C)";

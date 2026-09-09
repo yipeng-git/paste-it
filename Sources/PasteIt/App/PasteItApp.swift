@@ -10,7 +10,6 @@ struct PasteItApp: App {
     var body: some Scene {
         Settings {
             SettingsView(appState: runtime.state)
-                .frame(minWidth: 720, minHeight: 520)
         }
     }
 }

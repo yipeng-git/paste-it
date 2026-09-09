@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "履歴をすべて消去";
 "settings.clearKeepPinned" = "履歴を消去（ピン留めは保持）";
 "settings.clipboardPolling" = "クリップボードのポーリング";
+"settings.group.advanced" = "詳細設定";
+"settings.group.capture" = "キャプチャ";
+"settings.group.cleanup" = "履歴の削除";
+"settings.group.help" = "ヘルプ";
+"settings.group.history" = "履歴";
+"settings.group.pasting" = "ペースト";
+"settings.group.permissions" = "システム権限";
+"settings.group.shortcuts" = "キーボードショートカット";
+"settings.group.startup" = "起動";
+"settings.group.updates" = "アップデート";
 "settings.keepHistory" = "履歴の保持";
 "settings.launchAtLogin" = "ログイン時に起動";
 "settings.maxBinaryStorage" = "最大バイナリ容量：%lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "今すぐ整理";
 "settings.seconds" = "秒";
 "settings.showTutorial" = "チュートリアルを表示…";
+"settings.sidebar.clipboard" = "クリップボード";
 "settings.stackDirection" = "デフォルトのペースト方向";
 "settings.stackFootnote" = "⇧⌘C でペーストスタックを開閉。スタックに項目がある間、任意のアプリで ⌘V が次をペーストします（アクセシビリティが必要）。実行時の操作はスタックパネルと ⋯ メニューにあります。";
 "settings.tab.about" = "このアプリについて";
+"settings.tab.clipboard" = "クリップボードと履歴";
 "settings.tab.folders" = "フォルダ";
 "settings.tab.general" = "一般";
 "settings.tab.privacy" = "プライバシー";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "バージョン";
 "settings.whatsNew" = "新機能…";
+"settings.windowTitle" = "Paste It 設定";
 "stack.accessibilityHint" = "⌘V でスタックを進めるにはアクセシビリティを許可してください";
 "stack.close" = "ペーストスタックを閉じる";
 "stack.closeHelp" = "ペーストスタックを閉じる (⇧⌘C)";

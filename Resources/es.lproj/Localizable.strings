@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "Borrar todo el historial";
 "settings.clearKeepPinned" = "Borrar historial, conservar fijados";
 "settings.clipboardPolling" = "Sondeo del portapapeles";
+"settings.group.advanced" = "Avanzado";
+"settings.group.capture" = "Captura";
+"settings.group.cleanup" = "Limpieza del historial";
+"settings.group.help" = "Ayuda";
+"settings.group.history" = "Historial";
+"settings.group.pasting" = "Pegado";
+"settings.group.permissions" = "Permisos del sistema";
+"settings.group.shortcuts" = "Atajos de teclado";
+"settings.group.startup" = "Inicio";
+"settings.group.updates" = "Actualizaciones";
 "settings.keepHistory" = "Conservar historial";
 "settings.launchAtLogin" = "Abrir al iniciar sesión";
 "settings.maxBinaryStorage" = "Almacenamiento binario máx.: %lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "Limpiar ahora";
 "settings.seconds" = "s";
 "settings.showTutorial" = "Mostrar tutorial…";
+"settings.sidebar.clipboard" = "Portapapeles";
 "settings.stackDirection" = "Dirección de pegado predeterminada";
 "settings.stackFootnote" = "⇧⌘C abre o cierra la pila de pegado. Mientras tenga elementos, ⌘V en cualquier app pega el siguiente (se requiere accesibilidad). Los controles están en el panel Pila y el menú ⋯.";
 "settings.tab.about" = "Acerca de";
+"settings.tab.clipboard" = "Portapapeles e historial";
 "settings.tab.folders" = "Carpetas";
 "settings.tab.general" = "General";
 "settings.tab.privacy" = "Privacidad";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "Versión";
 "settings.whatsNew" = "Novedades…";
+"settings.windowTitle" = "Ajustes de Paste It";
 "stack.accessibilityHint" = "Concede accesibilidad para que ⌘V avance la pila";
 "stack.close" = "Cerrar pila de pegado";
 "stack.closeHelp" = "Cerrar pila de pegado (⇧⌘C)";

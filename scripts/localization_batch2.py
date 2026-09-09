@@ -590,6 +590,84 @@ BATCH2.update({
 })
 
 
+# Native settings navigation and grouped forms.
+BATCH2.update({
+    "settings.windowTitle": {
+        "fr": "Réglages de Paste It",
+        "de": "Paste It Einstellungen",
+        "es": "Ajustes de Paste It",
+        "pl": "Ustawienia Paste It"
+    },
+    "settings.sidebar.clipboard": {"fr": "Presse-papiers", "de": "Zwischenablage", "es": "Portapapeles", "pl": "Schowek"},
+    "settings.tab.clipboard": {
+        "fr": "Presse-papiers et historique",
+        "de": "Zwischenablage & Verlauf",
+        "es": "Portapapeles e historial",
+        "pl": "Schowek i historia"
+    },
+    "settings.group.startup": {
+        "fr": "Démarrage",
+        "de": "Start",
+        "es": "Inicio",
+        "pl": "Uruchamianie"
+    },
+    "settings.group.pasting": {
+        "fr": "Collage",
+        "de": "Einfügen",
+        "es": "Pegado",
+        "pl": "Wklejanie"
+    },
+    "settings.group.shortcuts": {
+        "fr": "Raccourcis clavier",
+        "de": "Tastaturkurzbefehle",
+        "es": "Atajos de teclado",
+        "pl": "Skróty klawiszowe"
+    },
+    "settings.group.capture": {
+        "fr": "Capture",
+        "de": "Erfassung",
+        "es": "Captura",
+        "pl": "Przechwytywanie"
+    },
+    "settings.group.history": {
+        "fr": "Historique",
+        "de": "Verlauf",
+        "es": "Historial",
+        "pl": "Historia"
+    },
+    "settings.group.advanced": {
+        "fr": "Avancé",
+        "de": "Erweitert",
+        "es": "Avanzado",
+        "pl": "Zaawansowane"
+    },
+    "settings.group.permissions": {
+        "fr": "Autorisations système",
+        "de": "Systemberechtigungen",
+        "es": "Permisos del sistema",
+        "pl": "Uprawnienia systemowe"
+    },
+    "settings.group.cleanup": {
+        "fr": "Nettoyage de l’historique",
+        "de": "Verlauf bereinigen",
+        "es": "Limpieza del historial",
+        "pl": "Czyszczenie historii"
+    },
+    "settings.group.updates": {
+        "fr": "Mises à jour",
+        "de": "Updates",
+        "es": "Actualizaciones",
+        "pl": "Aktualizacje"
+    },
+    "settings.group.help": {
+        "fr": "Aide",
+        "de": "Hilfe",
+        "es": "Ayuda",
+        "pl": "Pomoc"
+    }
+})
+
+
 def merge_batch2(strings: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     merged = {key: dict(locs) for key, locs in strings.items()}
     missing = set(merged) - set(BATCH2)

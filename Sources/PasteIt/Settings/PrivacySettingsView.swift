@@ -13,6 +13,10 @@ struct PrivacySettingsView: View {
 
     var body: some View {
         Form {
+            Section(L10n.tr("settings.group.permissions", default: "System Permissions")) {
+                DirectPastePermissionView()
+            }
+
             Section {
                 Toggle(
                     L10n.tr("privacy.shareAnalytics", default: "Share anonymous usage analytics"),
@@ -147,7 +151,6 @@ struct PrivacySettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .padding()
         .sheet(isPresented: $isShowingAddSheet) {
             AddIgnoredAppSheet(
                 installedApps: installedApps,

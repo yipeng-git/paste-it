@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "清除全部历史";
 "settings.clearKeepPinned" = "清除历史，保留已固定";
 "settings.clipboardPolling" = "剪贴板轮询";
+"settings.group.advanced" = "高级设置";
+"settings.group.capture" = "剪贴板采集";
+"settings.group.cleanup" = "清理历史";
+"settings.group.help" = "帮助";
+"settings.group.history" = "历史记录";
+"settings.group.pasting" = "粘贴行为";
+"settings.group.permissions" = "系统权限";
+"settings.group.shortcuts" = "键盘快捷键";
+"settings.group.startup" = "启动";
+"settings.group.updates" = "应用更新";
 "settings.keepHistory" = "保留历史";
 "settings.launchAtLogin" = "登录时启动";
 "settings.maxBinaryStorage" = "最大二进制存储：%lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "立即清理";
 "settings.seconds" = "秒";
 "settings.showTutorial" = "显示教程…";
+"settings.sidebar.clipboard" = "剪贴板";
 "settings.stackDirection" = "默认粘贴方向";
 "settings.stackFootnote" = "⇧⌘C 可打开或关闭粘贴堆栈。堆栈中有内容时，在任意应用中按 ⌘V 可粘贴下一项（需辅助功能权限）。运行时控制位于堆栈面板和 ⋯ 菜单。";
 "settings.tab.about" = "关于";
+"settings.tab.clipboard" = "剪贴板与历史";
 "settings.tab.folders" = "文件夹";
 "settings.tab.general" = "通用";
 "settings.tab.privacy" = "隐私";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "版本";
 "settings.whatsNew" = "新功能…";
+"settings.windowTitle" = "Paste It 设置";
 "stack.accessibilityHint" = "请允许辅助功能权限，以便 ⌘V 可推进堆栈";
 "stack.close" = "关闭粘贴堆栈";
 "stack.closeHelp" = "关闭粘贴堆栈 (⇧⌘C)";

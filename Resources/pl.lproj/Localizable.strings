@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "Wyczyść całą historię";
 "settings.clearKeepPinned" = "Wyczyść historię, zachowaj przypięte";
 "settings.clipboardPolling" = "Odpytywanie schowka";
+"settings.group.advanced" = "Zaawansowane";
+"settings.group.capture" = "Przechwytywanie";
+"settings.group.cleanup" = "Czyszczenie historii";
+"settings.group.help" = "Pomoc";
+"settings.group.history" = "Historia";
+"settings.group.pasting" = "Wklejanie";
+"settings.group.permissions" = "Uprawnienia systemowe";
+"settings.group.shortcuts" = "Skróty klawiszowe";
+"settings.group.startup" = "Uruchamianie";
+"settings.group.updates" = "Aktualizacje";
 "settings.keepHistory" = "Zachowaj historię";
 "settings.launchAtLogin" = "Uruchamiaj przy logowaniu";
 "settings.maxBinaryStorage" = "Maks. pamięć binarna: %lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "Oczyść teraz";
 "settings.seconds" = "s";
 "settings.showTutorial" = "Pokaż samouczek…";
+"settings.sidebar.clipboard" = "Schowek";
 "settings.stackDirection" = "Domyślny kierunek wklejania";
 "settings.stackFootnote" = "⇧⌘C otwiera lub zamyka stos wklejania. Gdy ma elementy, ⌘V w dowolnej aplikacji wkleja następny (wymagana dostępność). Sterowanie w panelu Stos i menu ⋯.";
 "settings.tab.about" = "Informacje";
+"settings.tab.clipboard" = "Schowek i historia";
 "settings.tab.folders" = "Foldery";
 "settings.tab.general" = "Ogólne";
 "settings.tab.privacy" = "Prywatność";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "Wersja";
 "settings.whatsNew" = "Co nowego…";
+"settings.windowTitle" = "Ustawienia Paste It";
 "stack.accessibilityHint" = "Zezwól na dostępność, aby ⌘V przechodziło do następnego";
 "stack.close" = "Zamknij stos wklejania";
 "stack.closeHelp" = "Zamknij stos wklejania (⇧⌘C)";

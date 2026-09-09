@@ -141,6 +141,16 @@
 "settings.clearAllHistory" = "Clear All History";
 "settings.clearKeepPinned" = "Clear History, Keep Pinned";
 "settings.clipboardPolling" = "Clipboard polling";
+"settings.group.advanced" = "Advanced";
+"settings.group.capture" = "Capture";
+"settings.group.cleanup" = "History Cleanup";
+"settings.group.help" = "Help";
+"settings.group.history" = "History";
+"settings.group.pasting" = "Pasting";
+"settings.group.permissions" = "System Permissions";
+"settings.group.shortcuts" = "Keyboard Shortcuts";
+"settings.group.startup" = "Startup";
+"settings.group.updates" = "Updates";
 "settings.keepHistory" = "Keep history";
 "settings.launchAtLogin" = "Launch at login";
 "settings.maxBinaryStorage" = "Max binary storage: %lld MB";
@@ -151,9 +161,11 @@
 "settings.pruneNow" = "Prune Now";
 "settings.seconds" = "s";
 "settings.showTutorial" = "Show Tutorial…";
+"settings.sidebar.clipboard" = "Clipboard";
 "settings.stackDirection" = "Default paste direction";
 "settings.stackFootnote" = "⇧⌘C opens or closes Paste Stack. While the stack has items, ⌘V in any app pastes the next one (Accessibility required). Runtime controls live in the Stack panel and the ⋯ menu.";
 "settings.tab.about" = "About";
+"settings.tab.clipboard" = "Clipboard & History";
 "settings.tab.folders" = "Folders";
 "settings.tab.general" = "General";
 "settings.tab.privacy" = "Privacy";
@@ -162,6 +174,7 @@
 "settings.version" = "Paste It %@ (%@)";
 "settings.versionLabel" = "Version";
 "settings.whatsNew" = "What's New…";
+"settings.windowTitle" = "Paste It Settings";
 "stack.accessibilityHint" = "Grant Accessibility so ⌘V can advance the stack";
 "stack.close" = "Close Paste Stack";
 "stack.closeHelp" = "Close Paste Stack (⇧⌘C)";
