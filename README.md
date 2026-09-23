@@ -85,6 +85,6 @@ Requires Xcode / Swift 6.2. Packaging and signing: [`docs/mac-packaging.md`](doc
 
 ## License
 
-[PolyForm Noncommercial License 1.0.0](LICENSE) — free for personal, educational, research, hobby, and other noncommercial use. **Commercial use requires a separate license** from the copyright holder.
+[MIT License](LICENSE) — free for personal and commercial use, modification, and redistribution, provided the copyright and license notices are retained.
 
-Versions published under MIT before this change remain available under MIT for those releases only.
+Third-party dependencies remain subject to their respective licenses.

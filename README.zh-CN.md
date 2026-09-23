@@ -85,6 +85,6 @@ swift run PasteIt
 
 ## 许可证
 
-[PolyForm Noncommercial License 1.0.0](LICENSE) — 个人、教育、研究、业余等非商业用途免费。**商用需要向版权方另行授权**。
+[MIT License](LICENSE) — 允许免费用于个人和商业用途，以及修改和再分发，须保留版权和许可声明。
 
-改成这份许可之前以 MIT 发布的版本，那些旧版本仍可按 MIT 使用。
+第三方依赖仍遵循各自的许可证。
