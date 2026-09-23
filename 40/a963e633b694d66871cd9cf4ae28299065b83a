@@ -1,0 +1,27 @@
+LICENSE
+  s_00cf54bf30061b::t_a2ea1aeeeffd1f 1-21
+README.ja.md
+  s_00cf54bf30061b::t_fae6f58dfa68a4 88,90
+README.ko.md
+  s_00cf54bf30061b::t_806f5c4ee3a07d 88,90
+README.md
+  s_00cf54bf30061b::t_a83389e8116b3e 88,90
+README.zh-CN.md
+  s_00cf54bf30061b::t_e06b2f2b70df77 88,90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "40a963e633b694d66871cd9cf4ae28299065b83a",
+  "prompts": {},
+  "sessions": {
+    "s_00cf54bf30061b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cddd-d5b7-7ca0-9287-1da0a3f50136",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
