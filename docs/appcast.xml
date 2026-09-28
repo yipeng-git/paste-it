@@ -3,8 +3,25 @@
     <channel>
         <title>Paste It</title>
         <item>
+            <title>0.2.9</title>
+            <pubDate>Mon, 28 Sep 2026 16:34:02 +0800</pubDate>
+            <sparkle:version>11</sparkle:version>
+            <sparkle:shortVersionString>0.2.9</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.9/PasteIt-0.2.9-universal.dmg" length="8227501" type="application/octet-stream" sparkle:edSignature="h2D7CSxV6Fkmyh6x3rAn7HoOCa5/iwSVhJRJexADj9QLJVtJryfGGjFoL15awITv3tbbh/Zp5YFYRsG3+/HDAQ=="/>
+        </item>
+        <item>
+            <title>0.2.9</title>
+            <pubDate>Mon, 28 Sep 2026 16:34:01 +0800</pubDate>
+            <sparkle:version>11</sparkle:version>
+            <sparkle:shortVersionString>0.2.9</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.9/PasteIt-0.2.9-arm64.dmg" length="5356043" type="application/octet-stream" sparkle:edSignature="mjauiTIQBfT0QD7SlEaqiJevao4AK97TXYeWNbxpWGuqCjX2tkdSN2jNEXCBE++qb7ulQzbTHwCPVEZj1ksVDw=="/>
+        </item>
+        <item>
             <title>0.2.8</title>
-            <pubDate>Wed, 09 Sep 2026 14:14:00 +0800</pubDate>
+            <pubDate>Mon, 28 Sep 2026 16:34:02 +0800</pubDate>
             <sparkle:version>10</sparkle:version>
             <sparkle:shortVersionString>0.2.8</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
@@ -12,7 +29,7 @@
         </item>
         <item>
             <title>0.2.8</title>
-            <pubDate>Wed, 09 Sep 2026 14:14:00 +0800</pubDate>
+            <pubDate>Mon, 28 Sep 2026 16:34:01 +0800</pubDate>
             <sparkle:version>10</sparkle:version>
             <sparkle:shortVersionString>0.2.8</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
@@ -21,37 +38,20 @@
         </item>
         <item>
             <title>0.2.7</title>
-            <pubDate>Wed, 09 Sep 2026 14:14:00 +0800</pubDate>
+            <pubDate>Mon, 28 Sep 2026 16:34:01 +0800</pubDate>
             <sparkle:version>9</sparkle:version>
             <sparkle:shortVersionString>0.2.7</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.7/PasteIt-0.2.7-universal.dmg" length="10635432" type="application/octet-stream" sparkle:edSignature="OEWRuuWTVqYa1xnlmhQaXbR/WbpeuuqTTL+ymc7lndh+CTLXEj7y0h98qTpDIt5qEajeAz0LQgiGknK38jIlCQ=="/>
         </item>
-        <item>
+    <item>
             <title>0.2.7</title>
-            <pubDate>Wed, 09 Sep 2026 14:14:00 +0800</pubDate>
+            <pubDate>Mon, 28 Sep 2026 16:34:01 +0800</pubDate>
             <sparkle:version>9</sparkle:version>
             <sparkle:shortVersionString>0.2.7</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.7/PasteIt-0.2.7-arm64.dmg" length="7466838" type="application/octet-stream" sparkle:edSignature="F00fREjn1UHXH3kYQHs268OV5tirdhSDeDlE61uYSdguN7dZk00mqDPsy7d3wMC2SDpCAhTjEcPThEyD2i6hAg=="/>
-        </item>
-        <item>
-            <title>0.2.6</title>
-            <pubDate>Wed, 09 Sep 2026 14:14:00 +0800</pubDate>
-            <sparkle:version>8</sparkle:version>
-            <sparkle:shortVersionString>0.2.6</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.6/PasteIt-0.2.6-universal.dmg" length="9759895" type="application/octet-stream" sparkle:edSignature="K6H7ea+nytAyn21qYNRl99nGK9Utmku7s2jp/OD+XYHVH2zHLp1/ziu8uOMd1bXztjvSYH2jb8lUYcm2FA8fAA=="/>
-        </item>
-    <item>
-            <title>0.2.6</title>
-            <pubDate>Wed, 09 Sep 2026 14:14:00 +0800</pubDate>
-            <sparkle:version>8</sparkle:version>
-            <sparkle:shortVersionString>0.2.6</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/yipeng-git/paste-it/releases/download/mac-v0.2.6/PasteIt-0.2.6-arm64.dmg" length="6980884" type="application/octet-stream" sparkle:edSignature="IPtwWFY5tIpKEr+ZT0iFgSkKmn1VlP1NJo0DrpFqsicBLy97DmzOo3sY7owLcBQDZQ1rzG1HdS/kfmb/7v6DBA=="/>
         </item>
     </channel>
 </rss>

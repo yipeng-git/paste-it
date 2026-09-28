@@ -31,9 +31,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.2.8</string>
+	<string>0.2.9</string>
 	<key>CFBundleVersion</key>
-	<string>10</string>
+	<string>11</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>
@@ -46,13 +46,13 @@
 	<true/>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
-	<key>SUScheduledCheckInterval</key>
-	<integer>21600</integer>
-	<key>SUScheduledImpatientCheckInterval</key>
-	<integer>86400</integer>
 	<key>SUFeedURL</key>
 	<string>https://yipeng-git.github.io/paste-it/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>swPHBrOCR4/Iqp0mWPDEGfz3Tml9ChoElForJ1BKPhc=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>21600</integer>
+	<key>SUScheduledImpatientCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>
