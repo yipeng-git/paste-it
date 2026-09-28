@@ -137,6 +137,9 @@
 "removal.undoShort" = "Deshacer";
 "removal.unpinned" = "Desfijado";
 "settings.aboutBlurb" = "Paste It es un gestor de portapapeles local. El historial permanece en este Mac.";
+"settings.automaticUpdatesHelp" = "Las actualizaciones se descargan en segundo plano. Cuando una actualización esté lista, se te pedirá que reinicies Paste It. También puedes instalarla al salir de la aplicación.";
+"settings.automaticallyCheckUpdates" = "Buscar actualizaciones automáticamente";
+"settings.automaticallyDownloadUpdates" = "Descargar actualizaciones automáticamente";
 "settings.checkingUpdates" = "Buscando actualizaciones…";
 "settings.clearAllHistory" = "Borrar todo el historial";
 "settings.clearKeepPinned" = "Borrar historial, conservar fijados";

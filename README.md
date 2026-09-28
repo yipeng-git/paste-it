@@ -23,7 +23,7 @@ A local clipboard manager for macOS — visual timeline, searchable history (inc
 3. Launch it from Applications. It lives in the menu bar.
 4. For one-key paste into other apps, allow **Accessibility** when prompted (System Settings → Privacy & Security → Accessibility).
 
-macOS 14 or later. Official builds update themselves in the background.
+macOS 14 or later. Official builds check for updates every six hours and download them in the background by default, then immediately prompt you to install and relaunch or install when you quit. Automatic checks and downloads can be changed in **Settings → About**; existing explicit preferences are preserved.
 
 ## Usage
 

@@ -36,7 +36,7 @@ enum AnalyticsCatalog {
         Event(name: "clip_staged", summary: "Item copied to system pasteboard from timeline"),
         Event(name: "plain_paste", summary: "⌃⌘V paste without formatting (success / fail_reason only)"),
         Event(name: "paste_stack_session", summary: "Paste Stack open→close summary (collect / paste-next / Accessibility)"),
-        Event(name: "update_interaction", summary: "Sparkle update check / find / download / install / fail")
+        Event(name: "update_interaction", summary: "Sparkle update check / find / download / shown (ready to install or update available) / install / dismiss / fail")
     ]
 
     static let neverCollected: [String] = [

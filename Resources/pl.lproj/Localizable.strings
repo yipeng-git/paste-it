@@ -137,6 +137,9 @@
 "removal.undoShort" = "Cofnij";
 "removal.unpinned" = "Odpięto";
 "settings.aboutBlurb" = "Paste It to lokalny menedżer schowka. Historia pozostaje na tym Macu.";
+"settings.automaticUpdatesHelp" = "Aktualizacje są pobierane w tle. Gdy aktualizacja będzie gotowa, pojawi się prośba o ponowne uruchomienie Paste It. Możesz ją też zainstalować przy zamknięciu aplikacji.";
+"settings.automaticallyCheckUpdates" = "Automatycznie sprawdzaj dostępność aktualizacji";
+"settings.automaticallyDownloadUpdates" = "Automatycznie pobieraj aktualizacje";
 "settings.checkingUpdates" = "Sprawdzanie aktualizacji…";
 "settings.clearAllHistory" = "Wyczyść całą historię";
 "settings.clearKeepPinned" = "Wyczyść historię, zachowaj przypięte";

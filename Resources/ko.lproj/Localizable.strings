@@ -137,6 +137,9 @@
 "removal.undoShort" = "실행 취소";
 "removal.unpinned" = "고정 해제됨";
 "settings.aboutBlurb" = "Paste It은 로컬 우선 클립보드 관리 앱입니다. 기록은 이 Mac에만 저장됩니다.";
+"settings.automaticUpdatesHelp" = "업데이트는 백그라운드에서 다운로드됩니다. 업데이트가 준비되면 Paste It을 다시 시작하라는 알림이 표시됩니다. 앱을 종료할 때 설치하도록 선택할 수도 있습니다.";
+"settings.automaticallyCheckUpdates" = "업데이트 자동 확인";
+"settings.automaticallyDownloadUpdates" = "업데이트 자동 다운로드";
 "settings.checkingUpdates" = "업데이트 확인 중…";
 "settings.clearAllHistory" = "모든 기록 지우기";
 "settings.clearKeepPinned" = "기록 지우기(고정 항목 유지)";

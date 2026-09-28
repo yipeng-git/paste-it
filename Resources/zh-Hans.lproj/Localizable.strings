@@ -137,6 +137,9 @@
 "removal.undoShort" = "撤销";
 "removal.unpinned" = "已取消置顶";
 "settings.aboutBlurb" = "Paste It 是一款本地优先的剪贴板管理器。历史记录仅保存在本 Mac。";
+"settings.automaticUpdatesHelp" = "更新会在后台下载，准备就绪后提示重启 Paste It。你也可以选择退出时安装。";
+"settings.automaticallyCheckUpdates" = "自动检查更新";
+"settings.automaticallyDownloadUpdates" = "自动下载更新";
 "settings.checkingUpdates" = "正在检查更新…";
 "settings.clearAllHistory" = "清除全部历史";
 "settings.clearKeepPinned" = "清除历史，保留已固定";

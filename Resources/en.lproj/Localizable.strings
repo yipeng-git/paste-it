@@ -137,6 +137,9 @@
 "removal.undoShort" = "Undo";
 "removal.unpinned" = "Unpinned";
 "settings.aboutBlurb" = "Paste It is a local-first clipboard manager. History stays on this Mac.";
+"settings.automaticUpdatesHelp" = "Updates download in the background. When an update is ready, you’ll be asked to restart Paste It. You can also install when you quit.";
+"settings.automaticallyCheckUpdates" = "Automatically check for updates";
+"settings.automaticallyDownloadUpdates" = "Automatically download updates";
 "settings.checkingUpdates" = "Checking for updates…";
 "settings.clearAllHistory" = "Clear All History";
 "settings.clearKeepPinned" = "Clear History, Keep Pinned";

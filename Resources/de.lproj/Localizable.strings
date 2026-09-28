@@ -137,6 +137,9 @@
 "removal.undoShort" = "Rückgängig";
 "removal.unpinned" = "Losgelöst";
 "settings.aboutBlurb" = "Paste It ist ein lokaler Zwischenablage-Manager. Der Verlauf bleibt auf diesem Mac.";
+"settings.automaticUpdatesHelp" = "Updates werden im Hintergrund geladen. Sobald ein Update bereit ist, werden Sie aufgefordert, Paste It neu zu starten. Sie können es auch beim Beenden der App installieren.";
+"settings.automaticallyCheckUpdates" = "Automatisch nach Updates suchen";
+"settings.automaticallyDownloadUpdates" = "Updates automatisch laden";
 "settings.checkingUpdates" = "Suche nach Updates…";
 "settings.clearAllHistory" = "Gesamten Verlauf löschen";
 "settings.clearKeepPinned" = "Verlauf löschen, Angeheftetes behalten";

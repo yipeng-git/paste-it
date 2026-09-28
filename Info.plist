@@ -43,9 +43,13 @@
 	<key>PostHogProjectToken</key>
 	<string></string>
 	<key>SUAutomaticallyUpdate</key>
-	<false/>
+	<true/>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>21600</integer>
+	<key>SUScheduledImpatientCheckInterval</key>
+	<integer>86400</integer>
 	<key>SUFeedURL</key>
 	<string>https://yipeng-git.github.io/paste-it/appcast.xml</string>
 	<key>SUPublicEDKey</key>

@@ -659,6 +659,24 @@ BATCH2.update({
         "es": "Actualizaciones",
         "pl": "Aktualizacje"
     },
+    "settings.automaticallyCheckUpdates": {
+        "fr": "Rechercher automatiquement les mises à jour",
+        "de": "Automatisch nach Updates suchen",
+        "es": "Buscar actualizaciones automáticamente",
+        "pl": "Automatycznie sprawdzaj dostępność aktualizacji"
+    },
+    "settings.automaticallyDownloadUpdates": {
+        "fr": "Télécharger automatiquement les mises à jour",
+        "de": "Updates automatisch laden",
+        "es": "Descargar actualizaciones automáticamente",
+        "pl": "Automatycznie pobieraj aktualizacje"
+    },
+    "settings.automaticUpdatesHelp": {
+        "fr": "Les mises à jour sont téléchargées en arrière-plan. Lorsqu’une mise à jour est prête, vous serez invité à redémarrer Paste It. Vous pouvez aussi l’installer à la fermeture de l’application.",
+        "de": "Updates werden im Hintergrund geladen. Sobald ein Update bereit ist, werden Sie aufgefordert, Paste It neu zu starten. Sie können es auch beim Beenden der App installieren.",
+        "es": "Las actualizaciones se descargan en segundo plano. Cuando una actualización esté lista, se te pedirá que reinicies Paste It. También puedes instalarla al salir de la aplicación.",
+        "pl": "Aktualizacje są pobierane w tle. Gdy aktualizacja będzie gotowa, pojawi się prośba o ponowne uruchomienie Paste It. Możesz ją też zainstalować przy zamknięciu aplikacji."
+    },
     "settings.group.help": {
         "fr": "Aide",
         "de": "Hilfe",

@@ -137,6 +137,9 @@
 "removal.undoShort" = "復原";
 "removal.unpinned" = "已取消釘選";
 "settings.aboutBlurb" = "Paste It 是本地優先的剪貼簿管理工具，歷史記錄僅保存在這台 Mac。";
+"settings.automaticUpdatesHelp" = "更新會在背景下載，準備就緒後提示重新啟動 Paste It。你也可以選擇結束應用程式時安裝。";
+"settings.automaticallyCheckUpdates" = "自動檢查更新";
+"settings.automaticallyDownloadUpdates" = "自動下載更新";
 "settings.checkingUpdates" = "正在檢查更新項目…";
 "settings.clearAllHistory" = "清除所有歷史記錄";
 "settings.clearKeepPinned" = "清除歷史記錄，保留已釘選項目";

@@ -137,6 +137,9 @@
 "removal.undoShort" = "Annuler";
 "removal.unpinned" = "Désépinglé";
 "settings.aboutBlurb" = "Paste It est un gestionnaire de presse-papiers local. L'historique reste sur ce Mac.";
+"settings.automaticUpdatesHelp" = "Les mises à jour sont téléchargées en arrière-plan. Lorsqu’une mise à jour est prête, vous serez invité à redémarrer Paste It. Vous pouvez aussi l’installer à la fermeture de l’application.";
+"settings.automaticallyCheckUpdates" = "Rechercher automatiquement les mises à jour";
+"settings.automaticallyDownloadUpdates" = "Télécharger automatiquement les mises à jour";
 "settings.checkingUpdates" = "Recherche de mises à jour…";
 "settings.clearAllHistory" = "Tout effacer";
 "settings.clearKeepPinned" = "Effacer l'historique, garder les épinglés";

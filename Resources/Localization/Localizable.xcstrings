@@ -12819,6 +12819,180 @@
         }
       }
     },
+    "settings.automaticallyCheckUpdates": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically check for updates"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动检查更新"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデートを自動的に確認"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher automatiquement les mises à jour"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch nach Updates suchen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar actualizaciones automáticamente"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatycznie sprawdzaj dostępność aktualizacji"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動檢查更新"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 자동 확인"
+          }
+        }
+      }
+    },
+    "settings.automaticallyDownloadUpdates": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically download updates"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动下载更新"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデートを自動的にダウンロード"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Télécharger automatiquement les mises à jour"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates automatisch laden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descargar actualizaciones automáticamente"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatycznie pobieraj aktualizacje"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動下載更新"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 자동 다운로드"
+          }
+        }
+      }
+    },
+    "settings.automaticUpdatesHelp": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates download in the background. When an update is ready, you’ll be asked to restart Paste It. You can also install when you quit."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新会在后台下载，准备就绪后提示重启 Paste It。你也可以选择退出时安装。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデートはバックグラウンドでダウンロードされ、準備ができると Paste It の再起動を求める通知が表示されます。アプリの終了時にインストールすることもできます。"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les mises à jour sont téléchargées en arrière-plan. Lorsqu’une mise à jour est prête, vous serez invité à redémarrer Paste It. Vous pouvez aussi l’installer à la fermeture de l’application."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates werden im Hintergrund geladen. Sobald ein Update bereit ist, werden Sie aufgefordert, Paste It neu zu starten. Sie können es auch beim Beenden der App installieren."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las actualizaciones se descargan en segundo plano. Cuando una actualización esté lista, se te pedirá que reinicies Paste It. También puedes instalarla al salir de la aplicación."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizacje są pobierane w tle. Gdy aktualizacja będzie gotowa, pojawi się prośba o ponowne uruchomienie Paste It. Możesz ją też zainstalować przy zamknięciu aplikacji."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新會在背景下載，準備就緒後提示重新啟動 Paste It。你也可以選擇結束應用程式時安裝。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트는 백그라운드에서 다운로드됩니다. 업데이트가 준비되면 Paste It을 다시 시작하라는 알림이 표시됩니다. 앱을 종료할 때 설치하도록 선택할 수도 있습니다."
+          }
+        }
+      }
+    },
     "settings.group.help": {
       "localizations": {
         "en": {

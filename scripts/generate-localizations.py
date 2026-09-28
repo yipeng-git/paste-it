@@ -639,6 +639,21 @@ STRINGS.update({
         "zh-Hans": "应用更新",
         "ja": "アップデート"
     },
+    "settings.automaticallyCheckUpdates": {
+        "en": "Automatically check for updates",
+        "zh-Hans": "自动检查更新",
+        "ja": "アップデートを自動的に確認"
+    },
+    "settings.automaticallyDownloadUpdates": {
+        "en": "Automatically download updates",
+        "zh-Hans": "自动下载更新",
+        "ja": "アップデートを自動的にダウンロード"
+    },
+    "settings.automaticUpdatesHelp": {
+        "en": "Updates download in the background. When an update is ready, you’ll be asked to restart Paste It. You can also install when you quit.",
+        "zh-Hans": "更新会在后台下载，准备就绪后提示重启 Paste It。你也可以选择退出时安装。",
+        "ja": "アップデートはバックグラウンドでダウンロードされ、準備ができると Paste It の再起動を求める通知が表示されます。アプリの終了時にインストールすることもできます。"
+    },
     "settings.group.help": {
         "en": "Help",
         "zh-Hans": "帮助",

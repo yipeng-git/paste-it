@@ -491,6 +491,18 @@ BATCH_CJK.update({
         "zh-Hant": "應用程式更新",
         "ko": "업데이트"
     },
+    "settings.automaticallyCheckUpdates": {
+        "zh-Hant": "自動檢查更新",
+        "ko": "업데이트 자동 확인"
+    },
+    "settings.automaticallyDownloadUpdates": {
+        "zh-Hant": "自動下載更新",
+        "ko": "업데이트 자동 다운로드"
+    },
+    "settings.automaticUpdatesHelp": {
+        "zh-Hant": "更新會在背景下載，準備就緒後提示重新啟動 Paste It。你也可以選擇結束應用程式時安裝。",
+        "ko": "업데이트는 백그라운드에서 다운로드됩니다. 업데이트가 준비되면 Paste It을 다시 시작하라는 알림이 표시됩니다. 앱을 종료할 때 설치하도록 선택할 수도 있습니다."
+    },
     "settings.group.help": {
         "zh-Hant": "輔助說明",
         "ko": "도움말"

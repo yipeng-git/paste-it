@@ -54,6 +54,13 @@ The PostHog SDK may also attach its own library/device fields (including `$local
 | `paste_stack_session` | Paste Stack closed (one event per open→close) | `direction`; `duration_ms_bucket`; `collected_count_bucket`; `paste_next_count`; `paste_next_attempts`; `empty_paste_next_count`; `paste_next_without_ax`; `accessibility_trusted_at_open`; `accessibility_trusted_at_close`; `last_fail_reason?` |
 | `update_interaction` | Sparkle update funnel | `action`; `source` (`auto` \| `menu` \| `settings`); `from_version`; `to_version?`; `result?` |
 
+### `update_interaction` notes
+
+- `action`: `check` · `found` · `download` · `shown` · `install` · `dismiss` · `not_found` · `fail`.
+- `shown` records presentation of Sparkle's update prompt. Its `result` is `ready_to_install` when the update is prepared, or `update_available` when downloading or preparation is still needed.
+- Automatic reminders use `source: auto`, including when a completed background download opens the install-and-relaunch prompt. Menu and Settings checks retain their respective sources.
+- Only version numbers and the fixed action, source, and result values are sent; update payloads and release-note contents are not collected. Existing download, choice, installation, and error events are unchanged.
+
 ### Buckets (fixed cardinality)
 
 - `history_count_bucket`: `0` · `1-10` · `11-50` · `51-200` · `200+`

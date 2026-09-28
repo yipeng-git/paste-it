@@ -51,10 +51,10 @@ struct SettingsView: View {
     @ObservedObject var appState: AppState
     @ObservedObject private var settings: AppSettings
     @ObservedObject private var historyStore: HistoryStore
+    @ObservedObject private var updateChecker = UpdateChecker.shared
     /// Mirrors SMAppService registration; refreshed on appear and app activation
     /// so turning the login item off in System Settings is reflected here.
     @State private var launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
-    @State private var updateStatus: String?
     @State private var pendingCleanup: PendingCleanup?
     @State private var selectedPage: Page? = .general
     @State private var accessibilityTrusted = SystemPasteSynthesizer.isAccessibilityTrusted
@@ -228,16 +228,26 @@ struct SettingsView: View {
             }
 
             Section(L10n.tr("settings.group.updates", default: "Updates")) {
+                Toggle(
+                    L10n.tr("settings.automaticallyCheckUpdates", default: "Automatically check for updates"),
+                    isOn: $updateChecker.automaticallyChecksForUpdates
+                )
+                Toggle(
+                    L10n.tr("settings.automaticallyDownloadUpdates", default: "Automatically download updates"),
+                    isOn: $updateChecker.automaticallyDownloadsUpdates
+                )
+                .disabled(!updateChecker.automaticallyChecksForUpdates)
+                Text(L10n.tr(
+                    "settings.automaticUpdatesHelp",
+                    default: "Updates download in the background. When an update is ready, you’ll be asked to restart Paste It. You can also install when you quit."
+                ))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
                 Button(L10n.tr("menu.checkUpdates", default: "Check for Updates…")) {
-                    UpdateChecker.shared.checkForUpdates(source: "settings")
-                    updateStatus = L10n.tr("settings.checkingUpdates", default: "Checking for updates…")
+                    updateChecker.checkForUpdates(source: "settings")
                 }
-                .disabled(!UpdateChecker.shared.canCheckForUpdates)
-                if let updateStatus {
-                    Text(updateStatus)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                .disabled(!updateChecker.canCheckForUpdates)
             }
         }
         .formStyle(.grouped)
