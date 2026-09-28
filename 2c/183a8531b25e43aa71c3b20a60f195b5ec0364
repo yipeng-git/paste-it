@@ -1,0 +1,43 @@
+Sources/PasteIt/AgentAPI/AgentAPIServer.swift
+  s_1cf3d2ea0d16a4::t_43eab1932ee835 41
+Sources/PasteIt/AgentAPI/PasteItMCPServer.swift
+  s_1cf3d2ea0d16a4::t_6feb17fb6f87d6 10-11,13-35,37-40,47-49,51,60-71,73-76,79-80
+Tests/PasteItIntegrationTests/MCPStatelessRequestTests.swift
+  s_c3705d622e60ea::t_0b131c62b97995 1-119
+docs/mcp.md
+  s_1cf3d2ea0d16a4::t_1e984ac12d406a 31-34,122-129
+scripts/test-mcp-clients.py
+  s_01c453e8da1f12::t_6a217d03754196 1-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "2c183a8531b25e43aa71c3b20a60f195b5ec0364",
+  "prompts": {},
+  "sessions": {
+    "s_01c453e8da1f12": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d30c-e265-7832-93c3-577495a7450d",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_1cf3d2ea0d16a4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d308-f8da-7f90-9259-b9872e284433",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    },
+    "s_c3705d622e60ea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d30a-3e0f-7f70-a17e-cf94ad66e1a8",
+        "model": "unknown"
+      },
+      "human_author": "yipeng-git <63670789+yipeng-git@users.noreply.github.com>"
+    }
+  }
+}
