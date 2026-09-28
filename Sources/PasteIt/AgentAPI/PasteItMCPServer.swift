@@ -7,22 +7,48 @@ import PasteItCore
 actor PasteItMCPServer {
     static let shared = PasteItMCPServer()
 
-    private var server: Server?
-    private var transport: StatelessHTTPServerTransport?
-    private var isReady = false
+    private var generation: UUID?
+    private var activeRequests: [UUID: Server] = [:]
 
-    /// Tears down any existing stack and starts a fresh MCP server + transport.
-    func restart() async throws {
-        await stop()
+    /// Enables fresh requests and closes transports from the previous generation.
+    func restart() async {
+        let previousRequests = activeRequests
+        activeRequests.removeAll()
+        generation = UUID()
+        for server in previousRequests.values {
+            await server.stop()
+        }
+    }
 
+    func stop() async {
+        let previousRequests = activeRequests
+        activeRequests.removeAll()
+        generation = nil
+        for server in previousRequests.values {
+            await server.stop()
+        }
+    }
+
+    func handle(_ request: MCP.HTTPRequest) async -> MCP.HTTPResponse {
+        guard let generation else {
+            return unavailableResponse()
+        }
+
+        // A stateless endpoint has no client/session identity. Both the SDK's
+        // initialization state and its request-ID response routing must belong to
+        // this HTTP request, so independent clients can safely reuse JSON-RPC IDs.
+        let requestID = UUID()
         let transport = StatelessHTTPServerTransport()
         let version =
             Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
         let server = Server(
             name: "Paste It",
             version: version,
-            capabilities: .init(tools: .init())
+            capabilities: .init(tools: .init()),
+            // Later HTTP requests have no shared handshake state in stateless mode.
+            configuration: .default
         )
+        activeRequests[requestID] = server
 
         await server.withMethodHandler(ListTools.self) { _ in
             ListTools.Result(tools: PasteItMCPTools.definitions)
@@ -31,32 +57,27 @@ actor PasteItMCPServer {
             await PasteItMCPTools.call(params)
         }
 
-        try await server.start(transport: transport)
-
-        self.server = server
-        self.transport = transport
-        self.isReady = true
-    }
-
-    func stop() async {
-        let server = self.server
-        let transport = self.transport
-        self.server = nil
-        self.transport = nil
-        self.isReady = false
-
-        await server?.stop()
-        await transport?.disconnect()
-    }
-
-    func handle(_ request: MCP.HTTPRequest) async -> MCP.HTTPResponse {
-        guard isReady, let transport else {
-            return .error(
-                statusCode: 503,
-                .internalError("MCP transport is not ready")
-            )
+        let response: MCP.HTTPResponse
+        do {
+            try await server.start(transport: transport)
+            // A stop/restart may have interleaved with the awaited SDK setup.
+            if self.generation == generation {
+                response = await transport.handleRequest(request)
+            } else {
+                response = unavailableResponse()
+            }
+        } catch {
+            response = .error(statusCode: 500, .internalError("MCP request transport failed to start"))
         }
-        return await transport.handleRequest(request)
+
+        // Also runs for invalid requests and notifications (202, with no body).
+        await server.stop()
+        activeRequests.removeValue(forKey: requestID)
+        return response
+    }
+
+    private func unavailableResponse() -> MCP.HTTPResponse {
+        .error(statusCode: 503, .internalError("MCP transport is not ready"))
     }
 }
 

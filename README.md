@@ -33,6 +33,8 @@ macOS 14 or later. Official builds update themselves in the background.
 4. Press **Space** to preview above the timeline. Click the text to edit; for images you can review OCR, for links you get a page preview.
 5. Pin clips you want to keep, or put them in a custom folder (up to three folders).
 
+Image OCR runs in the background and automatically detects the language using macOS Vision. Available languages depend on the system’s recognition models; no language selection is needed. Existing images keep their saved OCR text; open an image preview and click **Re-run** to recognize it again. Automatic detection can misclassify short or mixed-language text; small text and symbols may also need manual correction.
+
 ### More shortcuts
 
 | Shortcut | Action |

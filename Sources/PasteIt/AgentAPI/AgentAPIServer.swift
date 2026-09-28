@@ -38,12 +38,7 @@ final class AgentAPIServer: @unchecked Sendable {
         let generation = startGeneration
 
         Task {
-            do {
-                try await PasteItMCPServer.shared.restart()
-            } catch {
-                NSLog("PasteIt: MCP stack failed to start: \(error)")
-                return
-            }
+            await PasteItMCPServer.shared.restart()
 
             await MainActor.run {
                 guard generation == self.startGeneration else { return }

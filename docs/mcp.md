@@ -28,6 +28,10 @@ Requests must be JSON-RPC over HTTP with:
 - `Content-Type: application/json`
 - `Accept: application/json`
 
+Clients initialize normally and use the negotiated `MCP-Protocol-Version` header on later requests. The endpoint does not issue an `MCP-Session-Id` or retain client handshake state between HTTP requests. Each request uses its own SDK server and transport, so multiple clients and reconnects can initialize independently, including when their JSON-RPC request IDs overlap. Tools remain available on subsequent requests without a session header.
+
+Cross-request cancellation is not supported: a `notifications/cancelled` POST cannot cancel work in another HTTP request. Clients may stop waiting locally, but an in-progress screenshot render can still finish. Request IDs are never used to cancel another client's work.
+
 ## Tools
 
 | Tool | Purpose |
@@ -115,3 +119,11 @@ curl -s http://127.0.0.1:17321/mcp \
 ```
 
 Old REST paths (`/v1/*`) are not served (404).
+
+For connection regression checks against the running app with MCP enabled:
+
+```bash
+python3 scripts/test-mcp-clients.py
+```
+
+This verifies two independent clients, a reconnect, and 24 concurrent clients reusing request IDs. It discovers tools, reads health metadata, and calls synthetic unknown tool names to check response routing; it does not list or read clipboard contents, render screenshots, or change history/settings. The automated Swift suite `MCPStatelessRequestTests` additionally checks malformed requests, origin/protocol validation, and transport stop/restart without opening a network port.
