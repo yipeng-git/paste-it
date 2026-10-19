@@ -94,6 +94,8 @@ Card fields (all optional except enough content to render):
 | `imageBase64` / `imagePath` | Image cards (`imagePath` max 25MB; loaded off the UI thread) |
 | `linkImageBase64` | Optional link preview image (skips network fetch when provided) |
 
+Image `ocrText` can include Markdown tables on macOS 26 or later when Vision detects a table. Text outside the table is retained. Ordinary images, older systems, and table-detection failures use the existing plain-text OCR output; no DTO fields or tool schemas change.
+
 For `type: link`/`url` without `linkImageBase64`, render waits for OG image / favicon fetch before capturing. Concurrent renders return a tool error while one is in progress. If the listener ever dies, toggle **MCP** off/on to rebind `:17321`.
 
 ## Manual smoke test

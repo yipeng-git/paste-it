@@ -35,6 +35,8 @@ macOS 14 or later. Official builds check for updates every six hours and downloa
 
 Image OCR runs in the background and automatically detects the language using macOS Vision. Available languages depend on the system’s recognition models; no language selection is needed. Existing images keep their saved OCR text; open an image preview and click **Re-run** to recognize it again. Automatic detection can misclassify short or mixed-language text; small text and symbols may also need manual correction.
 
+On macOS 26 or later, detected tables are automatically included in OCR results as Markdown tables. Surrounding text is retained; the first row becomes the Markdown header, and merged-cell text is placed at its top-left position. Ordinary images and table-detection failures keep the existing plain-text OCR output. Existing images can use **Re-run** to refresh their saved result.
+
 ### More shortcuts
 
 | Shortcut | Action |
